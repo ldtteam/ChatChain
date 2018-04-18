@@ -5,10 +5,42 @@
    "version": "0.2.0",
    "configurations": [
         {
-            "name": ".NET Core Launch (web)",
+            "name": "DiscordianAuth",
             "type": "coreclr",
             "request": "launch",
-            "preLaunchTask": "build",
+            "preLaunchTask": "buildAuth",
+            // If you have changed target frameworks, make sure to update the program path.
+            "program": "${workspaceFolder}/DiscordianAuth/bin/Debug/netcoreapp2.0/DiscordianAuth.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/DiscordianAuth",
+            "stopAtEntry": false,
+            "internalConsoleOptions": "openOnSessionStart",
+            "launchBrowser": {
+                "enabled": true,
+                "args": "${auto-detect-url}",
+                "windows": {
+                    "command": "cmd.exe",
+                    "args": "/C start ${auto-detect-url}"
+                },
+                "osx": {
+                    "command": "open"
+                },
+                "linux": {
+                    "command": "xdg-open"
+                }
+            },
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development"
+            },
+            "sourceFileMap": {
+                "/Views": "${workspaceFolder}/Views"
+            }
+        },
+        {
+            "name": "DiscordianServer",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "buildServer",
             // If you have changed target frameworks, make sure to update the program path.
             "program": "${workspaceFolder}/DiscordianServer/bin/Debug/netcoreapp2.1/DiscordianServer.dll",
             "args": [],
