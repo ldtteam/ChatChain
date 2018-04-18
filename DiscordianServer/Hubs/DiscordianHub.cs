@@ -16,16 +16,22 @@ namespace DiscordianServer.Hubs
             this.logger = logger;
         }
 
-        public async Task DiscordChatMessage(string author, string channel, string message)
+        public async Task DiscordChatMessage(string channel, string author, string message)
         {
-            logger.LogInformation($"Discord: {author} in channel {channel} - {message}");
-            await Clients.All.SendAsync("DiscordChatMessage", author, channel, message);
+            logger.LogInformation($"Discord Chat Message: {author} in channel {channel} - {message}");
+            await Clients.All.SendAsync("DiscordChatMessage", channel, author, message);
         }
 
-        public async Task MinecraftChatMessage(string author, string server, string message)
+        public async Task MinecraftGenericMessage(string channel, string server, string displayMessage)
         {
-            logger.LogInformation($"Minecraft: {author} in server {server} - {message}");
-            await Clients.All.SendAsync("MinecraftChatMessage", author, server, message);
+            logger.LogInformation($"Minecraft Generic Message: {displayMessage}");
+            await Clients.All.SendAsync("MinecraftGenericMessage", channel, server, displayMessage);
+        }
+        
+        public async Task MinecraftChatMessageEmbed(string channel, string server, string author, string message)
+        {
+            logger.LogInformation($"Minecraft Chat Message Embed: {author} sent \"{message}\" to {channel}");
+            await Clients.All.SendAsync("MinecraftChatMessageEmbed", channel, server, author, message);
         }
     }
 }
