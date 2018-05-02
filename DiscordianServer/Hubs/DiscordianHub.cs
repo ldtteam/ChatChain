@@ -22,59 +22,50 @@ namespace DiscordianServer.Hubs
             await Clients.All.SendAsync("GenericAnyDiscordChatMessage", channel, author, message);
         }
 
-        // Format for event names:
-        // First word is type, Generic, Embed, or etc (or empty).
-        // Second is destination.
-        // Third is sender.
-        // last is descriptor of event.
+        // ClientType is what ChatChain extension is connecting. E.G. "ChatChainDC", These should be Unique!
+        // ClientName is the name of the specific cleitn connecting. E.G. "Minecolonies Test Server", These should be Unique!
+        // Channel is used to specify a chat channel. E.G. "staff" channel.
 
-        // Format for arguments:
-        // First (if message is to discord) is the Destination channel.
-        // Second is the identifier of the sender (Usually `server`)
-        // remander are the arguments of the message.
-
-                    ///  MINECRAFT EVENTS \\\
-        public async Task GenericDiscordMinecraftMessage(string channel, string server, string displayMessage)
+        public async Task RequestJoined(string clientType, string clientName, string requestedClient)
         {
-            logger.LogInformation($"Minecraft Generic Message: {displayMessage}");
-            await Clients.All.SendAsync("GenericDiscordMinecraftMessage", channel, server, displayMessage);
-        }
-        
-        public async Task EmbedDiscordMinecraftChatMessage(string channel, string server, string author, string message)
-        {
-            logger.LogInformation($"Minecraft Chat Message Embed: {author} sent \"{message}\" to {channel}");
-            await Clients.All.SendAsync("EmbedDiscordMinecraftChatMessage", channel, server, author, message);
+            logger.LogInformation($"Client Type: {clientType} of Name: {clientName} requested a joined list from: {requestedClient}");
+            await Clients.All.SendAsync("RequestJoined", clientType, clientName, requestedClient);
         }
 
-        public async Task AnyMinecraftChatMessage(string server, string author, string message)
+        public async Task RespondJoined(string clientType, string clientName, string channel, string destinationClient, string message)
         {
-            logger.LogInformation($"Minecraft Chat Message: [{server}] {author}: {message}");
-            await Clients.All.SendAsync("AnyMinecraftChatMessage", server, author, message);
+            logger.LogInformation($"Client Type: {clientType} of Name: {clientName} sent joined list response to: {destinationClient} in {channel}");
+            await Clients.All.SendAsync("RespondJoined", clientType, clientName, channel, destinationClient, message);
         }
 
-        public async Task AnyMinecraftPlayerJoin(string server, string username)
+        public async Task GenericConnectionEvent(string clientType, string clientName, string channel)
         {
-            logger.LogInformation($"Minecraft Chat Message: [{server}] {username} joined.");
-            await Clients.All.SendAsync("AnyMinecraftPlayerJoin", server, username);
+            logger.LogInformation($"Client Type: {clientType} of Name: {clientName} connected in channel: {channel}");
+            await Clients.All.SendAsync("GenericConnectionEvent", clientType, clientName, channel);
         }
 
-        public async Task AnyMinecraftPlayerLeave(string server, string username)
+        public async Task GenericDisconnectionEvent(string clientType, string clientName, string channel)
         {
-            logger.LogInformation($"Minecraft Chat Message: [{server}] {username} left.");
-            await Clients.All.SendAsync("AnyMinecraftPlayerLeave", server, username);
+            logger.LogInformation($"Client Type: {clientType} of Name: {clientName} disconnected in channel: {channel}");
+            await Clients.All.SendAsync("GenericDisconnectionEvent", clientType, clientName, channel);
         }
 
-        public async Task AnyMinecraftServerStart(string server)
+        public async Task GenericMessageEvent(string clientType, string clientName, string channel, string user, string message)
         {
-            logger.LogInformation($"Minecraft Chat Message: [{server}] started.");
-            await Clients.All.SendAsync("AnyMinecraftServerStart", server);
+            logger.LogInformation($"Client Type: {clientType} of Name: {clientName} had author: {user} send \"{message}\" in channel: {channel}");
+            await Clients.All.SendAsync("GenericMessageEvent", clientType, clientName, channel, user, message);
         }
 
-        public async Task AnyMinecraftServerStop(string server)
+        public async Task GenericJoinEvent(string clientType, string clientName, string channel, string user)
         {
-            logger.LogInformation($"Minecraft Chat Message: [{server}] stopped");
-            await Clients.All.SendAsync("AnyMinecraftServerStop", server);
+            logger.LogInformation($"Client Type: {clientType} of Name: {clientName} had user: {user} join channel: {channel}");
+            await Clients.All.SendAsync("GenericJoinEvent", clientType, clientName, channel, user);
         }
-                    /// ^ MINECRAFT EVENTS ^ \\\
+
+        public async Task GenericLeaveEvent(string clientType, string clientName, string channel, string user)
+        {
+            logger.LogInformation($"Client Type: {clientType} of Name: {clientName} had user: {user} leave channel: {channel}");
+            await Clients.All.SendAsync("GenericLeaveEvent", clientType, clientName, channel, user);
+        }
     }
 }
