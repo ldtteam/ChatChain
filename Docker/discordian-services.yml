@@ -1,0 +1,19 @@
+version: '2'
+
+services:
+  static:
+    image: docker.minecolonies.com/discordian/server/discordianserver:0.0.1.0
+    restart: unless-stopped
+    expose:
+      - 80
+    environment:
+      VIRTUAL_HOST: discordian.orionminecraft.com, www.discordian.orionminecraft.com
+      VIRTUAL_PROTO: http
+      VIRTUAL_PORT: 80
+      LETSENCRYPT_HOST: discordian.orionminecraft.com, www.discordian.orionminecraft.com
+      LETSENCRYPT_EMAIL: marcf1@hotmail.com
+
+networks:
+    default:
+       external:
+         name: webproxy
