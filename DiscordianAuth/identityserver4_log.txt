@@ -280,3 +280,54 @@ Microsoft.Data.Sqlite.SqliteException (0x80004005): SQLite Error 1: 'no such tab
 }
 2018-04-15 13:54:46.278 +02:00 [INF] AuthenticationScheme: Identity.Application was successfully authenticated.
 2018-04-15 13:54:46.279 +02:00 [INF] AuthenticationScheme: Identity.Application was successfully authenticated.
+2018-04-16 15:27:48.647 +02:00 [INF] You are using the in-memory version of the persisted grant store. This will store consent decisions, authorization codes, refresh and reference tokens in memory only. If you are using any of those features in production, you want to switch to a different store implementation.
+2018-04-16 15:27:48.686 +02:00 [DBG] Using Identity.Application as default scheme for authentication
+2018-04-16 15:27:48.688 +02:00 [DBG] Using Identity.External as default scheme for sign-in
+2018-04-16 15:27:48.688 +02:00 [DBG] Using Identity.External as default scheme for sign-out
+2018-04-16 15:27:48.688 +02:00 [DBG] Using Identity.Application as default scheme for challenge
+2018-04-16 15:27:48.689 +02:00 [DBG] Using Identity.Application as default scheme for forbid
+2018-04-16 15:28:52.739 +02:00 [INF] You are using the in-memory version of the persisted grant store. This will store consent decisions, authorization codes, refresh and reference tokens in memory only. If you are using any of those features in production, you want to switch to a different store implementation.
+2018-04-16 15:28:52.773 +02:00 [DBG] Using Identity.Application as default scheme for authentication
+2018-04-16 15:28:52.776 +02:00 [DBG] Using Identity.External as default scheme for sign-in
+2018-04-16 15:28:52.776 +02:00 [DBG] Using Identity.External as default scheme for sign-out
+2018-04-16 15:28:52.776 +02:00 [DBG] Using Identity.Application as default scheme for challenge
+2018-04-16 15:28:52.776 +02:00 [DBG] Using Identity.Application as default scheme for forbid
+2018-04-16 15:31:08.824 +02:00 [INF] You are using the in-memory version of the persisted grant store. This will store consent decisions, authorization codes, refresh and reference tokens in memory only. If you are using any of those features in production, you want to switch to a different store implementation.
+2018-04-16 15:31:08.872 +02:00 [DBG] Using Identity.Application as default scheme for authentication
+2018-04-16 15:31:08.876 +02:00 [DBG] Using Identity.External as default scheme for sign-in
+2018-04-16 15:31:08.876 +02:00 [DBG] Using Identity.External as default scheme for sign-out
+2018-04-16 15:31:08.876 +02:00 [DBG] Using Identity.Application as default scheme for challenge
+2018-04-16 15:31:08.876 +02:00 [DBG] Using Identity.Application as default scheme for forbid
+2018-04-16 15:32:51.119 +02:00 [INF] You are using the in-memory version of the persisted grant store. This will store consent decisions, authorization codes, refresh and reference tokens in memory only. If you are using any of those features in production, you want to switch to a different store implementation.
+2018-04-16 15:32:51.181 +02:00 [DBG] Using Identity.Application as default scheme for authentication
+2018-04-16 15:32:51.184 +02:00 [DBG] Using Identity.External as default scheme for sign-in
+2018-04-16 15:32:51.184 +02:00 [DBG] Using Identity.External as default scheme for sign-out
+2018-04-16 15:32:51.184 +02:00 [DBG] Using Identity.Application as default scheme for challenge
+2018-04-16 15:32:51.184 +02:00 [DBG] Using Identity.Application as default scheme for forbid
+2018-04-16 15:33:18.726 +02:00 [INF] You are using the in-memory version of the persisted grant store. This will store consent decisions, authorization codes, refresh and reference tokens in memory only. If you are using any of those features in production, you want to switch to a different store implementation.
+2018-04-16 15:33:18.772 +02:00 [DBG] Using Identity.Application as default scheme for authentication
+2018-04-16 15:33:18.775 +02:00 [DBG] Using Identity.External as default scheme for sign-in
+2018-04-16 15:33:18.775 +02:00 [DBG] Using Identity.External as default scheme for sign-out
+2018-04-16 15:33:18.775 +02:00 [DBG] Using Identity.Application as default scheme for challenge
+2018-04-16 15:33:18.775 +02:00 [DBG] Using Identity.Application as default scheme for forbid
+2018-04-16 15:38:35.100 +02:00 [INF] You are using the in-memory version of the persisted grant store. This will store consent decisions, authorization codes, refresh and reference tokens in memory only. If you are using any of those features in production, you want to switch to a different store implementation.
+2018-04-16 15:38:35.151 +02:00 [DBG] Using Identity.Application as default scheme for authentication
+2018-04-16 15:38:35.153 +02:00 [DBG] Using Identity.External as default scheme for sign-in
+2018-04-16 15:38:35.154 +02:00 [DBG] Using Identity.External as default scheme for sign-out
+2018-04-16 15:38:35.154 +02:00 [DBG] Using Identity.Application as default scheme for challenge
+2018-04-16 15:38:35.154 +02:00 [DBG] Using Identity.Application as default scheme for forbid
+2018-04-16 15:51:59.146 +02:00 [INF] AuthenticationScheme: Identity.Application was challenged.
+2018-04-16 15:51:59.146 +02:00 [INF] AuthenticationScheme: Identity.Application was challenged.
+2018-04-16 16:07:49.415 +02:00 [INF] You are using the in-memory version of the persisted grant store. This will store consent decisions, authorization codes, refresh and reference tokens in memory only. If you are using any of those features in production, you want to switch to a different store implementation.
+2018-04-16 16:07:49.465 +02:00 [DBG] Using Identity.Application as default scheme for authentication
+2018-04-16 16:07:49.469 +02:00 [DBG] Using Identity.External as default scheme for sign-in
+2018-04-16 16:07:49.469 +02:00 [DBG] Using Identity.External as default scheme for sign-out
+2018-04-16 16:07:49.469 +02:00 [DBG] Using Identity.Application as default scheme for challenge
+2018-04-16 16:07:49.469 +02:00 [DBG] Using Identity.Application as default scheme for forbid
+2018-04-16 16:07:56.392 +02:00 [INF] AuthenticationScheme: Identity.Application was challenged.
+2018-05-04 08:02:14.196 +02:00 [INF] You are using the in-memory version of the persisted grant store. This will store consent decisions, authorization codes, refresh and reference tokens in memory only. If you are using any of those features in production, you want to switch to a different store implementation.
+2018-05-04 08:02:14.235 +02:00 [DBG] Using Identity.Application as default scheme for authentication
+2018-05-04 08:02:14.238 +02:00 [DBG] Using Identity.External as default scheme for sign-in
+2018-05-04 08:02:14.238 +02:00 [DBG] Using Identity.External as default scheme for sign-out
+2018-05-04 08:02:14.238 +02:00 [DBG] Using Identity.Application as default scheme for challenge
+2018-05-04 08:02:14.238 +02:00 [DBG] Using Identity.Application as default scheme for forbid
