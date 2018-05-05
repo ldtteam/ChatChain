@@ -1,4 +1,4 @@
-FROM microsoft/dotnet:2.1-sdk as builder
+FROM microsoft/dotnet-nightly:2.1-sdk as builder
  
 RUN mkdir -p /root/src/app/discordianserver
 WORKDIR /root/src/app/discordianserver
@@ -6,19 +6,12 @@ WORKDIR /root/src/app/discordianserver
 COPY DiscordianServer.csproj . 
 RUN dotnet restore ./DiscordianServer.csproj 
 
-COPY *.csproj ./
-RUN dotnet restore
+COPY . .
+RUN dotnet publish -c release -o published 
 
-# Copy everything else and build
-COPY . ./
-RUN dotnet publish -c Release -o out
+FROM microsoft/dotnet-nightly:2.1-aspnetcore-runtime-alpine
 
-RUN echo $PWD
-RUN ls
-
-FROM microsoft/dotnet:2.1-aspnetcore-runtime-alpine
-
-WORKDIR /app
-COPY --from=builder /root/src/app/discordianserver/out .
+WORKDIR /root/  
+COPY --from=builder /root/src/app/discordianserver/published .
 EXPOSE 80/tcp
-ENTRYPOINT ["dotnet", "DiscordianServer.dll"]
+ENTRYPOINT ["dotnet", "./DiscordianServer.dll"]  
