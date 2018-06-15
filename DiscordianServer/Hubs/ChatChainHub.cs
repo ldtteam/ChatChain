@@ -6,12 +6,12 @@ using Microsoft.Extensions.Logging;
 namespace DiscordianServer.Hubs
 {
 
-    public class DiscordianHub:Hub
+    public class ChatChainHub:Hub
     {
 
-        private readonly ILogger<DiscordianHub> logger;
+        private readonly ILogger<ChatChainHub> logger;
 
-        public DiscordianHub(ILogger<DiscordianHub> logger)
+        public ChatChainHub(ILogger<ChatChainHub> logger)
         {
             this.logger = logger;
         }
