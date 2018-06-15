@@ -49,7 +49,7 @@ namespace DiscordianServer
 
             app.UseSignalR(routes =>
             {
-                routes.MapHub<DiscordianHub>("/hubs/discordian");
+                routes.MapHub<ChatChainHub>("/hubs/chatchain");
             });
         }
     }
