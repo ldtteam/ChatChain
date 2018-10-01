@@ -1,10 +1,10 @@
 FROM microsoft/dotnet:2.1-sdk as builder
  
-RUN mkdir -p /root/src/app/discordianserver
-WORKDIR /root/src/app/discordianserver
+RUN mkdir -p /root/src/app/chatchainserver
+WORKDIR /root/src/app/chatchainserver
  
-COPY DiscordianServer.csproj . 
-RUN dotnet restore ./DiscordianServer.csproj 
+COPY ChatChainServer.csproj . 
+RUN dotnet restore ./ChatChainServer.csproj 
 
 COPY *.csproj ./
 RUN dotnet restore
@@ -19,6 +19,6 @@ RUN ls
 FROM microsoft/dotnet:2.1-aspnetcore-runtime-alpine
 
 WORKDIR /app
-COPY --from=builder /root/src/app/discordianserver/out .
+COPY --from=builder /root/src/app/chatchainserver/out .
 EXPOSE 80/tcp
-ENTRYPOINT ["dotnet", "DiscordianServer.dll"]
+ENTRYPOINT ["dotnet", "ChatChainServer.dll"]

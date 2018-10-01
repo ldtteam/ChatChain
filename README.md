@@ -1,7 +1,7 @@
 # ChatChainServer
 The central server side of the ChatChain framework.
 
-## ChatChain Network
+## ChatChainNetwork
 The ChatChain network is a WebSocket based communication system. Its ChatChainConnect library can be used to connect any library to the the network.
 
 ## Dependencies:

@@ -5,12 +5,13 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace DiscordianServer.Pages
+namespace ChatChainServer.Pages
 {
-    public class PrivacyModel : PageModel
+    public class IndexModel : PageModel
     {
         public void OnGet()
         {
+
         }
     }
 }

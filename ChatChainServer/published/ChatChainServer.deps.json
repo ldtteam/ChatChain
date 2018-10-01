@@ -21,7 +21,7 @@
   },
   "targets": {
     ".NETCoreApp,Version=v2.1": {
-      "DiscordianServer/1.0.0": {
+      "ChatChainServer/1.0.0": {
         "dependencies": {
           "Microsoft.AspNetCore.App": "2.1.0-preview1-final",
           "Microsoft.AspNetCore.Authentication.Abstractions": "2.1.0-preview1-final",
@@ -31,10 +31,10 @@
           "Microsoft.NETCore.App": "2.1.0-preview1-26216-03"
         },
         "runtime": {
-          "DiscordianServer.dll": {}
+          "ChatChainServer.dll": {}
         },
         "compile": {
-          "DiscordianServer.dll": {}
+          "ChatChainServer.dll": {}
         }
       },
       "Microsoft.NETCore.App/2.1.0-preview1-26216-03": {
@@ -3237,7 +3237,7 @@
     }
   },
   "libraries": {
-    "DiscordianServer/1.0.0": {
+    "ChatChainServer/1.0.0": {
       "type": "project",
       "serviceable": false,
       "sha512": ""
