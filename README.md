@@ -1,8 +1,8 @@
-# DiscordianServer
-The central server side of the Discordian framework.
+# ChatChainServer
+The central server side of the ChatChain framework.
 
-## DiscordianNetwork
-The discordian network is a WebSocket based communication system. Its DiscordianConnect library can be used to connect any library to the the network.
+## ChatChainNetwork
+The ChatChain network is a WebSocket based communication system. Its ChatChainConnect library can be used to connect any library to the the network.
 
 ## Dependencies:
 * .NetCore 2.1 - Preview 2

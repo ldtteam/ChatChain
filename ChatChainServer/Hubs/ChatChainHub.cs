@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 
-namespace DiscordianServer.Hubs
+namespace ChatChainServer.Hubs
 {
 
     public class ChatChainHub:Hub

@@ -7,7 +7,7 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/DiscordianServer/DiscordianServer.csproj"
+                "${workspaceFolder}/ChatChainServer/ChatChainServer.csproj"
             ],
             "problemMatcher": "$msCompile"
         }
