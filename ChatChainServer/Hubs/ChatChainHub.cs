@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 
@@ -16,48 +17,27 @@ namespace ChatChainServer.Hubs
             this.logger = logger;
         }
 
-        // ClientType is what ChatChain extension is connecting. E.G. "ChatChainDC", These should be Unique!
-        // ClientName is the name of the specific cleitn connecting. E.G. "Minecolonies Test Server", These should be Unique!
-        // Channel is used to specify a chat channel. E.G. "staff" channel.
-
-        public async Task SendCommand(string clientType, string clientName, string channel, string user, string destinationClient, string command)
+        public override Task OnConnectedAsync()
         {
-            logger.LogInformation($"Client Type: {clientType} of Name: {clientName} had user: {user} in channel: {channel} send command: {command} to client: {destinationClient}");
-            await Clients.All.SendAsync("SendCommand", clientType, clientName, channel, user, destinationClient, command);
+            logger.LogInformation($"Connection: {Context.User.Identity.Name}");
+            logger.LogInformation($"Connected: {Context.ConnectionId}, User: {Context.User}, User ID: {Context.UserIdentifier}");
+            return base.OnConnectedAsync();
         }
-
-        public async Task CommandResponse(string clientType, string clientName, string channel, string user, string destinationClient, string command, string response)
-        {
-            logger.LogInformation($"Client Type: {clientType} of Name: {clientName} had user: {user} in channel: {channel} respond to command: {command} from client: {destinationClient} with response: {response}");
-            await Clients.All.SendAsync("SendCommand", clientType, clientName, channel, user, destinationClient, command, response);
-        }
-        public async Task RequestJoined(string clientType, string clientName, string requestedClient)
-        {
-            logger.LogInformation($"Client Type: {clientType} of Name: {clientName} requested a joined list from: {requestedClient}");
-            await Clients.All.SendAsync("RequestJoined", clientType, clientName, requestedClient);
-        }
-
-        public async Task RespondJoined(string clientType, string clientName, string channel, string destinationClient, string message)
-        {
-            logger.LogInformation($"Client Type: {clientType} of Name: {clientName} sent joined list response to: {destinationClient} in {channel}");
-            await Clients.All.SendAsync("RespondJoined", clientType, clientName, channel, destinationClient, message);
-        }
-
-        public async Task GenericConnectionEvent(string clientType, string clientName, string channel)
-        {
-            logger.LogInformation($"Client Type: {clientType} of Name: {clientName} connected in channel: {channel}");
-            await Clients.All.SendAsync("GenericConnectionEvent", clientType, clientName, channel);
-        }
-
-        public async Task GenericDisconnectionEvent(string clientType, string clientName, string channel)
-        {
+        /*public override Task OnDisconnectedAsync(Exception exception)
+        {   
             logger.LogInformation($"Client Type: {clientType} of Name: {clientName} disconnected in channel: {channel}");
             await Clients.All.SendAsync("GenericDisconnectionEvent", clientType, clientName, channel);
-        }
+            return base.OnDisconnectedAsync(exception);
+        }*/
+        
+        // ClientType is what ChatChain extension is connecting. E.G. "ChatChainDC", These should be Unique!
+        // ClientName is the name of the specific client connecting. E.G. "Minecolonies Test Server", These should be Unique!d
+        // Channel is used to specify a chat channel. E.G. "staff" channel.
 
         public async Task GenericMessageEvent(string clientType, string clientName, string channel, string user, string message)
         {
             logger.LogInformation($"Client Type: {clientType} of Name: {clientName} had author: {user} send \"{message}\" in channel: {channel}");
+            logger.LogInformation($"Client: {Context.ConnectionId}, User: {Context.UserIdentifier}");
             await Clients.All.SendAsync("GenericMessageEvent", clientType, clientName, channel, user, message);
         }
 
