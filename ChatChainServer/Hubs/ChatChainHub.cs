@@ -1,12 +1,15 @@
 using System;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Connections;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 
 namespace ChatChainServer.Hubs
 {
 
+    [Authorize]
     public class ChatChainHub:Hub
     {
 
@@ -20,7 +23,13 @@ namespace ChatChainServer.Hubs
         public override Task OnConnectedAsync()
         {
             logger.LogInformation($"Connection: {Context.User.Identity.Name}");
-            logger.LogInformation($"Connected: {Context.ConnectionId}, User: {Context.User}, User ID: {Context.UserIdentifier}");
+
+            foreach (var claim in Context.User.Claims)
+            {
+                logger.LogInformation($"Claim: {claim.Type}, Value: {claim.Value}");
+            }
+            
+            logger.LogInformation($"Connected: {Context.ConnectionId}, User: {Context.User.Claims}, User ID: {Context.UserIdentifier}");
             return base.OnConnectedAsync();
         }
         /*public override Task OnDisconnectedAsync(Exception exception)
@@ -36,9 +45,10 @@ namespace ChatChainServer.Hubs
 
         public async Task GenericMessageEvent(string clientType, string clientName, string channel, string user, string message)
         {
-            logger.LogInformation($"Client Type: {clientType} of Name: {clientName} had author: {user} send \"{message}\" in channel: {channel}");
+            logger.LogInformation($"Client Type: {clientType} of Name: {Context.UserIdentifier} had author: {user} send \"{message}\" in channel: {channel}");
             logger.LogInformation($"Client: {Context.ConnectionId}, User: {Context.UserIdentifier}");
             await Clients.All.SendAsync("GenericMessageEvent", clientType, clientName, channel, user, message);
+            await Clients.User("client").SendAsync("GenericMessageEvent", "it worked", "", "", "", "");
         }
 
         public async Task GenericJoinEvent(string clientType, string clientName, string channel, string user)
