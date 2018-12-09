@@ -22,14 +22,7 @@ namespace ChatChainServer.Hubs
 
         public override Task OnConnectedAsync()
         {
-            logger.LogInformation($"Connection: {Context.User.Identity.Name}");
-
-            foreach (var claim in Context.User.Claims)
-            {
-                logger.LogInformation($"Claim: {claim.Type}, Value: {claim.Value}");
-            }
-            
-            logger.LogInformation($"Connected: {Context.ConnectionId}, User: {Context.User.Claims}, User ID: {Context.UserIdentifier}");
+            logger.LogInformation($"Connection: {Context.UserIdentifier}");
             return base.OnConnectedAsync();
         }
         /*public override Task OnDisconnectedAsync(Exception exception)
