@@ -26,7 +26,7 @@ namespace ChatChainServer.Hubs
             return base.OnConnectedAsync();
         }
         /*public override Task OnDisconnectedAsync(Exception exception)
-        {   
+        {
             logger.LogInformation($"Client Type: {clientType} of Name: {clientName} disconnected in channel: {channel}");
             await Clients.All.SendAsync("GenericDisconnectionEvent", clientType, clientName, channel);
             return base.OnDisconnectedAsync(exception);
