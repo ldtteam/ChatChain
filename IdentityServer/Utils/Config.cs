@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using IdentityServer4;
 using IdentityServer4.Models;
 
 namespace IdentityServer.Utils
@@ -14,8 +15,10 @@ namespace IdentityServer.Utils
                 new Client
                 {
                     ClientId = "client",
-                    AllowedGrantTypes = GrantTypes.ClientCredentials,
+                    AllowedGrantTypes = GrantTypes.HybridAndClientCredentials,
 
+                    RequireConsent = false,
+                    
                     //Client secrets
                     ClientSecrets =
                     {
@@ -23,8 +26,11 @@ namespace IdentityServer.Utils
                     },
                     AllowedScopes =
                     {
+                        IdentityServerConstants.StandardScopes.OpenId,
+                        IdentityServerConstants.StandardScopes.Profile,
                         "api1"
                     },
+                    AllowOfflineAccess = true
                 }
             };
         }
@@ -35,6 +41,16 @@ namespace IdentityServer.Utils
             return new List<ApiResource>
             {
                 new ApiResource("api1", "Api 1")
+            };
+        }
+        
+        // scopes define the resources in your system
+        public static IEnumerable<IdentityResource> GetIdentityResources()
+        {
+            return new List<IdentityResource>
+            {
+                new IdentityResources.OpenId(),
+                new IdentityResources.Profile(),
             };
         }
 
