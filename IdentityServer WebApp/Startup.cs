@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using IdentityServer4.EntityFramework.DbContexts;
+using IdentityServer4.EntityFramework.Options;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Hosting;
@@ -12,6 +13,7 @@ using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using IdentityServer_WebApp.Data;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -42,9 +44,16 @@ namespace IdentityServer_WebApp
             
             var migrationsAssembly = typeof(Startup).GetTypeInfo().Assembly.GetName().Name;
             
-            services.AddDbContext<ConfigurationDbContext>(options =>
-                options.UseSqlite(
-                    Configuration.GetConnectionString("IdentityServer"), sql => sql.MigrationsAssembly(migrationsAssembly)));
+            ConfigurationStoreOptions cso = new ConfigurationStoreOptions();
+
+            cso.ConfigureDbContext = builder =>
+            {
+                builder.UseSqlite(
+                    Configuration.GetConnectionString("IdentityServer"),
+                    sql => sql.MigrationsAssembly(migrationsAssembly));
+            };
+
+            services.AddSingleton(cso);
             
             services.AddDefaultIdentity<IdentityUser>()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
