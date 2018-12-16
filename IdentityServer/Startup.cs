@@ -32,9 +32,9 @@ namespace IdentityServer
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<IdentityUsersDbContext>(options =>
+            /*services.AddDbContext<IdentityUsersDbContext>(options =>
                 options.UseSqlite(
-                    Configuration.GetConnectionString("Identity")));
+                    Configuration.GetConnectionString("Identity")));*/
             
             var migrationsAssembly = typeof(Startup).GetTypeInfo().Assembly.GetName().Name;
 
@@ -43,9 +43,9 @@ namespace IdentityServer
                 options.UseSqlite(
                     Configuration.GetConnectionString("IdentityServer")));*/
             
-            services.AddDefaultIdentity<ApplicationUser>()
+            /*services.AddDefaultIdentity<ApplicationUser>()
                 .AddEntityFrameworkStores<IdentityUsersDbContext>()
-                .AddDefaultTokenProviders();
+                .AddDefaultTokenProviders();*/
             
             services.AddMvc();
 
@@ -60,12 +60,11 @@ namespace IdentityServer
                     options.ConfigureDbContext = builder =>
                         builder.UseSqlite(Configuration.GetConnectionString("IdentityServer"),
                             sql => sql.MigrationsAssembly(migrationsAssembly));
-                    
+
                     // this enables automatic token cleanup. this is optional.
                     options.EnableTokenCleanup = true;
                     options.TokenCleanupInterval = 30;
-                })
-                .AddAspNetIdentity<ApplicationUser>();
+                });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

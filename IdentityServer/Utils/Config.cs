@@ -41,6 +41,7 @@ namespace IdentityServer.Utils
             return new List<ApiResource>
             {
                 new ApiResource("api1", "Api 1")
+                
             };
         }
         
