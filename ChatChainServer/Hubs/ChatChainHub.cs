@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Connections;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.Logging;
 
 namespace ChatChainServer.Hubs
@@ -23,8 +24,14 @@ namespace ChatChainServer.Hubs
         public override Task OnConnectedAsync()
         {
             logger.LogInformation($"Connection: {Context.UserIdentifier}");
+            foreach (Claim claim in Context.User.Claims)
+            {
+                logger.LogInformation($"Claim: {claim.Properties}, {claim.Issuer}, {claim.Value}");
+            }
+            logger.LogInformation($"Claims: {Context.User.Claims}");
             return base.OnConnectedAsync();
         }
+        
         /*public override Task OnDisconnectedAsync(Exception exception)
         {
             logger.LogInformation($"Client Type: {clientType} of Name: {clientName} disconnected in channel: {channel}");

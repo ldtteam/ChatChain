@@ -1,0 +1,8 @@
+@using Microsoft.AspNetCore.Identity
+
+@inject SignInManager<IdentityUser> SignInManager
+
+@if (SignInManager.IsSignedIn(User))
+{
+    <li><a asp-page="/Clients/Index">Clients</a></li>
+}

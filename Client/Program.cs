@@ -22,7 +22,7 @@ namespace Client
             }
             // request the token from the Auth server
             Console.WriteLine(discoveryClient.TokenEndpoint);
-            var tokenClient = new TokenClient(discoveryClient.TokenEndpoint, "test.test@test.com", "Test123!");
+            var tokenClient = new TokenClient(discoveryClient.TokenEndpoint, "client", "secret");
             Console.WriteLine(tokenClient.ClientId);
             var response = await tokenClient.RequestClientCredentialsAsync("offline_access");
  

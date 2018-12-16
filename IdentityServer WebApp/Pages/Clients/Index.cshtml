@@ -1,0 +1,19 @@
+@page
+@using IdentityServer4.EntityFramework.Entities
+@model IndexModel
+
+@{
+    ViewData["Title"] = "Clients";
+}
+
+<h2>@ViewData["Title"]</h2>
+<div class="row">
+    <div class="col-md-4">
+        <section>
+            @foreach (Client element in Model.Clients)
+            {
+                <p>@Html.DisplayFor(m => element.Id)</p>
+            }
+        </section>
+    </div>
+</div>
