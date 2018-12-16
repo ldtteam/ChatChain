@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using IdentityServer4.EntityFramework.DbContexts;
 using Microsoft.AspNetCore.Builder;
@@ -39,9 +40,11 @@ namespace IdentityServer_WebApp
                 options.UseSqlite(
                     Configuration.GetConnectionString("DefaultConnection")));
             
+            var migrationsAssembly = typeof(Startup).GetTypeInfo().Assembly.GetName().Name;
+            
             services.AddDbContext<ConfigurationDbContext>(options =>
                 options.UseSqlite(
-                    Configuration.GetConnectionString("IdentityServer")));
+                    Configuration.GetConnectionString("IdentityServer"), sql => sql.MigrationsAssembly(migrationsAssembly)));
             
             services.AddDefaultIdentity<IdentityUser>()
                 .AddEntityFrameworkStores<ApplicationDbContext>();

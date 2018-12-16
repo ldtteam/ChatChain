@@ -3,6 +3,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using IdentityServer4.EntityFramework.DbContexts;
 using IdentityServer4.EntityFramework.Entities;
+using IdentityServer_WebApp.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -20,10 +21,6 @@ namespace IdentityServer_WebApp.Pages.Clients
         public IndexModel(ConfigurationDbContext context)
         {
             _context = context;
-        }
-        
-        public void OnGet()
-        {
         }
 
         public IList<Client> Clients { get; set; }
