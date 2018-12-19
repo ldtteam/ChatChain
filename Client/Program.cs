@@ -14,7 +14,7 @@ namespace Client
         private static async Task MainAsync()
         {
             // discover endpoints from the metadata by calling Auth server hosted on 5000 port
-            var discoveryClient = await DiscoveryClient.GetAsync("http://localhost:5001");
+            var discoveryClient = await DiscoveryClient.GetAsync("http://localhost:5000");
             if (discoveryClient.IsError)
             {
                 Console.WriteLine(discoveryClient.Error);
@@ -22,9 +22,9 @@ namespace Client
             }
             // request the token from the Auth server
             Console.WriteLine(discoveryClient.TokenEndpoint);
-            var tokenClient = new TokenClient(discoveryClient.TokenEndpoint, "client", "secret");
+            var tokenClient = new TokenClient(discoveryClient.TokenEndpoint, "22ea1a18-ab4a-47a7-892b-fbd0448c3623", "test123");
             Console.WriteLine(tokenClient.ClientId);
-            var response = await tokenClient.RequestClientCredentialsAsync("offline_access");
+            var response = await tokenClient.RequestClientCredentialsAsync("api1");
  
             if (response.IsError)
             {
