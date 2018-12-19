@@ -58,7 +58,8 @@ namespace IdentityServer_WebApp.Pages.Groups
             {
                 GroupId = groupId,
                 GroupName = Input.GroupName,
-                OwnerId = _userManager.GetUserAsync(User).Id
+                OwnerId = _userManager.GetUserAsync(User).Id,
+                Clients = new List<Data.Client>()
             };
             
             _groupsContext.Groups.Add(group);
