@@ -15,10 +15,8 @@ namespace IdentityServer.Utils
                 new Client
                 {
                     ClientId = "client",
-                    AllowedGrantTypes = GrantTypes.HybridAndClientCredentials,
+                    AllowedGrantTypes = GrantTypes.ClientCredentials,
 
-                    RequireConsent = false,
-                    
                     //Client secrets
                     ClientSecrets =
                     {
@@ -26,9 +24,7 @@ namespace IdentityServer.Utils
                     },
                     AllowedScopes =
                     {
-                        IdentityServerConstants.StandardScopes.OpenId,
-                        IdentityServerConstants.StandardScopes.Profile,
-                        "api1"
+                       "api1"
                     },
                     AllowOfflineAccess = true
                 }

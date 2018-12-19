@@ -41,6 +41,10 @@ namespace IdentityServer_WebApp
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlite(
                     Configuration.GetConnectionString("DefaultConnection")));
+
+            services.AddDbContext<GroupsDbContext>(options =>
+                options.UseSqlite(
+                    Configuration.GetConnectionString("GroupsDatabase")));
             
             var migrationsAssembly = typeof(Startup).GetTypeInfo().Assembly.GetName().Name;
             
@@ -52,8 +56,16 @@ namespace IdentityServer_WebApp
                     Configuration.GetConnectionString("IdentityServer"),
                     sql => sql.MigrationsAssembly(migrationsAssembly));
             };
-
+            
             services.AddSingleton(cso);
+
+            services.AddDbContext<ConfigurationDbContext>(
+                builder =>
+                {
+                    builder.UseSqlite(
+                        Configuration.GetConnectionString("IdentityServer"),
+                        sql => sql.MigrationsAssembly(migrationsAssembly));
+                });
             
             services.AddDefaultIdentity<IdentityUser>()
                 .AddEntityFrameworkStores<ApplicationDbContext>();

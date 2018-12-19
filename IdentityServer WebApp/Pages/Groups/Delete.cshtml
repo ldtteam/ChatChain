@@ -1,0 +1,41 @@
+﻿@page "{id:int}"
+@model DeleteModel
+@{
+    ViewData["Title"] = "Delete";
+}
+
+<h2>Delete</h2>
+
+<p class="text-danger">@Model.ErrorMessage</p>
+
+<h3>Are you sure you want to delete this?</h3>
+<div>
+    <h4>Client</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(m => m.Group.Id)
+        </dt>
+        <dd>
+            @Html.DisplayFor(m => m.Group.Id)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(m => m.Group.GroupName)
+        </dt>
+        <dd>
+            @Html.DisplayFor(m => m.Group.GroupName)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(m => m.Clients)
+        </dt>
+        <dd>
+            @Html.DisplayFor(m => m.Clients)
+        </dd>
+    </dl>
+    
+    <form method="post">
+        <input type="hidden" asp-for="Group.Id" />
+        <input type="submit" value="Delete" class="btn btn-default" /> |
+        <a asp-page="./Index">Back to List</a>
+    </form>
+</div>

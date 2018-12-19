@@ -1,0 +1,48 @@
+﻿@page
+@model GroupsModel
+
+@{
+    ViewData["Title"] = "Groups";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<p>
+    <a asp-page="./Create">Create New</a>
+</p>
+
+<div class="row">
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Id</th>
+            <th>Group Name</th>
+            <th>Group Id</th>
+            <th>Clients</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var group in Model.Groups)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(m => group.Id)
+                </td>
+                <td>
+                    @Html.DisplayFor(m => group.GroupName)
+                </td>
+                <td>
+                    @Html.DisplayFor(m => group.GroupId)
+                </td>
+                <td>
+                    @Html.DisplayFor(m => group.Clients)
+                </td>
+                <td>
+                    <a asp-page="./Edit" asp-route-id="@group.Id">Edit</a>
+                    <a asp-page="./Delete" asp-route-id="@group.Id">Delete</a>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>
