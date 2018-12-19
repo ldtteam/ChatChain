@@ -28,9 +28,12 @@
         <dt>
             @Html.DisplayNameFor(m => m.Clients)
         </dt>
-        <dd>
-            @Html.DisplayFor(m => m.Clients)
-        </dd>
+        @foreach (var client in Model.Clients)
+        {
+            <dd>
+                @Html.DisplayFor(m => client)
+            </dd>
+        }
     </dl>
     
     <form method="post">

@@ -36,7 +36,7 @@ namespace IdentityServer_WebApp.Pages.Groups
                 return NotFound();
             }
 
-            Group = await _groupsContext.Groups.AsNoTracking().FirstOrDefaultAsync(g => g.Id == id);
+            Group = await _groupsContext.Groups.FirstOrDefaultAsync(g => g.Id == id);
 
             if (Group == null)
             {
@@ -44,12 +44,20 @@ namespace IdentityServer_WebApp.Pages.Groups
             }
 
             var testClient = await _groupsContext.Clients.FirstAsync(c => c.Id == 12);
-
-            Console.WriteLine($"Test Client: {testClient}");
+            var testClient2 = await _groupsContext.Clients.FirstAsync(c => c.Id == 11);
             
+            Console.WriteLine($"Test Client: {testClient}");
+
+            /*if (Group.Clients == null)
+            {
+                Group.Clients = new List<Data.Client>();
+            }*/
+
             if (testClient != null)
             {
+                Console.WriteLine($"Group Clients: {Group.Clients == null}");
                 Group.Clients.Add(testClient);
+                Group.Clients.Add(testClient2);
             }
 
             Clients = new List<string>();
@@ -58,7 +66,7 @@ namespace IdentityServer_WebApp.Pages.Groups
             {
                 foreach (var client in Group.Clients)
                 {
-                    var is4Client = await _is4Context.Clients.AsNoTracking().FirstAsync(c => c.Id == client.ClientId);
+                    var is4Client = await _is4Context.Clients.FirstAsync(c => c.Id == client.ClientId);
                     Clients.Add(is4Client.ClientName);
                 }
             }
