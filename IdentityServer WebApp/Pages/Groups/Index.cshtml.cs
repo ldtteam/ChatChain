@@ -21,7 +21,7 @@ namespace IdentityServer_WebApp.Pages.Groups
 
         public async Task OnGetAsync()
         {
-            Groups = await _groupsContext.Groups.ToListAsync();
+            Groups = await _groupsContext.Groups.Include(group => group.Clients).ToListAsync();
         }
     }
 }

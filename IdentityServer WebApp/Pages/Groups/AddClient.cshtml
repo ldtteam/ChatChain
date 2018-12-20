@@ -1,0 +1,29 @@
+﻿@page "{id:int}"
+@model AddClientModel
+@{
+    ViewData["Title"] = "Create";
+}
+
+<h2>Add Client to @Model.Group.GroupName</h2>
+
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form method="post">
+            <div class="col-md-8">
+                <input type="hidden" asp-for="Group.Id"/>
+                @Html.DropDownListFor(model => model.Input.ClientId, new SelectList(Model.Clients, "Value", "Text"), htmlAttributes: new {@class = "form-control", id = "Client"})
+                @Html.ValidationMessageFor(model => model.Input.ClientId, "", new {@class = "text-danger"})
+                <input type="submit" value="Add" class="btn btn-default"/>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-page="./Clients">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

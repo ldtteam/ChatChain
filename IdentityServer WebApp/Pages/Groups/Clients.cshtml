@@ -1,0 +1,50 @@
+@page "{id:int}"
+@model ClientsModel
+
+@{
+    ViewData["Title"] = Model.Group.GroupName + "'s Clients";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<p>
+    <a asp-page="./AddClient" asp-route-id="@Model.Group.Id">Add Client</a>
+</p>
+
+<div class="row">
+        <table class="table">
+            <thead>
+            <tr>
+                <th>Id</th>
+                <th>Client Name</th>
+                <th>Client Id</th>
+                <th>Enabled</th>
+            </tr>
+            </thead>
+            <tbody>
+                @foreach (var client in Model.Clients)
+                {
+                    if (Model.ClientIds.Contains(client.Id))
+                    {
+                        <tr>
+                            <td>
+                                @Html.DisplayFor(m => client.Id)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(m => client.ClientName)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(m => client.ClientId)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(m => client.Enabled)
+                            </td>
+                            <td>
+                                <a asp-page="./Remove" asp-route-id="@client.Id">Remove</a>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+</div>

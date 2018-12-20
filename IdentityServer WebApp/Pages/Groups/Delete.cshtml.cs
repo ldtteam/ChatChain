@@ -26,8 +26,8 @@ namespace IdentityServer_WebApp.Pages.Groups
         
         [BindProperty]
         public Group Group { get; set; }
-        public List<String> Clients { get; set; }
-        public string ErrorMessage { get; set; }
+        public List<string> Clients { get; set; }
+        public string ErrorMessage { get; private set; }
         
         public async Task<IActionResult> OnGetAsync(int? id, bool? saveChangesError = false)
         {
@@ -36,28 +36,11 @@ namespace IdentityServer_WebApp.Pages.Groups
                 return NotFound();
             }
 
-            Group = await _groupsContext.Groups.FirstOrDefaultAsync(g => g.Id == id);
+            Group = await _groupsContext.Groups.Include(group => group.Clients).FirstOrDefaultAsync(g => g.Id == id);
 
             if (Group == null)
             {
                 return NotFound();
-            }
-
-            var testClient = await _groupsContext.Clients.FirstAsync(c => c.Id == 12);
-            var testClient2 = await _groupsContext.Clients.FirstAsync(c => c.Id == 11);
-            
-            Console.WriteLine($"Test Client: {testClient}");
-
-            /*if (Group.Clients == null)
-            {
-                Group.Clients = new List<Data.Client>();
-            }*/
-
-            if (testClient != null)
-            {
-                Console.WriteLine($"Group Clients: {Group.Clients == null}");
-                Group.Clients.Add(testClient);
-                Group.Clients.Add(testClient2);
             }
 
             Clients = new List<string>();
