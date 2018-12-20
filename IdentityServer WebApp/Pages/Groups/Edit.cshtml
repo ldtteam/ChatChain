@@ -1,7 +1,7 @@
-﻿@page
-@model CreateModel
+﻿@page "{id:int}"
+@model EditModel
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Edit";
 }
 
 <h2>Edit</h2>
@@ -12,13 +12,14 @@
     <div class="col-md-4">
         <form method="post">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Group.Id"/>
             <div class="form-group">
-                <label asp-for="Input.GroupName" class="control-label"></label>
-                <input asp-for="Input.GroupName" class="form-control" />
-                <span asp-validation-for="Input.GroupName" class="text-danger"></span>
+                    <label asp-for="Group.GroupName" class="control-label"></label>
+                    <input asp-for="Group.GroupName"/>
+                    <span asp-validation-for="Group.GroupName" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-default" />
+                <input type="submit" value="Save" class="btn btn-default" />
             </div>
         </form>
     </div>
