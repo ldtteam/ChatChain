@@ -6,7 +6,10 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="IdentityModel" Version="3.10.1" />
+      <PackageReference Include="IdentityModel" Version="4.0.0-bruichladdich" />
+      <PackageReference Include="Microsoft.AspNet.SignalR.JS" Version="2.4.0" />
+      <PackageReference Include="Microsoft.AspNetCore.Http.Connections.Common" Version="1.1.0" />
+      <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="1.1.0" />
     </ItemGroup>
 
 </Project>

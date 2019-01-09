@@ -35,7 +35,7 @@
                     @Html.DisplayFor(m => group.GroupId)
                 </td>
                 <td>
-                    <a asp-page="./Clients" asp-route-id="@group.Id">View Clients</a>
+                    <a asp-page="./Clients" asp-route-id="@group.Id.ToString()">View @group.ClientGroups.Select(cg => cg.Client).Count() Clients</a>
                 </td>
                 <td>
                     <a asp-page="./Edit" asp-route-id="@group.Id">Edit</a>

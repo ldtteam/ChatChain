@@ -17,18 +17,33 @@ namespace IdentityServer_WebApp.Pages.Clients
     [Authorize]
     public class IndexModel : PageModel
     {
-        private readonly ConfigurationDbContext _configurationContext;
+        private readonly UserManager<IdentityUser> _userManager;
+        private readonly ConfigurationDbContext _is4Context;
+        private readonly GroupsDbContext _groupsContext;
         
-        public IndexModel(ConfigurationDbContext configurationContext)
+        public IndexModel(UserManager<IdentityUser> userManager, ConfigurationDbContext is4Context, GroupsDbContext groupsContext)
         {
-            _configurationContext = configurationContext;
+            _userManager = userManager;
+            _is4Context = is4Context;
+            _groupsContext = groupsContext;
         }
 
         public IList<Client> Clients { get; set; }
 
         public async Task OnGetAsync()
         {
-            Clients = await _configurationContext.Clients.ToListAsync();
+            Clients = new List<Client>();
+
+            foreach (var client in await _is4Context.Clients.ToListAsync())
+            {
+                var groupClient = await _groupsContext.Clients.FirstAsync(c => c.ClientId == client.Id);
+
+                if (groupClient.OwnerId == _userManager.GetUserAsync(User).Result.Id)
+                {
+                    Clients.Add(client);
+                }
+            }
         }
+        //d10d988b-e7f4-4c40-bf86-c1beeaded8b3; 38; Test Client 1; 12/24/2018 19:07:28
     }
 }

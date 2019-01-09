@@ -2,9 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using System.Threading.Tasks;
 using IdentityServer4.EntityFramework.DbContexts;
 using IdentityServer4.EntityFramework.Options;
+using IdentityServer4.Test;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Hosting;
@@ -16,6 +18,7 @@ using IdentityServer_WebApp.Data;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using RabbitMQ.Client;
 
 namespace IdentityServer_WebApp
 {
@@ -67,7 +70,7 @@ namespace IdentityServer_WebApp
                         sql => sql.MigrationsAssembly(migrationsAssembly));
                 });
             
-            services.AddDefaultIdentity<IdentityUser>()
+            services.AddDefaultIdentity<IdentityUser>(options => options.Password.RequireNonAlphanumeric = false )
                 .AddEntityFrameworkStores<ApplicationDbContext>();
 
             services.ConfigureApplicationCookie(options =>
@@ -80,6 +83,10 @@ namespace IdentityServer_WebApp
             });
             
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+
+            var factory = new ConnectionFactory {HostName = "66.70.180.4"};
+            
+            services.AddSingleton<IConnectionFactory>(factory);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
