@@ -13,8 +13,10 @@
         <PackageReference Include="IdentityServer4" Version="2.3.2" />
         <PackageReference Include="IdentityServer4.EntityFramework" Version="2.3.2" />
         <PackageReference Include="Microsoft.AspNetCore.App" />
+        <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.1.1" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="2.1.1" />
         <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.1.1" PrivateAssets="All" />
+        <PackageReference Include="RabbitMQ.Client" Version="6.0.0-pre3" />
     </ItemGroup>
 
     <ItemGroup>

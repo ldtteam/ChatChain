@@ -12,39 +12,45 @@
 </p>
 
 <div class="row">
-        <table class="table">
-            <thead>
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Id</th>
+            <th>Client Name</th>
+            <th>Client Id</th>
+            <th>Enabled</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var client in Model.Clients)
+        {
+            Model.ClientId = client.Id;
             <tr>
-                <th>Id</th>
-                <th>Client Name</th>
-                <th>Client Id</th>
-                <th>Enabled</th>
+                <td>
+                    @Html.DisplayFor(m => client.Id)
+                </td>
+                <td>
+                    @Html.DisplayFor(m => client.ClientName)
+                </td>
+                <td>
+                    @Html.DisplayFor(m => client.ClientId)
+                </td>
+                <td>
+                    @Html.DisplayFor(m => client.Enabled)
+                </td>
+                <td>
+                    <form method="post">
+                        <input type="hidden" asp-for="@Model.Group.Id"/>
+                        <input type="hidden" asp-for="@Model.ClientId" value="@client.Id"/>
+                        <input type="submit" value="Remove" class="btn-link"/>
+                    </form>
+                </td>
             </tr>
-            </thead>
-            <tbody>
-                @foreach (var client in Model.Clients)
-                {
-                    if (Model.ClientIds.Contains(client.Id))
-                    {
-                        <tr>
-                            <td>
-                                @Html.DisplayFor(m => client.Id)
-                            </td>
-                            <td>
-                                @Html.DisplayFor(m => client.ClientName)
-                            </td>
-                            <td>
-                                @Html.DisplayFor(m => client.ClientId)
-                            </td>
-                            <td>
-                                @Html.DisplayFor(m => client.Enabled)
-                            </td>
-                            <td>
-                                <a asp-page="./Remove" asp-route-id="@client.Id">Remove</a>
-                            </td>
-                        </tr>
-                    }
-                }
-            </tbody>
-        </table>
+        }
+        </tbody>
+    </table>
+</div>
+
+<div>
+    <a asp-page="./Index">Back to Groups</a>
 </div>

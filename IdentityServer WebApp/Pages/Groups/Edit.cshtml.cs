@@ -26,14 +26,14 @@ namespace IdentityServer_WebApp.Pages.Groups
         {
             if (id == null)
             {
-                return NotFound();
+                return RedirectToPage("./Index");
             }
 
             Group = await _groupsContext.Groups.FindAsync(id);
-
-            if (Group == null)
+            
+            if (Group == null || Group.OwnerId != _userManager.GetUserAsync(User).Result.Id)
             {
-                return NotFound();
+                return RedirectToPage("./Index");
             }
 
             return Page();
@@ -44,6 +44,13 @@ namespace IdentityServer_WebApp.Pages.Groups
             if (!ModelState.IsValid)
             {
                 return Page();
+            }
+            
+            Group = await _groupsContext.Groups.FindAsync(id);
+            
+            if (Group.OwnerId != _userManager.GetUserAsync(User).Result.Id)
+            {
+                return RedirectToPage("./Index");
             }
 
             var groupToUpdate = await _groupsContext.Groups.FindAsync(id);

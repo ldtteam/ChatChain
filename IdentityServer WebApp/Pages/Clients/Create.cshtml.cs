@@ -93,27 +93,13 @@ namespace IdentityServer_WebApp.Pages.Clients
 
             var newClient = new Data.Client
             {
-                OwnerId = _userManager.GetUserAsync(User).Id,
-                ClientId = is4Client.Id
+                OwnerId = _userManager.GetUserAsync(User).Result.Id,
+                ClientId = is4Client.Id,
+                ClientGuid = is4Client.ClientId
             };
 
             _groupsContext.Clients.Add(newClient);
             await _groupsContext.SaveChangesAsync();
-            
-            /*var group = new Group();
-            
-            group.OwnerId = _userManager.GetUserAsync(User).Id;
-            group.GroupName = "Test";
-            
-            var client = await _groupsContext.Clients
-                .FirstOrDefaultAsync(c => c.ClientId == is4Client.Id);
-            
-            Console.WriteLine($"Client: {client.Id} {client.ClientId} {client.OwnerId}");
-            
-            group.Clients.Add(client);
-
-            _groupsContext.Groups.Add(group);
-            await _groupsContext.SaveChangesAsync();*/
             
             return RedirectToPage("./Index");
         }

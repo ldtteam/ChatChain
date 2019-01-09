@@ -1,14 +1,9 @@
-using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using IdentityServer4.Models;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Client = IdentityServer4.EntityFramework.Entities.Client;
 
-namespace IdentityServer_WebApp.Data
+namespace ChatChainServer.Data
 {
     public class GroupsDbContext : DbContext
     {
@@ -19,7 +14,6 @@ namespace IdentityServer_WebApp.Data
         
         public DbSet<Group> Groups { get; set; }
         public DbSet<Client> Clients { get; set; }
-        //public DbSet<ClientGroup> ClientGroups { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

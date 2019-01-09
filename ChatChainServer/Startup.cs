@@ -1,14 +1,23 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
+using ChatChainServer.Data;
 using ChatChainServer.Hubs;
 using ChatChainServer.Utils;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Hosting.Internal;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Primitives;
+using Newtonsoft.Json;
+using RabbitMQ.Client;
+using RabbitMQ.Client.Events;
 
 namespace ChatChainServer
 {
@@ -19,7 +28,8 @@ namespace ChatChainServer
             Configuration = configuration;
         }
 
-        public IConfiguration Configuration { get; }
+        public static readonly Dictionary<string, List<string>> ClientIds = new Dictionary<string, List<string>>();
+        private IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
@@ -30,6 +40,10 @@ namespace ChatChainServer
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });*/
 
+            services.AddDbContext<GroupsDbContext>(options =>
+                options.UseSqlite(
+                    Configuration.GetConnectionString("GroupsDatabase"))); 
+            
             services.AddMvc();
 
             services.AddAuthentication(options =>
@@ -49,6 +63,9 @@ namespace ChatChainServer
             services.AddSignalR();
 
             services.AddSingleton<IUserIdProvider, ChatChainUserProvider>();
+
+            services.AddHostedService<RabbitMqService>();
+            services.AddScoped<IRabbitMqService, ScopedRabbitMqService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

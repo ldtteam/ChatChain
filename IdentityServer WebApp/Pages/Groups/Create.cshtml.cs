@@ -2,12 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using IdentityModel;
 using IdentityServer4.EntityFramework.DbContexts;
 using IdentityServer4.EntityFramework.Mappers;
 using IdentityServer4.Models;
 using IdentityServer_WebApp.Data;
+using IdentityServer_WebApp.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -16,6 +18,8 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
+using RabbitMQ.Client;
 using Client = IdentityServer4.EntityFramework.Entities.Client;
 using Secret = IdentityServer4.Models.Secret;
 
@@ -58,8 +62,7 @@ namespace IdentityServer_WebApp.Pages.Groups
             {
                 GroupId = groupId,
                 GroupName = Input.GroupName,
-                OwnerId = _userManager.GetUserAsync(User).Id,
-                Clients = new List<Data.Client>()
+                OwnerId = _userManager.GetUserAsync(User).Result.Id
             };
             
             _groupsContext.Groups.Add(group);
