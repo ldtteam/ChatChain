@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ChatChainServer.Data;
 using ChatChainServer.Hubs;
+using ChatChainServer.Services;
 using ChatChainServer.Utils;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
@@ -64,8 +65,11 @@ namespace ChatChainServer
 
             services.AddSingleton<IUserIdProvider, ChatChainUserProvider>();
 
-            services.AddHostedService<RabbitMqService>();
-            services.AddScoped<IRabbitMqService, ScopedRabbitMqService>();
+            //services.AddHostedService<RabbitMqService>();
+            //services.AddScoped<IRabbitMqService, ScopedRabbitMqService>();
+            
+            services.AddScoped<ClientService>();
+            services.AddScoped<GroupService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

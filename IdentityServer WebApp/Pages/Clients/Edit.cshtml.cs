@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using IdentityServer4.EntityFramework.DbContexts;
 using IdentityServer_WebApp.Data;
+using IdentityServer_WebApp.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -18,13 +19,13 @@ namespace IdentityServer_WebApp.Pages.Clients
     {
         private readonly UserManager<IdentityUser> _userManager;
         private readonly ConfigurationDbContext _context;
-        private readonly GroupsDbContext _groupsContext;
+        private readonly ClientService _clientsContext;
 
-        public EditModel(UserManager<IdentityUser> userManager, ConfigurationDbContext context, GroupsDbContext groupsContext)
+        public EditModel(UserManager<IdentityUser> userManager, ConfigurationDbContext context, ClientService clientsContext)
         {
             _userManager = userManager;
             _context = context;
-            _groupsContext = groupsContext;
+            _clientsContext = clientsContext;
         }
         
         [BindProperty]
@@ -39,7 +40,7 @@ namespace IdentityServer_WebApp.Pages.Clients
 
             Client = await _context.Clients.FindAsync(id);
 
-            var groupsClient = await _groupsContext.Clients.FirstAsync(c => c.ClientId == id);
+            var groupsClient = _clientsContext.GetFromClientId(id.Value);
 
             if (groupsClient.OwnerId != _userManager.GetUserAsync(User).Result.Id)
             {
@@ -56,12 +57,17 @@ namespace IdentityServer_WebApp.Pages.Clients
         
         public async Task<IActionResult> OnPostAsync(int? id)
         {
+            if (id == null)
+            {
+                return NotFound();
+            }
+            
             if (!ModelState.IsValid)
             {
                 return Page();
             }
             
-            var groupsClient = await _groupsContext.Clients.FirstAsync(c => c.ClientId == id);
+            var groupsClient = _clientsContext.GetFromClientId(id.Value);
 
             if (groupsClient.OwnerId != _userManager.GetUserAsync(User).Result.Id)
             {

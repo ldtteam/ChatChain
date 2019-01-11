@@ -7,7 +7,8 @@ using IdentityModel;
 using IdentityServer4.EntityFramework.DbContexts;
 using IdentityServer4.EntityFramework.Mappers;
 using IdentityServer4.Models;
-using IdentityServer_WebApp.Data;
+using IdentityServer_WebApp.Models;
+using IdentityServer_WebApp.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -25,13 +26,13 @@ namespace IdentityServer_WebApp.Pages.Clients
     {
         private readonly UserManager<IdentityUser> _userManager;
         private readonly ConfigurationDbContext _is4Context;
-        private readonly GroupsDbContext _groupsContext;
+        private readonly ClientService _clientsContext;
 
-        public CreateModel(UserManager<IdentityUser> userManager, ConfigurationDbContext is4Context, GroupsDbContext groupsContext)
+        public CreateModel(UserManager<IdentityUser> userManager, ConfigurationDbContext is4Context, ClientService clientsContext)
         {
             _userManager = userManager;
             _is4Context = is4Context;
-            _groupsContext = groupsContext;
+            _clientsContext = clientsContext;
         }
         
         [BindProperty]
@@ -91,15 +92,16 @@ namespace IdentityServer_WebApp.Pages.Clients
             Client is4Client = await _is4Context.Clients
                 .FirstOrDefaultAsync(c => c.ClientId == clientId);
 
-            var newClient = new Data.Client
+            var newClient = new Models.Client
             {
                 OwnerId = _userManager.GetUserAsync(User).Result.Id,
                 ClientId = is4Client.Id,
                 ClientGuid = is4Client.ClientId
             };
 
-            _groupsContext.Clients.Add(newClient);
-            await _groupsContext.SaveChangesAsync();
+
+            _clientsContext.Create(newClient);
+            //await _clientsContext.SaveChangesAsync();
             
             return RedirectToPage("./Index");
         }

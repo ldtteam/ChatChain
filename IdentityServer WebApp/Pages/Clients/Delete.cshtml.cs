@@ -2,7 +2,8 @@ using System;
 using System.Threading.Tasks;
 using IdentityServer4.EntityFramework.DbContexts;
 using IdentityServer4.Extensions;
-using IdentityServer_WebApp.Data;
+using IdentityServer_WebApp.Models;
+using IdentityServer_WebApp.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -17,13 +18,13 @@ namespace IdentityServer_WebApp.Pages.Clients
     {
         private readonly UserManager<IdentityUser> _userManager;
         private readonly ConfigurationDbContext _is4Context;
-        private readonly GroupsDbContext _groupsContext;
+        private readonly ClientService _clientsContext;
 
-        public DeleteModel(UserManager<IdentityUser> userManager, ConfigurationDbContext context, GroupsDbContext groupsContext)
+        public DeleteModel(UserManager<IdentityUser> userManager, ConfigurationDbContext context, ClientService clientsContext)
         {
             _userManager = userManager;
             _is4Context = context;
-            _groupsContext = groupsContext;
+            _clientsContext = clientsContext;
         }
         
         [BindProperty]
@@ -39,7 +40,7 @@ namespace IdentityServer_WebApp.Pages.Clients
 
             Client = await _is4Context.Clients.AsNoTracking().FirstOrDefaultAsync(m => m.Id == id);
 
-            var groupsClient = await _groupsContext.Clients.FirstAsync(c => c.ClientId == id);
+            var groupsClient = _clientsContext.GetFromClientId(id.Value);
             
             Console.WriteLine("Get Subject Id: " + _userManager.GetUserAsync(User).Result.Id);
             
@@ -67,9 +68,7 @@ namespace IdentityServer_WebApp.Pages.Clients
                 .AsNoTracking()
                 .FirstOrDefaultAsync(m => m.Id == id);
 
-            var groupClient = await _groupsContext.Clients
-                .AsNoTracking()
-                .FirstOrDefaultAsync(m => m.ClientId == id);
+            var groupClient = _clientsContext.GetFromClientId(id.Value);
             
             if (groupClient != null && groupClient.OwnerId != _userManager.GetUserAsync(User).Result.Id)
             {
@@ -88,8 +87,7 @@ namespace IdentityServer_WebApp.Pages.Clients
 
                 if (groupClient != null)
                 {
-                    _groupsContext.Clients.Remove(groupClient);
-                    await _groupsContext.SaveChangesAsync();
+                    _clientsContext.Remove(groupClient);
                 }
                 return RedirectToPage("./Index");
             }

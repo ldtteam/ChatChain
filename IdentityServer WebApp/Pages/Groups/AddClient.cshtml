@@ -1,4 +1,4 @@
-﻿@page "{id:int}"
+﻿@page
 @model AddClientModel
 @{
     ViewData["Title"] = "Create";
@@ -11,7 +11,7 @@
     <div class="col-md-4">
         <form method="post">
             <div class="col-md-8">
-                <input type="hidden" asp-for="Group.Id"/>
+                @Html.Hidden("id", Model.Group.Id)
                 @Html.DropDownListFor(model => model.Input.ClientId, new SelectList(Model.Clients, "Value", "Text"), htmlAttributes: new {@class = "form-control", id = "Client"})
                 @Html.ValidationMessageFor(model => model.Input.ClientId, "", new {@class = "text-danger"})
                 <input type="submit" value="Add" class="btn btn-default"/>

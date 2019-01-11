@@ -5,6 +5,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using ChatChainServer.Data;
+using ChatChainServer.Services;
 using ChatChainServer.Utils;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Connections;
@@ -16,6 +17,7 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using Client = IdentityServer4.Models.Client;
 
 namespace ChatChainServer.Hubs
 {
@@ -25,12 +27,14 @@ namespace ChatChainServer.Hubs
     {
 
         private readonly ILogger<ChatChainHub> _logger;
-        private readonly GroupsDbContext _groupsContext;
+        private readonly GroupService _groupsContext;
+        private readonly ClientService _clientsContext;
 
-        public ChatChainHub(ILogger<ChatChainHub> logger, GroupsDbContext groupsContext)
+        public ChatChainHub(ILogger<ChatChainHub> logger, GroupService groupsContext, ClientService clientsContext)
         {
             _logger = logger;
             _groupsContext = groupsContext;
+            _clientsContext = clientsContext;
         }
 
         public override Task OnConnectedAsync()
@@ -42,8 +46,7 @@ namespace ChatChainServer.Hubs
             }
             _logger.LogInformation($"Claims: {Context.User.Claims}");
             
-            var client = _groupsContext.Clients.Include(c => c.ClientGroups).ThenInclude(cg => cg.Group)
-                .FirstAsync(c => c.ClientGuid == Context.UserIdentifier).GetAwaiter().GetResult();
+            /*var client = _clientsContext.GetFromClientGuid(Context.UserIdentifier);
 
             if (!Startup.ClientIds.ContainsKey(client.ClientGuid))
             {
@@ -58,7 +61,7 @@ namespace ChatChainServer.Hubs
             {
                 Groups.AddToGroupAsync(Context.ConnectionId,
                     cg.Group.GroupId);
-            }
+            }*/
 
             /*foreach (var cg in client.ClientGroups.FindAll(cg => cg.ClientId == client.Id))
             {
@@ -67,26 +70,6 @@ namespace ChatChainServer.Hubs
             
             return base.OnConnectedAsync();
         }
-
-        public override Task OnDisconnectedAsync(Exception exception)
-        {
-            var client = _groupsContext.Clients.Include(c => c.ClientGroups).ThenInclude(cg => cg.Group)
-                .FirstAsync(c => c.ClientGuid == Context.UserIdentifier).GetAwaiter().GetResult();
-
-            if (Startup.ClientIds[client.ClientGuid].Contains(Context.ConnectionId))
-            {
-                Startup.ClientIds[client.ClientGuid].Remove(Context.ConnectionId);
-            }
-            
-            return base.OnDisconnectedAsync(exception);
-        }
-        
-        /*public override Task OnDisconnectedAsync(Exception exception)
-        {
-            logger.LogInformation($"Client Type: {clientType} of Name: {clientName} disconnected in channel: {channel}");
-            await Clients.All.SendAsync("GenericDisconnectionEvent", clientType, clientName, channel);
-            return base.OnDisconnectedAsync(exception);
-        }*/
         
         // ClientType is what ChatChain extension is connecting. E.G. "ChatChainDC", These should be Unique!
         // ClientName is the name of the specific client connecting. E.G. "Minecolonies Test Server", These should be Unique!d
@@ -98,12 +81,22 @@ namespace ChatChainServer.Hubs
             _logger.LogInformation($"Client: {Context.ConnectionId}, User: {Context.UserIdentifier}");
             //await Clients.All.SendAsync("GenericMessageEvent", clientType, clientName, channel, user, message);
             //await Clients.User("client").SendAsync("GenericMessageEvent", "it worked", "", "", "", "");
-            var client = await _groupsContext.Clients.Include(c => c.ClientGroups).ThenInclude(cg => cg.Group)
+            /*var client = await _groupsContext.Clients.Include(c => c.ClientGroups).ThenInclude(cg => cg.Group)
                 .FirstAsync(c => c.ClientGuid == Context.UserIdentifier);
             
             foreach (var cg in client.ClientGroups.FindAll(cg => cg.ClientId == client.Id))
             {
                 await Clients.Group(cg.Group.GroupId).SendAsync("GenericMessageEvent", $"{clientType}", $"{cg.Group.GroupName}", $"{cg.Group.GroupId}", "", "");
+            }*/
+
+            foreach (var group in _clientsContext.GetGroups(_clientsContext.GetFromClientGuid(Context.UserIdentifier).Id
+                .ToString()))
+            {
+                foreach (var client in _groupsContext.GetClients(group.Id.ToString()))
+                {
+                    await Clients.User(client.ClientGuid).SendAsync("GenericMessageEvent", $"{clientType}",
+                        $"{group.GroupName}", $"{group.GroupId}", "", "");
+                }
             }
         }
 
