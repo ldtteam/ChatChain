@@ -3,7 +3,8 @@ using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using IdentityServer4.EntityFramework.DbContexts;
 using IdentityServer4.EntityFramework.Entities;
-using IdentityServer_WebApp.Data;
+using IdentityServer_WebApp.Models;
+using IdentityServer_WebApp.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -19,13 +20,13 @@ namespace IdentityServer_WebApp.Pages.Clients
     {
         private readonly UserManager<IdentityUser> _userManager;
         private readonly ConfigurationDbContext _is4Context;
-        private readonly GroupsDbContext _groupsContext;
+        private readonly ClientService _clientsContext;
         
-        public IndexModel(UserManager<IdentityUser> userManager, ConfigurationDbContext is4Context, GroupsDbContext groupsContext)
+        public IndexModel(UserManager<IdentityUser> userManager, ConfigurationDbContext is4Context, ClientService clientsContext)
         {
             _userManager = userManager;
             _is4Context = is4Context;
-            _groupsContext = groupsContext;
+            _clientsContext = clientsContext;
         }
 
         public IList<Client> Clients { get; set; }
@@ -36,9 +37,9 @@ namespace IdentityServer_WebApp.Pages.Clients
 
             foreach (var client in await _is4Context.Clients.ToListAsync())
             {
-                var groupClient = await _groupsContext.Clients.FirstAsync(c => c.ClientId == client.Id);
+                var groupClient = _clientsContext.GetFromClientId(client.Id);
 
-                if (groupClient.OwnerId == _userManager.GetUserAsync(User).Result.Id)
+                if (groupClient != null && groupClient.OwnerId == _userManager.GetUserAsync(User).Result.Id)
                 {
                     Clients.Add(client);
                 }

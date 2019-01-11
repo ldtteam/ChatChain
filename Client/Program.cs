@@ -27,12 +27,12 @@ namespace Client
             //var tokenClient = new TokenClient(disco.TokenEndpoint, "eada14e8-b238-458e-a0d9-b2f913c0289d", "test123");
             //Console.WriteLine(tokenClient.ClientId);
             //var response = await tokenClient.RequestClientCredentialsAsync("api1");
-
-            var clientId = "129d4141-0f71-42f7-b4c2-8bb53a3b3e46";
+           
+            var clientId = "55a8060a-c58e-41a9-9c46-1bceb9ca84de";
 
             HubConnection connection = new HubConnectionBuilder()
                 .WithUrl("http://localhost:5000/hubs/chatchain",
-                    options => { options.AccessTokenProvider = () => GetJwtToken(clientId, "test123"); })
+                    options => { options.AccessTokenProvider = () => GetJwtToken(clientId, "test123!"); })
                 .Build();
             
             Console.WriteLine("test1234");
@@ -44,6 +44,7 @@ namespace Client
                 {
                     Console.WriteLine(
                         $"Client Name: {clientType} ---- Group Name: {clientName} ---- Group Id: {channel}");
+                    Console.WriteLine("");
                 });
 
             Console.WriteLine("test123");
@@ -62,7 +63,6 @@ namespace Client
             while (true)
             {
                 Thread.Sleep(10000);
-                Console.WriteLine("");
                 await connection.InvokeAsync("GenericMessageEvent", clientId, "2", "3", "4", "5");
             }
         }

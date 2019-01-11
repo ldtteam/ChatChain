@@ -1,5 +1,8 @@
+using System;
+using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
-using IdentityServer_WebApp.Data;
+using IdentityServer_WebApp.Models;
+using IdentityServer_WebApp.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -11,55 +14,72 @@ namespace IdentityServer_WebApp.Pages.Groups
     public class EditModel : PageModel
     {
         private readonly UserManager<IdentityUser> _userManager;
-        private readonly GroupsDbContext _groupsContext;
+        private readonly GroupService _groupsContext;
 
-        public EditModel(UserManager<IdentityUser> userManager, GroupsDbContext groupContext)
+        public EditModel(UserManager<IdentityUser> userManager, GroupService groupContext)
         {
             _userManager = userManager;
             _groupsContext = groupContext;
         }
         
-        [BindProperty]
         public Group Group { get; set; }
+        [BindProperty]
+        public InputModel Input { get; set; }
         
-        public async Task<IActionResult> OnGetAsync(int? id)
+        public class InputModel
+        {
+            [Required]
+            [Display(Name = "Group Name")]
+            public string GroupName { get; set; }
+        }
+        
+        public async Task<IActionResult> OnGetAsync(string id)
         {
             if (id == null)
             {
                 return RedirectToPage("./Index");
             }
 
-            Group = await _groupsContext.Groups.FindAsync(id);
+            Group = _groupsContext.Get(id);
             
             if (Group == null || Group.OwnerId != _userManager.GetUserAsync(User).Result.Id)
             {
                 return RedirectToPage("./Index");
             }
 
+            Input = new InputModel
+            {
+                GroupName = Group.GroupName
+            };
+
             return Page();
         }
         
-        public async Task<IActionResult> OnPostAsync(int? id)
+        public async Task<IActionResult> OnPostAsync(string id)
         {
+            Console.WriteLine("test123");
             if (!ModelState.IsValid)
             {
                 return Page();
             }
+
+            Console.WriteLine("test1234");
             
-            Group = await _groupsContext.Groups.FindAsync(id);
+            Group = _groupsContext.Get(id);
             
             if (Group.OwnerId != _userManager.GetUserAsync(User).Result.Id)
             {
                 return RedirectToPage("./Index");
             }
+            Console.WriteLine("test1235");
 
-            var groupToUpdate = await _groupsContext.Groups.FindAsync(id);
+            var groupToUpdate = _groupsContext.Get(id);
 
-            if (!await TryUpdateModelAsync<Group>(
-                groupToUpdate,
-                "group",
-                g => g.GroupName)) return Page();
-            await _groupsContext.SaveChangesAsync();
+            groupToUpdate.GroupName = Input.GroupName;
+
+            Console.WriteLine($"Group Name: {groupToUpdate.GroupName}");
+            _groupsContext.Update(groupToUpdate.Id.ToString(), groupToUpdate);
+            
             return RedirectToPage("./Index");
 
         } 

@@ -6,8 +6,8 @@ using System.Text;
 using System.Threading.Tasks;
 using IdentityServer4.EntityFramework.DbContexts;
 using IdentityServer4.EntityFramework.Entities;
-using IdentityServer_WebApp.Data;
 using IdentityServer_WebApp.Models;
+using IdentityServer_WebApp.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -26,15 +26,15 @@ namespace IdentityServer_WebApp.Pages.Groups
     {
         private readonly UserManager<IdentityUser> _userManager;
         private readonly ConfigurationDbContext _is4Context;
-        private readonly GroupsDbContext _groupsContext;
-        private readonly IConnectionFactory _connectionFactory;
+        private readonly GroupService _groupsContext;
+        private readonly ClientService _clientsContext;
         
-        public ClientsModel(UserManager<IdentityUser> userManager, ConfigurationDbContext is4Context, GroupsDbContext groupsContext, IConnectionFactory connectionFactory)
+        public ClientsModel(UserManager<IdentityUser> userManager, ConfigurationDbContext is4Context, GroupService groupsContext, ClientService clientsContext)
         {
             _userManager = userManager;
             _is4Context = is4Context;
             _groupsContext = groupsContext;
-            _connectionFactory = connectionFactory;
+            _clientsContext = clientsContext;
         }
 
         public IList<Client> Clients { get; set; }
@@ -42,9 +42,9 @@ namespace IdentityServer_WebApp.Pages.Groups
         [BindProperty]
         public int ClientId { get; set; }
 
-        public async Task<IActionResult> OnGetAsync(int id)
+        public async Task<IActionResult> OnGetAsync(string id)
         {
-            Group = await _groupsContext.Groups.Include(group => group.ClientGroups).ThenInclude(cg => cg.Client).FirstAsync(group => group.Id == id);
+            Group = _groupsContext.Get(id);
 
             if (Group == null || Group.OwnerId != _userManager.GetUserAsync(User).Result.Id)
             {
@@ -55,12 +55,23 @@ namespace IdentityServer_WebApp.Pages.Groups
 
             List<int> clientIds = new List<int>();
          
-            foreach (var client in Group.ClientGroups.Select(cg => cg.Client))
+            foreach (var client in _groupsContext.GetClients(Group.Id.ToString()))
             {
                 clientIds.Add(client.ClientId);
             }
+
+            foreach (var clientId in clientIds)
+            {
+                var isClient = await _is4Context.Clients.Where(lclient => lclient.Id == clientId).FirstOrDefaultAsync();
+                var client = _clientsContext.GetFromClientId(clientId);
+                
+                if (isClient != null && client != null && client.OwnerId == _userManager.GetUserAsync(User).Result.Id)
+                {
+                    Clients.Add(isClient);
+                }    
+            }
             
-            foreach (var client in await _is4Context.Clients.ToListAsync())
+            /*foreach (var client in await _is4Context.Clients.ToListAsync())
             {
                 var groupClient = await _groupsContext.Clients.FirstAsync(c => c.ClientId == client.Id);
 
@@ -68,23 +79,20 @@ namespace IdentityServer_WebApp.Pages.Groups
                 {
                     Clients.Add(client);
                 }
-            }
+            }*/
 
             return Page();
         }
         
-        public async Task<IActionResult> OnPostAsync(int id)
+        public async Task<IActionResult> OnPostAsync(string id)
         {
             
             Console.WriteLine($"Group Id: {id}");
             Console.WriteLine($"Client Id: {ClientId}");
             
-            Group = await _groupsContext.Groups
-                .Include(g => g.ClientGroups)
-                .ThenInclude(cg => cg.Client)
-                .FirstOrDefaultAsync(m => m.Id == id);
+            Group = _groupsContext.Get(id);
 
-            var groupClient = await _groupsContext.Clients.FirstAsync(c => c.ClientId == ClientId);
+            var groupClient = _clientsContext.GetFromClientId(ClientId);
             
             if (Group.OwnerId != _userManager.GetUserAsync(User).Result.Id || groupClient.OwnerId != _userManager.GetUserAsync(User).Result.Id)
             {
@@ -95,11 +103,9 @@ namespace IdentityServer_WebApp.Pages.Groups
             
             try
             {
-                var clientGroup = Group.ClientGroups.Find(cg => cg.ClientId == clientId);
-                Group.ClientGroups.Remove(clientGroup);
-                await _groupsContext.SaveChangesAsync();
+                _groupsContext.RemoveClient(Group.Id, groupClient.Id);
                 
-                using(var connection = _connectionFactory.CreateConnection())
+                /*using(var connection = _connectionFactory.CreateConnection())
                 using (var channel = connection.CreateModel())
                 {
                     Console.WriteLine("test12345");
@@ -119,15 +125,15 @@ namespace IdentityServer_WebApp.Pages.Groups
                         routingKey: "",
                         basicProperties: null,
                         body: body);
-                }
+                }*/
                 
-                return RedirectToPage("./Clients");
+                return RedirectToPage("./Clients", new { id = Group.Id});
             }
             catch (DbUpdateException /* ex */)
             {
                 //Log the error (uncomment ex variable name and write a log.)
                 return RedirectToAction("./Clients",
-                    new { id = id, saveChangesError = true });
+                    new { id = Group.Id , saveChangesError = true });
             }
         }
     }

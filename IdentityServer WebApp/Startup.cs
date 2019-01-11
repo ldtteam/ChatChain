@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using IdentityServer_WebApp.Data;
+using IdentityServer_WebApp.Services;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -84,9 +85,8 @@ namespace IdentityServer_WebApp
             
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
-            var factory = new ConnectionFactory {HostName = "66.70.180.4"};
-            
-            services.AddSingleton<IConnectionFactory>(factory);
+            services.AddScoped<ClientService>();
+            services.AddScoped<GroupService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

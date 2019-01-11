@@ -8,8 +8,8 @@ using IdentityModel;
 using IdentityServer4.EntityFramework.DbContexts;
 using IdentityServer4.EntityFramework.Mappers;
 using IdentityServer4.Models;
-using IdentityServer_WebApp.Data;
 using IdentityServer_WebApp.Models;
+using IdentityServer_WebApp.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -29,9 +29,9 @@ namespace IdentityServer_WebApp.Pages.Groups
     public class CreateModel : PageModel
     {
         private readonly UserManager<IdentityUser> _userManager;
-        private readonly GroupsDbContext _groupsContext;
+        private readonly GroupService _groupsContext;
 
-        public CreateModel(UserManager<IdentityUser> userManager,GroupsDbContext groupsContext)
+        public CreateModel(UserManager<IdentityUser> userManager, GroupService groupsContext)
         {
             _userManager = userManager;
             _groupsContext = groupsContext;
@@ -65,8 +65,8 @@ namespace IdentityServer_WebApp.Pages.Groups
                 OwnerId = _userManager.GetUserAsync(User).Result.Id
             };
             
-            _groupsContext.Groups.Add(group);
-            await _groupsContext.SaveChangesAsync();
+            _groupsContext.Create(group);
+            //await _groupsContext.SaveChangesAsync();
             
             return RedirectToPage("./Index");
         }

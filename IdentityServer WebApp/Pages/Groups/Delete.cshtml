@@ -1,4 +1,4 @@
-﻿@page "{id:int}"
+﻿@page
 @model DeleteModel
 @{
     ViewData["Title"] = "Delete";
@@ -17,7 +17,7 @@
             @Html.DisplayNameFor(m => m.Group.Id)
         </dt>
         <dd>
-            @Html.DisplayFor(m => m.Group.Id)
+            @Html.DisplayTextFor(m => m.Group.Id)
         </dd>
         <dt>
             @Html.DisplayNameFor(m => m.Group.GroupName)
