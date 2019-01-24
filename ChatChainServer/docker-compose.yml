@@ -1,0 +1,39 @@
+version: '3.1'
+
+services:
+  chatchain:
+    image: chatchainserver
+    restart: always
+    ports:
+      - 5080:80
+    volumes:
+      - chatchain-databases:/app/databases
+    environment:
+      - CLIENTS_AND_GROUPS_DATABASE=mongodb://root:X5NqdM*R@66.70.180.4:27017
+      - ASPNETCORE_ENVIRONMENT=Development
+      - IDENTITY_SERVER_URL=http://chatchain-identity
+      
+  chatchain-identity:
+    image: chatchainidentityserver
+    restart: always
+    ports:
+      - 5081:80
+    volumes:
+      - chatchain-databases:/app/databases
+    environment:
+      - IDENTITY_SERVER_DATABASE=DataSource=databases/IS4.db
+      - IDENTITY_SERVER_URL=http://chatchain-identity
+      
+  chatchain-webapp:
+    image: chatchainwebappserver
+    restart: always
+    ports:
+      - 5082:80
+    volumes:
+      - chatchain-databases:/app/databases
+    environment:
+      - IDENTITY_DATABASE=DataSource=databases/Identity.db
+      - IDENTITY_SERVER_DATABASE=DataSource=databases/IS4.db
+      
+volumes:
+  chatchain-databases:

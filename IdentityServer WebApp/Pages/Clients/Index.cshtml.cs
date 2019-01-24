@@ -20,13 +20,13 @@ namespace IdentityServer_WebApp.Pages.Clients
     {
         private readonly UserManager<IdentityUser> _userManager;
         private readonly ConfigurationDbContext _is4Context;
-        private readonly ClientService _clientsContext;
+        public readonly ClientService ClientsContext;
         
         public IndexModel(UserManager<IdentityUser> userManager, ConfigurationDbContext is4Context, ClientService clientsContext)
         {
             _userManager = userManager;
             _is4Context = is4Context;
-            _clientsContext = clientsContext;
+            ClientsContext = clientsContext;
         }
 
         public IList<Client> Clients { get; set; }
@@ -37,7 +37,7 @@ namespace IdentityServer_WebApp.Pages.Clients
 
             foreach (var client in await _is4Context.Clients.ToListAsync())
             {
-                var groupClient = _clientsContext.GetFromClientId(client.Id);
+                var groupClient = ClientsContext.GetFromClientId(client.Id);
 
                 if (groupClient != null && groupClient.OwnerId == _userManager.GetUserAsync(User).Result.Id)
                 {

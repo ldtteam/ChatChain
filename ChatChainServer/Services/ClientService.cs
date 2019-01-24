@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using ChatChainServer.Models;
+using IdentityServer4.Extensions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Bson;
@@ -16,7 +17,19 @@ namespace ChatChainServer.Services
 
         public ClientService(IConfiguration config, IServiceProvider services)
         {
-            var client = new MongoClient(config.GetConnectionString("MongoDB"));
+            var databaseUrl = Environment.GetEnvironmentVariable("CLIENTS_AND_GROUPS_DATABASE");
+
+            MongoClient client;
+            
+            if (databaseUrl != null && !databaseUrl.IsNullOrEmpty())
+            {
+                client = new MongoClient(databaseUrl);
+            }
+            else
+            {
+                client = new MongoClient(config.GetConnectionString("MongoDB"));
+            }
+            
             var database = client.GetDatabase("ChatChainGroups");
             _clients = database.GetCollection<Client>("Clients");
             _groups = database.GetCollection<Group>("Groups");
@@ -85,7 +98,8 @@ namespace ChatChainServer.Services
             
             if (client == null || group == null) return;
             
-            client.GroupIds.Add(group.Id);
+            var groupIds = new List<ObjectId>(client.GroupIds) {group.Id};
+            client.GroupIds = groupIds;
             Update(client.Id.ToString(), client);
 
             if (!addClientToGroup) return;

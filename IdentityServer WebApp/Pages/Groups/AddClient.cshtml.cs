@@ -76,7 +76,6 @@ namespace IdentityServer_WebApp.Pages.Groups
             {
                 clientIds.Add(client.Id.ToString());
             }
-            
 
             foreach (var client in _clientsContext.GetFromOwnerId(_userManager.GetUserAsync(User).Result.Id))
             {

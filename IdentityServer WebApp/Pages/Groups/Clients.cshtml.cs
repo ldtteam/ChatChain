@@ -27,14 +27,14 @@ namespace IdentityServer_WebApp.Pages.Groups
         private readonly UserManager<IdentityUser> _userManager;
         private readonly ConfigurationDbContext _is4Context;
         private readonly GroupService _groupsContext;
-        private readonly ClientService _clientsContext;
+        public readonly ClientService ClientsContext;
         
         public ClientsModel(UserManager<IdentityUser> userManager, ConfigurationDbContext is4Context, GroupService groupsContext, ClientService clientsContext)
         {
             _userManager = userManager;
             _is4Context = is4Context;
             _groupsContext = groupsContext;
-            _clientsContext = clientsContext;
+            ClientsContext = clientsContext;
         }
 
         public IList<Client> Clients { get; set; }
@@ -63,7 +63,7 @@ namespace IdentityServer_WebApp.Pages.Groups
             foreach (var clientId in clientIds)
             {
                 var isClient = await _is4Context.Clients.Where(lclient => lclient.Id == clientId).FirstOrDefaultAsync();
-                var client = _clientsContext.GetFromClientId(clientId);
+                var client = ClientsContext.GetFromClientId(clientId);
                 
                 if (isClient != null && client != null && client.OwnerId == _userManager.GetUserAsync(User).Result.Id)
                 {
@@ -92,7 +92,7 @@ namespace IdentityServer_WebApp.Pages.Groups
             
             Group = _groupsContext.Get(id);
 
-            var groupClient = _clientsContext.GetFromClientId(ClientId);
+            var groupClient = ClientsContext.GetFromClientId(ClientId);
             
             if (Group.OwnerId != _userManager.GetUserAsync(User).Result.Id || groupClient.OwnerId != _userManager.GetUserAsync(User).Result.Id)
             {
