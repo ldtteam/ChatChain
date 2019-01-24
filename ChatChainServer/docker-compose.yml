@@ -9,7 +9,7 @@ services:
     volumes:
       - chatchain-databases:/app/databases
     environment:
-      - CLIENTS_AND_GROUPS_DATABASE=mongodb://root:X5NqdM*R@66.70.180.4:27017
+      - CLIENTS_AND_GROUPS_DATABASE=mongodb://username:password@ip:27017
       - ASPNETCORE_ENVIRONMENT=Development
       - IDENTITY_SERVER_URL=http://chatchain-identity
       
