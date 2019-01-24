@@ -17,7 +17,19 @@ namespace IdentityServer_WebApp.Services
 
         public ClientService(IConfiguration config, IServiceProvider services)
         {
-            var client = new MongoClient(config.GetConnectionString("MongoDB"));
+            var databaseUrl = Environment.GetEnvironmentVariable("CLIENTS_AND_GROUPS_DATABASE");
+
+            MongoClient client;
+            
+            if (databaseUrl != null && !databaseUrl.IsNullOrEmpty())
+            {
+                client = new MongoClient(databaseUrl);
+            }
+            else
+            {
+                client = new MongoClient(config.GetConnectionString("MongoDB"));
+            }
+            
             var database = client.GetDatabase("ChatChainGroups");
             _clients = database.GetCollection<Client>("Clients");
             _groups = database.GetCollection<Group>("Groups");

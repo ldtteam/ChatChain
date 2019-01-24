@@ -1,9 +1,9 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace IdentityServer.Data.Migrations.IdentityServer.ConfigurationDb
+namespace IdentityServerWebApp.Migrations
 {
-    public partial class InitialIdentityServerConfigurationDbMigration : Migration
+    public partial class IdentityServer : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -172,13 +172,13 @@ namespace IdentityServer.Data.Migrations.IdentityServer.ConfigurationDb
                 name: "ApiSecrets",
                 columns: table => new
                 {
-                    Created = table.Column<DateTime>(nullable: false),
-                    Expiration = table.Column<DateTime>(nullable: true),
                     Id = table.Column<int>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     Description = table.Column<string>(maxLength: 1000, nullable: true),
                     Value = table.Column<string>(maxLength: 4000, nullable: false),
+                    Expiration = table.Column<DateTime>(nullable: true),
                     Type = table.Column<string>(maxLength: 250, nullable: false),
+                    Created = table.Column<DateTime>(nullable: false),
                     ApiResourceId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
@@ -358,13 +358,13 @@ namespace IdentityServer.Data.Migrations.IdentityServer.ConfigurationDb
                 name: "ClientSecrets",
                 columns: table => new
                 {
-                    Created = table.Column<DateTime>(nullable: false),
-                    Expiration = table.Column<DateTime>(nullable: true),
                     Id = table.Column<int>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     Description = table.Column<string>(maxLength: 2000, nullable: true),
                     Value = table.Column<string>(maxLength: 4000, nullable: false),
+                    Expiration = table.Column<DateTime>(nullable: true),
                     Type = table.Column<string>(maxLength: 250, nullable: false),
+                    Created = table.Column<DateTime>(nullable: false),
                     ClientId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>

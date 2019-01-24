@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 using IdentityServer4.EntityFramework.DbContexts;
@@ -9,6 +10,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Client = IdentityServer4.EntityFramework.Entities.Client;
 
@@ -82,6 +84,8 @@ namespace IdentityServer_WebApp.Pages.Clients
                 c => c.ClientName , c => c.Enabled))
             {
                 await _context.SaveChangesAsync();
+                groupsClient.ClientName = clientToUpdate.ClientName;
+                _clientsContext.Update(groupsClient.Id.ToString(), groupsClient);
                 return RedirectToPage("./Index");
             }
 

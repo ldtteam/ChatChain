@@ -8,6 +8,7 @@ using IdentityServer.Models;
 using IdentityServer.Utils;
 using IdentityServer4.EntityFramework.DbContexts;
 using IdentityServer4.EntityFramework.Mappers;
+using IdentityServer4.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -32,33 +33,29 @@ namespace IdentityServer
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            /*services.AddDbContext<IdentityUsersDbContext>(options =>
-                options.UseSqlite(
-                    Configuration.GetConnectionString("Identity")));*/
             
             var migrationsAssembly = typeof(Startup).GetTypeInfo().Assembly.GetName().Name;
-
-
-            /*services.AddDbContext<IdentityServerDbContext>(options =>
-                options.UseSqlite(
-                    Configuration.GetConnectionString("IdentityServer")));*/
-            
-            /*services.AddDefaultIdentity<ApplicationUser>()
-                .AddEntityFrameworkStores<IdentityUsersDbContext>()
-                .AddDefaultTokenProviders();*/
             
             services.AddMvc();
 
-            services.AddIdentityServer()
+            var environmentConnectionString = Environment.GetEnvironmentVariable("IDENTITY_SERVER_DATABASE");
+            var connectionString = Configuration.GetConnectionString("IdentityServer");
+
+            if (environmentConnectionString != null && !environmentConnectionString.IsNullOrEmpty())
+            {
+                connectionString = environmentConnectionString;
+            }
+            
+            services.AddIdentityServer( options => options.IssuerUri = Environment.GetEnvironmentVariable("IDENTITY_SERVER_URL"))
                 .AddDeveloperSigningCredential()
                 .AddConfigurationStore(options =>
                     options.ConfigureDbContext = builder =>
-                        builder.UseSqlite(Configuration.GetConnectionString("IdentityServer"),
+                        builder.UseSqlite(connectionString,
                             sql => sql.MigrationsAssembly(migrationsAssembly)))
                 .AddOperationalStore(options =>
                 {
                     options.ConfigureDbContext = builder =>
-                        builder.UseSqlite(Configuration.GetConnectionString("IdentityServer"),
+                        builder.UseSqlite(connectionString,
                             sql => sql.MigrationsAssembly(migrationsAssembly));
 
                     // this enables automatic token cleanup. this is optional.

@@ -96,7 +96,8 @@ namespace IdentityServer_WebApp.Pages.Clients
             {
                 OwnerId = _userManager.GetUserAsync(User).Result.Id,
                 ClientId = is4Client.Id,
-                ClientGuid = is4Client.ClientId
+                ClientGuid = is4Client.ClientId,
+                ClientName = is4Client.ClientName
             };
 
 

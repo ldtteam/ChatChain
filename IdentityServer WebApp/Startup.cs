@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using IdentityServer4.EntityFramework.DbContexts;
 using IdentityServer4.EntityFramework.Options;
+using IdentityServer4.Extensions;
 using IdentityServer4.Test;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
@@ -42,34 +43,62 @@ namespace IdentityServer_WebApp
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
 
-            services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlite(
-                    Configuration.GetConnectionString("DefaultConnection")));
+            var identityDatabase = Environment.GetEnvironmentVariable("IDENTITY_DATABASE");
 
-            services.AddDbContext<GroupsDbContext>(options =>
-                options.UseSqlite(
-                    Configuration.GetConnectionString("GroupsDatabase")));
+            if (identityDatabase != null && !identityDatabase.IsNullOrEmpty())
+            {
+                services.AddDbContext<ApplicationDbContext>(options =>
+                    options.UseSqlite(
+                        identityDatabase));
+            }
+            else
+            {
+                services.AddDbContext<ApplicationDbContext>(options =>
+                    options.UseSqlite(
+                        Configuration.GetConnectionString("DefaultConnection")));
+            }
             
             var migrationsAssembly = typeof(Startup).GetTypeInfo().Assembly.GetName().Name;
             
             ConfigurationStoreOptions cso = new ConfigurationStoreOptions();
-
-            cso.ConfigureDbContext = builder =>
-            {
-                builder.UseSqlite(
-                    Configuration.GetConnectionString("IdentityServer"),
-                    sql => sql.MigrationsAssembly(migrationsAssembly));
-            };
             
-            services.AddSingleton(cso);
+            var identityServerDatabase = Environment.GetEnvironmentVariable("IDENTITY_SERVER_DATABASE");
 
-            services.AddDbContext<ConfigurationDbContext>(
-                builder =>
+            if (identityServerDatabase != null && !identityServerDatabase.IsNullOrEmpty() )
+            {
+                cso.ConfigureDbContext = builder =>
+                {
+                    builder.UseSqlite(
+                        identityServerDatabase,
+                        sql => sql.MigrationsAssembly(migrationsAssembly));
+                };
+                services.AddSingleton(cso);
+                services.AddDbContext<ConfigurationDbContext>(
+                    builder =>
+                    {
+                        builder.UseSqlite(
+                            identityServerDatabase,
+                            sql => sql.MigrationsAssembly(migrationsAssembly));
+                    });
+            }
+            else
+            {
+                cso.ConfigureDbContext = builder =>
                 {
                     builder.UseSqlite(
                         Configuration.GetConnectionString("IdentityServer"),
                         sql => sql.MigrationsAssembly(migrationsAssembly));
-                });
+                };
+                services.AddSingleton(cso);
+                services.AddDbContext<ConfigurationDbContext>(
+                    builder =>
+                    {
+                        builder.UseSqlite(
+                            Configuration.GetConnectionString("IdentityServer"),
+                            sql => sql.MigrationsAssembly(migrationsAssembly));
+                    });
+                
+            }
             
             services.AddDefaultIdentity<IdentityUser>(options => options.Password.RequireNonAlphanumeric = false )
                 .AddEntityFrameworkStores<ApplicationDbContext>();
@@ -92,6 +121,8 @@ namespace IdentityServer_WebApp
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
+            UpdateDatabase(app);
+            
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -110,6 +141,20 @@ namespace IdentityServer_WebApp
             app.UseAuthentication();
 
             app.UseMvc();
+        }
+        
+        private static void UpdateDatabase(IApplicationBuilder app)
+        {
+            using (var serviceScope = app.ApplicationServices
+                .GetRequiredService<IServiceScopeFactory>()
+                .CreateScope())
+            {
+                using (var context = serviceScope.ServiceProvider.GetService<ApplicationDbContext>())
+                {
+                    context.Database.EnsureCreated();
+                    //context.Database.Migrate();
+                }
+            }
         }
     }
 }

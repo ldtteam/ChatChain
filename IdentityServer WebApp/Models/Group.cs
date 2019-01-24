@@ -8,8 +8,6 @@ namespace IdentityServer_WebApp.Models
     {
         public ObjectId Id { get; set; }
 
-        [BsonElement("NumericalId")] public int NumericalId { get; set; }
-
         [BsonElement("GroupId")]
         public string GroupId { get; set; }
         
