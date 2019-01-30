@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using ChatChainServer.Hubs;
 using ChatChainServer.Services;
 using ChatChainServer.Utils;
+using IdentityServer4.Extensions;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -66,6 +67,18 @@ namespace ChatChainServer
 
             app.UseStaticFiles();
             app.UseCookiePolicy();
+
+            var useHttps = Environment.GetEnvironmentVariable("USE_HTTPS");
+
+            if (useHttps != null && !useHttps.IsNullOrEmpty())
+            {
+                var boolUseHttps = bool.Parse(useHttps);
+
+                if (boolUseHttps)
+                {
+                    app.UseHttpsRedirection();
+                }
+            }
 
             app.UseMvc();
 
