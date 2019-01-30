@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Reflection;
 using System.Threading.Tasks;
 using IdentityServer.Data;
@@ -12,6 +13,7 @@ using IdentityServer4.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -45,8 +47,22 @@ namespace IdentityServer
             {
                 connectionString = environmentConnectionString;
             }
-            
-            services.AddIdentityServer( options => options.IssuerUri = Environment.GetEnvironmentVariable("IDENTITY_SERVER_URL"))
+
+            /*var ips = Environment.GetEnvironmentVariable("KNOWN_PROXIES");
+            if (ips != null && !ips.IsNullOrEmpty())
+            {
+                var ipsList = ips.Split(";");
+
+                services.Configure<ForwardedHeadersOptions>(options =>
+                {
+                    foreach (var ip in ipsList)
+                    {
+                        options.KnownProxies.Add(IPAddress.Parse(ip));
+                    }
+                });
+            }*/
+
+            services.AddIdentityServer( options => options.IssuerUri = Environment.GetEnvironmentVariable("IDENTITY_SERVER_URL") )
                 .AddDeveloperSigningCredential()
                 .AddConfigurationStore(options =>
                     options.ConfigureDbContext = builder =>
@@ -78,6 +94,23 @@ namespace IdentityServer
                 app.UseExceptionHandler("/Error");
             }
 
+            /*app.UseForwardedHeaders(new ForwardedHeadersOptions
+            {
+                ForwardedHeaders =  ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+            });*/
+            
+            var useHttps = Environment.GetEnvironmentVariable("USE_HTTPS");
+
+            if (useHttps != null && !useHttps.IsNullOrEmpty())
+            {
+                var boolUseHttps = bool.Parse(useHttps);
+
+                if (boolUseHttps)
+                {
+                    app.UseHttpsRedirection();
+                }
+            }
+
             app.UseStaticFiles();
             
             app.UseIdentityServer();
@@ -86,6 +119,7 @@ namespace IdentityServer
 
             app.UseMvc();
         }
+        
         private void InitializeDatabase(IApplicationBuilder app)
         {
             using (var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope())

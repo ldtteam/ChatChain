@@ -134,7 +134,18 @@ namespace IdentityServer_WebApp
                 app.UseHsts();
             }
 
-            app.UseHttpsRedirection();
+            var useHttps = Environment.GetEnvironmentVariable("USE_HTTPS");
+
+            if (useHttps != null && !useHttps.IsNullOrEmpty())
+            {
+                var boolUseHttps = bool.Parse(useHttps);
+
+                if (boolUseHttps)
+                {
+                    app.UseHttpsRedirection();
+                }
+            }
+            
             app.UseStaticFiles();
             app.UseCookiePolicy();
 

@@ -1,39 +1,64 @@
 version: '3.1'
 
 services:
-  chatchain:
-    image: chatchainserver
+  server:
+    image: docker.minecolonies.com/chatchainserver:latest
     restart: always
-    ports:
-      - 5080:80
     volumes:
       - chatchain-databases:/app/databases
     environment:
-      - CLIENTS_AND_GROUPS_DATABASE=mongodb://username:password@ip:27017
+      - CLIENTS_AND_GROUPS_DATABASE=mongodb://${MONGODB_USERNAME}:${MONGODB_PASSWORD}@db:27017
       - ASPNETCORE_ENVIRONMENT=Development
-      - IDENTITY_SERVER_URL=http://chatchain-identity
+      - IDENTITY_SERVER_URL=http://identity
       
-  chatchain-identity:
-    image: chatchainidentityserver
+  identity:
+    image: docker.minecolonies.com/chatchainidentityserver:latest
     restart: always
-    ports:
-      - 5081:80
     volumes:
       - chatchain-databases:/app/databases
     environment:
       - IDENTITY_SERVER_DATABASE=DataSource=databases/IS4.db
-      - IDENTITY_SERVER_URL=http://chatchain-identity
+      - IDENTITY_SERVER_URL=http://identity
       
-  chatchain-webapp:
-    image: chatchainwebappserver
+  webapp:
+    image: docker.minecolonies.com/chatchainwebapp:latest
     restart: always
-    ports:
-      - 5082:80
     volumes:
       - chatchain-databases:/app/databases
     environment:
       - IDENTITY_DATABASE=DataSource=databases/Identity.db
       - IDENTITY_SERVER_DATABASE=DataSource=databases/IS4.db
       
+  ocelot:
+    image: docker.minecolonies.com/chatchainocelot:latest
+    restart: always
+    expose:
+      - 5000
+    volumes:
+      - chatchain-ocelot-configuration:/app/configuration
+    environment:
+      - VIRTUAL_HOST=chatchain.minecolonies.com
+      - VIRTUAL_PROTO=http
+      - VIRTUAL_PORT=5000
+      - LETSENCRYPT_HOST=chatchain.minecolonies.com
+      - LETSENCRYPT_EMAIL=asher.parry@icloud.com
+      - JEYKLL_GITHUB_TOKEN=${GITHUB_TOKEN}
+      
+  db:
+    image: mongo:3.4
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGODB_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGODB_PASSWORD}
+    volumes:
+      - chatchain-mongodb-databases:/data/db
+      
 volumes:
   chatchain-databases:
+  chatchain-mongodb-databases:
+  chatchain-ocelot-configuration:
+
+networks:
+  default:
+    external:
+      name: webproxy
