@@ -13,7 +13,10 @@
         }
       ],
       "UpstreamPathTemplate": "/hubs/{hub}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE", "OPTIONS" ]
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE", "OPTIONS" ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "IdentityServer4"
+      }
     },
     {
       "_comment": "This is the route for the ChatChain WebApp",
