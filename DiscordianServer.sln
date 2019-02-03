@@ -11,8 +11,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IdentityServer", "IdentityS
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IdentityServer WebApp", "IdentityServer WebApp\IdentityServer WebApp.csproj", "{57FCBDA3-818C-4919-B38B-B876A392E195}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatChainOcelot", "ChatChainOcelot\ChatChainOcelot.csproj", "{29404C71-74A7-435F-BD98-E1B3FA9BEFA0}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -74,17 +72,5 @@ Global
 		{57FCBDA3-818C-4919-B38B-B876A392E195}.Release|x64.Build.0 = Release|Any CPU
 		{57FCBDA3-818C-4919-B38B-B876A392E195}.Release|x86.ActiveCfg = Release|Any CPU
 		{57FCBDA3-818C-4919-B38B-B876A392E195}.Release|x86.Build.0 = Release|Any CPU
-		{29404C71-74A7-435F-BD98-E1B3FA9BEFA0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{29404C71-74A7-435F-BD98-E1B3FA9BEFA0}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{29404C71-74A7-435F-BD98-E1B3FA9BEFA0}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{29404C71-74A7-435F-BD98-E1B3FA9BEFA0}.Debug|x64.Build.0 = Debug|Any CPU
-		{29404C71-74A7-435F-BD98-E1B3FA9BEFA0}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{29404C71-74A7-435F-BD98-E1B3FA9BEFA0}.Debug|x86.Build.0 = Debug|Any CPU
-		{29404C71-74A7-435F-BD98-E1B3FA9BEFA0}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{29404C71-74A7-435F-BD98-E1B3FA9BEFA0}.Release|Any CPU.Build.0 = Release|Any CPU
-		{29404C71-74A7-435F-BD98-E1B3FA9BEFA0}.Release|x64.ActiveCfg = Release|Any CPU
-		{29404C71-74A7-435F-BD98-E1B3FA9BEFA0}.Release|x64.Build.0 = Release|Any CPU
-		{29404C71-74A7-435F-BD98-E1B3FA9BEFA0}.Release|x86.ActiveCfg = Release|Any CPU
-		{29404C71-74A7-435F-BD98-E1B3FA9BEFA0}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

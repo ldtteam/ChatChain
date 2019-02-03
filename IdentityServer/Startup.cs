@@ -41,7 +41,7 @@ namespace IdentityServer
             services.AddMvc();
 
             var environmentConnectionString = Environment.GetEnvironmentVariable("IDENTITY_SERVER_DATABASE");
-            var connectionString = Configuration.GetConnectionString("IdentityServer");
+            var connectionString = Configuration.GetConnectionString("IdentityServerDatabase");
 
             if (environmentConnectionString != null && !environmentConnectionString.IsNullOrEmpty())
             {
@@ -66,12 +66,12 @@ namespace IdentityServer
                 .AddDeveloperSigningCredential()
                 .AddConfigurationStore(options =>
                     options.ConfigureDbContext = builder =>
-                        builder.UseSqlite(connectionString,
+                        builder.UseMySql(connectionString,
                             sql => sql.MigrationsAssembly(migrationsAssembly)))
                 .AddOperationalStore(options =>
                 {
                     options.ConfigureDbContext = builder =>
-                        builder.UseSqlite(connectionString,
+                        builder.UseMySql(connectionString,
                             sql => sql.MigrationsAssembly(migrationsAssembly));
 
                     // this enables automatic token cleanup. this is optional.

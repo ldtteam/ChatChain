@@ -35,21 +35,6 @@ services:
       - IDENTITY_DATABASE=DataSource=databases/Identity.db
       - IDENTITY_SERVER_DATABASE=DataSource=databases/IS4.db
 
-#  ocelot:
-#    image: docker.minecolonies.com/chatchainocelot:latest
-#    restart: always
-#    expose:
-#      - 80
-#    volumes:
-#      - chatchain-ocelot-configuration:/app/configuration
-#    environment:
-#      - VIRTUAL_HOST=chatchain.minecolonies.com
-#      - VIRTUAL_PROTO=http
-#      - VIRTUAL_PORT=80
-#      - LETSENCRYPT_HOST=chatchain.minecolonies.com
-#      - LETSENCRYPT_EMAIL=asher.parry@icloud.com
-#      - JEKYLL_GITHUB_TOKEN=${GITHUB_TOKEN}
-
   db:
     image: mongo:3.4
     restart: always

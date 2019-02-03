@@ -48,14 +48,14 @@ namespace IdentityServer_WebApp
             if (identityDatabase != null && !identityDatabase.IsNullOrEmpty())
             {
                 services.AddDbContext<ApplicationDbContext>(options =>
-                    options.UseSqlite(
+                    options.UseMySql(
                         identityDatabase));
             }
             else
             {
                 services.AddDbContext<ApplicationDbContext>(options =>
-                    options.UseSqlite(
-                        Configuration.GetConnectionString("DefaultConnection")));
+                    options.UseMySql(
+                        Configuration.GetConnectionString("IdentityDatabase")));
             }
             
             var migrationsAssembly = typeof(Startup).GetTypeInfo().Assembly.GetName().Name;
@@ -68,7 +68,7 @@ namespace IdentityServer_WebApp
             {
                 cso.ConfigureDbContext = builder =>
                 {
-                    builder.UseSqlite(
+                    builder.UseMySql(
                         identityServerDatabase,
                         sql => sql.MigrationsAssembly(migrationsAssembly));
                 };
@@ -76,7 +76,7 @@ namespace IdentityServer_WebApp
                 services.AddDbContext<ConfigurationDbContext>(
                     builder =>
                     {
-                        builder.UseSqlite(
+                        builder.UseMySql(
                             identityServerDatabase,
                             sql => sql.MigrationsAssembly(migrationsAssembly));
                     });
@@ -85,22 +85,22 @@ namespace IdentityServer_WebApp
             {
                 cso.ConfigureDbContext = builder =>
                 {
-                    builder.UseSqlite(
-                        Configuration.GetConnectionString("IdentityServer"),
+                    builder.UseMySql(
+                        Configuration.GetConnectionString("IdentityServerDatabase"),
                         sql => sql.MigrationsAssembly(migrationsAssembly));
                 };
                 services.AddSingleton(cso);
                 services.AddDbContext<ConfigurationDbContext>(
                     builder =>
                     {
-                        builder.UseSqlite(
-                            Configuration.GetConnectionString("IdentityServer"),
+                        builder.UseMySql(
+                            Configuration.GetConnectionString("IdentityServerDatabase"),
                             sql => sql.MigrationsAssembly(migrationsAssembly));
                     });
                 
             }
             
-            services.AddDefaultIdentity<IdentityUser>(options => options.Password.RequireNonAlphanumeric = false )
+            services.AddDefaultIdentity<IdentityUser>(options => options.Password.RequireNonAlphanumeric = false)
                 .AddEntityFrameworkStores<ApplicationDbContext>();
 
             services.ConfigureApplicationCookie(options =>
