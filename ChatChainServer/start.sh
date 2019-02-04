@@ -1,1 +1,1 @@
- ASPNETCORE_URLS="http://*:8080" dotnet run
+/usr/bin/dotnet ChatChainServer.dll
