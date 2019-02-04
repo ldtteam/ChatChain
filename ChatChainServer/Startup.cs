@@ -43,7 +43,19 @@ namespace ChatChainServer
                 options.ApiName = "api1";
             });
             
-            services.AddSignalR();
+            var environmentConnectionString = Environment.GetEnvironmentVariable("REDIS_BACKPLANE");
+
+            if (environmentConnectionString != null && !environmentConnectionString.IsNullOrEmpty())
+            {
+                services.AddSignalR().AddStackExchangeRedis(environmentConnectionString, options =>
+                    {
+                        options.Configuration.ChannelPrefix = "ChatChain";
+                    });
+            }
+            else
+            {
+                services.AddSignalR();
+            }
 
             services.AddSingleton<IUserIdProvider, ChatChainUserProvider>();
             
