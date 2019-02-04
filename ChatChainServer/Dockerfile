@@ -18,5 +18,6 @@ ADD https://github.com/ufoscout/docker-compose-wait/releases/download/2.2.1/wait
 RUN chmod +x /wait
 
 COPY start.sh start.sh
+RUN chmod +x start.sh
 
 CMD /wait && start.sh
