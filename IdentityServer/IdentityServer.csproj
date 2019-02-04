@@ -52,4 +52,8 @@
       <_ContentIncludedByDefault Remove="Areas\Identity\Pages\_ViewStart.cshtml" />
     </ItemGroup>
 
+    <ItemGroup>
+      <UpToDateCheckInput Remove="Pages\Index.cshtml" />
+    </ItemGroup>
+
 </Project>
