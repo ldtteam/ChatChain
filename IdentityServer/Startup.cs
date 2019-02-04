@@ -43,7 +43,8 @@ namespace IdentityServer
             {
                 var redis = ConnectionMultiplexer.Connect(redisConnectionVariable);
                 services.AddDataProtection()
-                    .PersistKeysToStackExchangeRedis(redis, "DataProtection-Keys");
+                    .PersistKeysToStackExchangeRedis(redis, "DataProtection-Keys")
+                    .SetApplicationName("IdentityServer");
             }
             
             var migrationsAssembly = typeof(Startup).GetTypeInfo().Assembly.GetName().Name;

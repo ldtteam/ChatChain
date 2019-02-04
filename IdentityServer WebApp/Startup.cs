@@ -44,7 +44,8 @@ namespace IdentityServer_WebApp
             {
                 var redis = ConnectionMultiplexer.Connect(redisConnectionVariable);
                 services.AddDataProtection()
-                    .PersistKeysToStackExchangeRedis(redis, "DataProtection-Keys");
+                    .PersistKeysToStackExchangeRedis(redis, "DataProtection-Keys")
+                    .SetApplicationName("WebApp");
             }
             
             services.Configure<CookiePolicyOptions>(options =>
