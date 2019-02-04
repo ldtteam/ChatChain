@@ -48,21 +48,11 @@ namespace IdentityServer
                 connectionString = environmentConnectionString;
             }
 
-            /*var ips = Environment.GetEnvironmentVariable("KNOWN_PROXIES");
-            if (ips != null && !ips.IsNullOrEmpty())
-            {
-                var ipsList = ips.Split(";");
-
-                services.Configure<ForwardedHeadersOptions>(options =>
+            services.AddIdentityServer( options =>
                 {
-                    foreach (var ip in ipsList)
-                    {
-                        options.KnownProxies.Add(IPAddress.Parse(ip));
-                    }
-                });
-            }*/
-
-            services.AddIdentityServer( options => options.IssuerUri = Environment.GetEnvironmentVariable("IDENTITY_SERVER_URL") )
+                    options.IssuerUri = Environment.GetEnvironmentVariable("IDENTITY_SERVER_URL");
+                    options.PublicOrigin = Environment.GetEnvironmentVariable("IDENTITY_SERVER_ORIGIN");
+                })
                 .AddDeveloperSigningCredential()
                 .AddConfigurationStore(options =>
                     options.ConfigureDbContext = builder =>
