@@ -37,9 +37,14 @@ namespace IdentityServer
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            var redis = ConnectionMultiplexer.Connect("REDIS_STACK_EXCHANGE");
-            services.AddDataProtection()
-                .PersistKeysToStackExchangeRedis(redis, "DataProtection-Keys");
+            var redisConnectionVariable = Environment.GetEnvironmentVariable("REDIS_STACK_EXCHANGE");
+            
+            if (redisConnectionVariable != null && !redisConnectionVariable.IsNullOrEmpty())
+            {
+                var redis = ConnectionMultiplexer.Connect(redisConnectionVariable);
+                services.AddDataProtection()
+                    .PersistKeysToStackExchangeRedis(redis, "DataProtection-Keys");
+            }
             
             var migrationsAssembly = typeof(Startup).GetTypeInfo().Assembly.GetName().Name;
             
