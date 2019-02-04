@@ -6,11 +6,13 @@ using ChatChainServer.Utils;
 using IdentityServer4.Extensions;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Logging;
+using StackExchange.Redis;
 
 namespace ChatChainServer
 {
@@ -42,7 +44,7 @@ namespace ChatChainServer
                 options.RequireHttpsMetadata = false;
                 options.ApiName = "api1";
             });
-            
+
             var environmentConnectionString = Environment.GetEnvironmentVariable("REDIS_BACKPLANE");
 
             if (environmentConnectionString != null && !environmentConnectionString.IsNullOrEmpty())

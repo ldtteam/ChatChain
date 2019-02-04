@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
     <PropertyGroup>
-        <TargetFramework>netcoreapp2.1</TargetFramework>
+        <TargetFramework>netcoreapp2.2</TargetFramework>
         <UserSecretsId>aspnet-IdentityServer_WebApp-33B00A02-C589-4A90-89CA-69F4DFBDFDE7</UserSecretsId>
     </PropertyGroup>
 
@@ -14,12 +14,16 @@
         <PackageReference Include="IdentityServer4" Version="2.3.2" />
         <PackageReference Include="IdentityServer4.EntityFramework" Version="2.3.2" />
         <PackageReference Include="Microsoft.AspNetCore.App" />
-        <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.1.1" />
-        <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.1.1" PrivateAssets="All" />
+        <PackageReference Include="Microsoft.AspNetCore.Cryptography.Internal" Version="2.2.0" />
+        <PackageReference Include="Microsoft.AspNetCore.DataProtection.Abstractions" Version="2.2.0" />
+        <PackageReference Include="Microsoft.AspNetCore.DataProtection.StackExchangeRedis" Version="2.2.0" />
+        <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.2.0" />
+        <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.2.0" PrivateAssets="All" />
         <PackageReference Include="MongoDB.Driver" Version="2.7.2" />
         <PackageReference Include="MySqlConnector" Version="0.49.3" />
         <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="2.1.4" />
         <PackageReference Include="RabbitMQ.Client" Version="6.0.0-pre3" />
+        <PackageReference Include="StackExchange.Redis" Version="2.0.519" />
     </ItemGroup>
 
     <ItemGroup>
