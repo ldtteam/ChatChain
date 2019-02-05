@@ -84,16 +84,10 @@ namespace IdentityServer
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
-            using (var serviceScope = app.ApplicationServices
-                .GetRequiredService<IServiceScopeFactory>()
-                .CreateScope())
+
+            if (Environment.GetEnvironmentVariable("MIGRATE_DATABASE") == "yes")
             {
-                using (var context1 = serviceScope.ServiceProvider.GetService<ConfigurationDbContext>())
-                using (var context2 = serviceScope.ServiceProvider.GetService<PersistedGrantDbContext>())
-                {
-                    if (!context1.Database.EnsureCreated() && !context2.Database.EnsureCreated())
-                        SeedDatabase(app);
-                }
+                SeedDatabase(app);
             }
 
             if (env.IsDevelopment())
