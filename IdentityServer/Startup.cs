@@ -5,11 +5,14 @@ using System.Net;
 using System.Reflection;
 using System.Threading.Tasks;
 using IdentityServer.Data;
+using IdentityServer.Extension;
+using IdentityServer.Interface;
 using IdentityServer.Models;
 using IdentityServer.Utils;
 using IdentityServer4.EntityFramework.DbContexts;
 using IdentityServer4.EntityFramework.Mappers;
 using IdentityServer4.Extensions;
+using IdentityServer4.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
@@ -21,6 +24,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using MongoDB.Bson.Serialization;
 using StackExchange.Redis;
 
 namespace IdentityServer
@@ -51,21 +55,21 @@ namespace IdentityServer
             
             services.AddMvc();
 
-            var environmentConnectionString = Environment.GetEnvironmentVariable("IDENTITY_SERVER_DATABASE");
+            /*var environmentConnectionString = Environment.GetEnvironmentVariable("IDENTITY_SERVER_DATABASE");
             var connectionString = Configuration.GetConnectionString("IdentityServerDatabase");
 
             if (environmentConnectionString != null && !environmentConnectionString.IsNullOrEmpty())
             {
                 connectionString = environmentConnectionString;
-            }
+            }*/
 
-            services.AddIdentityServer( options =>
+            services.AddIdentityServer(options =>
                 {
                     options.IssuerUri = Environment.GetEnvironmentVariable("IDENTITY_SERVER_URL");
                     options.PublicOrigin = Environment.GetEnvironmentVariable("IDENTITY_SERVER_ORIGIN");
                 })
-                .AddDeveloperSigningCredential()
-                .AddConfigurationStore(options =>
+                //.AddDeveloperSigningCredential()
+                /*.AddConfigurationStore(options =>
                     options.ConfigureDbContext = builder =>
                         builder.UseMySql(connectionString,
                             sql => sql.MigrationsAssembly(migrationsAssembly)))
@@ -78,17 +82,13 @@ namespace IdentityServer
                     // this enables automatic token cleanup. this is optional.
                     options.EnableTokenCleanup = true;
                     options.TokenCleanupInterval = 30;
-                });
+                });*/
+                .AddMongoRepository();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
-
-            if (Environment.GetEnvironmentVariable("MIGRATE_DATABASE") == "yes")
-            {
-                SeedDatabase(app);
-            }
 
             if (env.IsDevelopment())
             {
@@ -98,11 +98,6 @@ namespace IdentityServer
             {
                 app.UseExceptionHandler("/Error");
             }
-
-            /*app.UseForwardedHeaders(new ForwardedHeadersOptions
-            {
-                ForwardedHeaders =  ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
-            });*/
             
             var useHttps = Environment.GetEnvironmentVariable("USE_HTTPS");
 
@@ -119,57 +114,74 @@ namespace IdentityServer
             app.UseStaticFiles();
             
             app.UseIdentityServer();
-            
-            //app.UseCookiePolicy();
 
             app.UseMvc();
+
+            ConfigureMongoDriver2IgnoreExtraElements();
+
+            InitializeDatabase(app);
+        }
+
+        /// <summary>
+        /// Configure Classes to ignore Extra Elements (e.g. _Id) when deserializing
+        /// As we are using "IdentityServer4.Models" we cannot add something like "[BsonIgnore]"
+        /// </summary>
+        private static void ConfigureMongoDriver2IgnoreExtraElements()
+        {
+            BsonClassMap.RegisterClassMap<Client>(cm =>
+            {
+                cm.AutoMap();
+                cm.SetIgnoreExtraElements(true);
+            });
+            BsonClassMap.RegisterClassMap<IdentityResource>(cm =>
+            {
+                cm.AutoMap();
+                cm.SetIgnoreExtraElements(true);
+            });
+            BsonClassMap.RegisterClassMap<ApiResource>(cm =>
+            {
+                cm.AutoMap();
+                cm.SetIgnoreExtraElements(true);
+            });
+            BsonClassMap.RegisterClassMap<PersistedGrant>(cm =>
+            {
+                cm.AutoMap();
+                cm.SetIgnoreExtraElements(true);
+            });
+
         }
         
         private void InitializeDatabase(IApplicationBuilder app)
         {
-            using (var serviceScope = app.ApplicationServices
-                .GetRequiredService<IServiceScopeFactory>()
-                .CreateScope())
+            bool createdNewRepository = false;
+            var repository = app.ApplicationServices.GetService<IRepository>();
+
+            //  --IdentityResource
+            if (!repository.CollectionExists<IdentityResource>())
             {
-                using (var context = serviceScope.ServiceProvider.GetService<ConfigurationDbContext>())
+                foreach (var res in Config.GetIdentityResources())
                 {
-                    if (!context.Database.EnsureCreated())
-                        context.Database.Migrate();
+                    repository.Add(res);
                 }
-                using (var context = serviceScope.ServiceProvider.GetService<PersistedGrantDbContext>())
-                {
-                    if (!context.Database.EnsureCreated())
-                        context.Database.Migrate();
-                }
+                createdNewRepository = true;
             }
-        }
-        
-        private void SeedDatabase(IApplicationBuilder app)
-        {
-            using (var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope())
+
+
+            //  --ApiResource
+            if (!repository.CollectionExists<ApiResource>())
             {
-                serviceScope.ServiceProvider.GetRequiredService<PersistedGrantDbContext>().Database.Migrate();
-
-                var context = serviceScope.ServiceProvider.GetRequiredService<ConfigurationDbContext>();
-                context.Database.Migrate();
-
-                if (!context.IdentityResources.Any())
+                foreach (var api in Config.GetApis())
                 {
-                    foreach (var resource in Config.GetIdentityResources())
-                    {
-                        context.IdentityResources.Add(resource.ToEntity());
-                    }
-                    context.SaveChanges();
+                    repository.Add(api);
                 }
+                createdNewRepository = true;
+            }
 
-                if (!context.ApiResources.Any())
-                {
-                    foreach (var resource in Config.GetApis())
-                    {
-                        context.ApiResources.Add(resource.ToEntity());
-                    }
-                    context.SaveChanges();
-                }
+            // If it's a new Repository (database), need to restart the website to configure Mongo to ignore Extra Elements.
+            if (createdNewRepository)
+            {
+                var newRepositoryMsg = $"Mongo Repository created/populated! Please restart you website, so Mongo driver will be configured  to ignore Extra Elements.";
+                throw new Exception(newRepositoryMsg);
             }
         }
     }
