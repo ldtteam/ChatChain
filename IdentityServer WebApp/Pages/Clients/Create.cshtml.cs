@@ -79,10 +79,12 @@ namespace IdentityServer_WebApp.Pages.Clients
                 {
                     new Secret(Input.Password.Sha256())
                 },
-                AllowedScopes = 
+                
+                AllowedScopes =
                 {
                     "ChatChain"
                 },
+                
                 AllowOfflineAccess = true
             }.ToEntity();
             

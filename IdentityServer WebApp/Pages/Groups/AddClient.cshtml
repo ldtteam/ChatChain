@@ -21,7 +21,7 @@
 </div>
 
 <div>
-    <a asp-page="./Clients">Back to List</a>
+    <a asp-page="./Clients" asp-route-id="@Model.Group.Id.ToString()">Back to List</a>
 </div>
 
 @section Scripts {
