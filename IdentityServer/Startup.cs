@@ -84,8 +84,18 @@ namespace IdentityServer
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
-            //InitializeDatabase(app);
-            
+            using (var serviceScope = app.ApplicationServices
+                .GetRequiredService<IServiceScopeFactory>()
+                .CreateScope())
+            {
+                using (var context1 = serviceScope.ServiceProvider.GetService<ConfigurationDbContext>())
+                using (var context2 = serviceScope.ServiceProvider.GetService<PersistedGrantDbContext>())
+                {
+                    if (!context1.Database.EnsureCreated() && !context2.Database.EnsureCreated())
+                        SeedDatabase(app);
+                }
+            }
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -136,6 +146,35 @@ namespace IdentityServer
                 {
                     if (!context.Database.EnsureCreated())
                         context.Database.Migrate();
+                }
+            }
+        }
+        
+        private void SeedDatabase(IApplicationBuilder app)
+        {
+            using (var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope())
+            {
+                serviceScope.ServiceProvider.GetRequiredService<PersistedGrantDbContext>().Database.Migrate();
+
+                var context = serviceScope.ServiceProvider.GetRequiredService<ConfigurationDbContext>();
+                context.Database.Migrate();
+
+                if (!context.IdentityResources.Any())
+                {
+                    foreach (var resource in Config.GetIdentityResources())
+                    {
+                        context.IdentityResources.Add(resource.ToEntity());
+                    }
+                    context.SaveChanges();
+                }
+
+                if (!context.ApiResources.Any())
+                {
+                    foreach (var resource in Config.GetApis())
+                    {
+                        context.ApiResources.Add(resource.ToEntity());
+                    }
+                    context.SaveChanges();
                 }
             }
         }
