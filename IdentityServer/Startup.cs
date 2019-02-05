@@ -129,13 +129,13 @@ namespace IdentityServer
             {
                 using (var context = serviceScope.ServiceProvider.GetService<ConfigurationDbContext>())
                 {
-                    context.Database.EnsureCreated();
-                    context.Database.Migrate();
+                    if (!context.Database.EnsureCreated())
+                        context.Database.Migrate();
                 }
                 using (var context = serviceScope.ServiceProvider.GetService<PersistedGrantDbContext>())
                 {
-                    context.Database.EnsureCreated();
-                    context.Database.Migrate();
+                    if (!context.Database.EnsureCreated())
+                        context.Database.Migrate();
                 }
             }
         }
