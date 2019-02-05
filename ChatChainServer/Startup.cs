@@ -42,7 +42,7 @@ namespace ChatChainServer
                 options.Authority = Environment.GetEnvironmentVariable("IDENTITY_SERVER_URL"); //"http://host.docker.internal:5081";
                 options.TokenRetriever = CustomTokenRetriever.FromHeaderAndQueryString;
                 options.RequireHttpsMetadata = false;
-                options.ApiName = "api1";
+                options.ApiName = "ChatChain";
             });
 
             var environmentConnectionString = Environment.GetEnvironmentVariable("REDIS_BACKPLANE");
