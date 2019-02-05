@@ -32,11 +32,11 @@ namespace IdentityServer.Utils
         }
         
         //API that are allowed to access the Auth server
-        public static IEnumerable<ApiResource> GetApiResources()
+        public static IEnumerable<ApiResource> GetApis()
         {
             return new List<ApiResource>
             {
-                new ApiResource("api1", "Api 1")
+                new ApiResource("ChatChain", "ChatChain API")
                 
             };
         }
@@ -47,7 +47,7 @@ namespace IdentityServer.Utils
             return new List<IdentityResource>
             {
                 new IdentityResources.OpenId(),
-                new IdentityResources.Profile(),
+                new IdentityResources.Profile()
             };
         }
 

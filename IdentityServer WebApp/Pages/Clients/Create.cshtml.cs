@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using IdentityModel;
 using IdentityServer4.EntityFramework.DbContexts;
+using IdentityServer4.EntityFramework.Entities;
 using IdentityServer4.EntityFramework.Mappers;
 using IdentityServer4.Models;
 using IdentityServer_WebApp.Models;
@@ -101,7 +102,6 @@ namespace IdentityServer_WebApp.Pages.Clients
                 ClientGuid = is4Client.ClientId,
                 ClientName = is4Client.ClientName
             };
-
 
             _clientsContext.Create(newClient);
             //await _clientsContext.SaveChangesAsync();
