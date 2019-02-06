@@ -17,6 +17,7 @@
         <PackageReference Include="Microsoft.AspNetCore.Cryptography.Internal" Version="2.2.0" />
         <PackageReference Include="Microsoft.AspNetCore.DataProtection.Abstractions" Version="2.2.0" />
         <PackageReference Include="Microsoft.AspNetCore.DataProtection.StackExchangeRedis" Version="2.2.0" />
+        <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.2.0" />
         <PackageReference Include="Microsoft.AspNetCore.Identity.MongoDB" Version="1.0.2" />
         <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.2.0" PrivateAssets="All" />
         <PackageReference Include="MongoDB.Driver" Version="2.7.3" />
