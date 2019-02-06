@@ -24,12 +24,12 @@ namespace IdentityServer_WebApp.Pages.Groups
     [Authorize]
     public class ClientsModel : PageModel
     {
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly UserManager<ApplicationUser> _userManager;
         private readonly ConfigurationDbContext _is4Context;
         private readonly GroupService _groupsContext;
         public readonly ClientService ClientsContext;
         
-        public ClientsModel(UserManager<IdentityUser> userManager, ConfigurationDbContext is4Context, GroupService groupsContext, ClientService clientsContext)
+        public ClientsModel(UserManager<ApplicationUser> userManager, ConfigurationDbContext is4Context, GroupService groupsContext, ClientService clientsContext)
         {
             _userManager = userManager;
             _is4Context = is4Context;

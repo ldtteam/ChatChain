@@ -21,11 +21,11 @@ namespace IdentityServer_WebApp.Pages.Groups
     [Authorize]
     public class DeleteModel : PageModel
     {
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly UserManager<ApplicationUser> _userManager;
         private readonly ConfigurationDbContext _is4Context;
         private readonly GroupService _groupsContext;
 
-        public DeleteModel(UserManager<IdentityUser> userManager, ConfigurationDbContext is4Context, GroupService groupsContext)
+        public DeleteModel(UserManager<ApplicationUser> userManager, ConfigurationDbContext is4Context, GroupService groupsContext)
         {
             _userManager = userManager;
             _is4Context = is4Context;

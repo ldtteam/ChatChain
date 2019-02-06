@@ -118,8 +118,8 @@ namespace IdentityServer_WebApp
             var identityDatabase = Environment.GetEnvironmentVariable("IDENTITY_DATABASE");
             //var identityDatabase = Environment.GetEnvironmentVariable("IDENTITY_DATABASE");
 
-            /*services.AddDefaultIdentity<IdentityUser>(options => options.Password.RequireNonAlphanumeric = false)
-                .AddEntityFrameworkStores<ApplicationDbContext>();*/
+            //services.AddDefaultIdentity<IdentityUser>(options => options.Password.RequireNonAlphanumeric = false);
+                //.AddEntityFrameworkStores<ApplicationDbContext>();
             
             services.AddIdentityMongoDbProvider<ApplicationUser, ApplicationRole>(identityOptions =>
                 {

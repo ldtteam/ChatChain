@@ -28,10 +28,10 @@ namespace IdentityServer_WebApp.Pages.Groups
     [Authorize]
     public class CreateModel : PageModel
     {
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly UserManager<ApplicationUser> _userManager;
         private readonly GroupService _groupsContext;
 
-        public CreateModel(UserManager<IdentityUser> userManager, GroupService groupsContext)
+        public CreateModel(UserManager<ApplicationUser> userManager, GroupService groupsContext)
         {
             _userManager = userManager;
             _groupsContext = groupsContext;
