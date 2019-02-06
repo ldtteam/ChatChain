@@ -18,10 +18,8 @@ namespace IdentityServer.Repository
         /// This Contructor leverages  .NET Core built-in DI
         /// </summary>
         /// <param name="optionsAccessor">Injected by .NET Core built-in Depedency Injection</param>
-        public MongoRepository(IOptions<ConfigurationOptions> optionsAccessor)
+        public MongoRepository()
         {
-            var configurationOptions = optionsAccessor.Value;
-
             _client = new MongoClient(Environment.GetEnvironmentVariable("IDENTITY_SERVER_DATABASE_CONNECTION"));
             _database = _client.GetDatabase(Environment.GetEnvironmentVariable("IDENTITY_SERVER_DATABASE"));
             
