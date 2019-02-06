@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using AspNetCore.Identity.Mongo;
 using AspNetCore.Identity.MongoDB;
 using IdentityServer4.EntityFramework.DbContexts;
 using IdentityServer4.EntityFramework.Options;
@@ -17,6 +18,7 @@ using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using IdentityServer_WebApp.Data;
+using IdentityServer_WebApp.Models;
 using IdentityServer_WebApp.Services;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -113,21 +115,19 @@ namespace IdentityServer_WebApp
                     });
                 
             }
-            
-            var identityDatabaseConnection = Environment.GetEnvironmentVariable("IDENTITY_DATABASE_CONNECTION");
+
             var identityDatabase = Environment.GetEnvironmentVariable("IDENTITY_DATABASE");
+            //var identityDatabase = Environment.GetEnvironmentVariable("IDENTITY_DATABASE");
 
-            services.AddSingleton<IUserStore<MongoIdentityUser>>(
-                provider =>
-                {
-                    var client = new MongoClient(identityDatabaseConnection);
-                    var database = client.GetDatabase(identityDatabase);
-
-                    return new MongoUserStore<MongoIdentityUser>(database);
-                });
-
-            services.AddDefaultIdentity<MongoIdentityUser>(options => options.Password.RequireNonAlphanumeric = false)
+            services.AddDefaultIdentity<IdentityUser>(options => options.Password.RequireNonAlphanumeric = false)
                 .AddEntityFrameworkStores<ApplicationDbContext>();
+            
+            services.AddIdentityMongoDbProvider<ApplicationUser, ApplicationRole>(identityOptions =>
+                {
+                    identityOptions.Password.RequireNonAlphanumeric = false;
+                }, mongoIdentityOptions => {
+                    mongoIdentityOptions.ConnectionString = identityDatabase;
+                });
             
             /*services.AddIdentityWithMongoStores(identityConnection)
                 .AddDefaultTokenProviders()
