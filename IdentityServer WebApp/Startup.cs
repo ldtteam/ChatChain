@@ -123,6 +123,9 @@ namespace IdentityServer_WebApp
             /*services.AddDefaultIdentity<IdentityUser>(options => options.Password.RequireNonAlphanumeric = false)
                 .AddEntityFrameworkStores<ApplicationDbContext>();*/
 
+            Console.WriteLine(identityConnection);
+            Console.WriteLine(identityDatabase);
+            
             services.AddIdentityWithMongoStores(identityConnection)
                 .AddDefaultTokenProviders()
                 .AddDefaultUI();
