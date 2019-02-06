@@ -55,7 +55,7 @@ namespace IdentityServer_WebApp
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
 
-            var identityDatabase = Environment.GetEnvironmentVariable("IDENTITY_DATABASE");
+/*            var identityDatabase = Environment.GetEnvironmentVariable("IDENTITY_DATABASE");
 
             if (identityDatabase != null && !identityDatabase.IsNullOrEmpty())
             {
@@ -68,7 +68,7 @@ namespace IdentityServer_WebApp
                 services.AddDbContext<ApplicationDbContext>(options =>
                     options.UseMySql(
                         Configuration.GetConnectionString("IdentityDatabase")));
-            }
+            }*/
             
             var migrationsAssembly = typeof(Startup).GetTypeInfo().Assembly.GetName().Name;
             
@@ -112,13 +112,25 @@ namespace IdentityServer_WebApp
                 
             }
             
-            services.AddDefaultIdentity<IdentityUser>(options => options.Password.RequireNonAlphanumeric = false)
-                .AddEntityFrameworkStores<ApplicationDbContext>();
+            var identityDatabase = Environment.GetEnvironmentVariable("IDENTITY_DATABASE");
+            var identityConnection = Configuration.GetConnectionString("IdentityDatabase");
+            
+            if (identityDatabase != null && !identityDatabase.IsNullOrEmpty())
+            {
+                identityConnection = identityDatabase;
+            }
 
+            /*services.AddDefaultIdentity<IdentityUser>(options => options.Password.RequireNonAlphanumeric = false)
+                .AddEntityFrameworkStores<ApplicationDbContext>();*/
+
+            services.AddIdentityWithMongoStores(identityConnection)
+                .AddDefaultTokenProviders()
+                .AddDefaultUI();
+            
             services.ConfigureApplicationCookie(options =>
             {
                 options.Cookie.HttpOnly = true;
-                options.ExpireTimeSpan = TimeSpan.FromMinutes(5);
+                options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
 
                 options.LoginPath = "/Identity/Account/Login";
                 options.AccessDeniedPath = "/Identity/Account/AccessDenied";
