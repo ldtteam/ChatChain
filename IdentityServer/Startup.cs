@@ -83,7 +83,10 @@ namespace IdentityServer
                     options.EnableTokenCleanup = true;
                     options.TokenCleanupInterval = 30;
                 });*/
-                .AddMongoRepository();
+                .AddMongoRepository()
+                .AddClients()
+                .AddIdentityApiResources()
+                .AddPersistedGrants();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
