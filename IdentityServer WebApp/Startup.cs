@@ -178,7 +178,7 @@ namespace IdentityServer_WebApp
             app.UseStaticFiles();
             app.UseCookiePolicy();
 
-            app.UseAuthentication();
+            //app.UseAuthentication();
 
             app.UseMvc();
         }
