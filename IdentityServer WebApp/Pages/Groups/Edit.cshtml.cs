@@ -13,10 +13,10 @@ namespace IdentityServer_WebApp.Pages.Groups
     [Authorize]
     public class EditModel : PageModel
     {
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly UserManager<ApplicationUser> _userManager;
         private readonly GroupService _groupsContext;
 
-        public EditModel(UserManager<IdentityUser> userManager, GroupService groupContext)
+        public EditModel(UserManager<ApplicationUser> userManager, GroupService groupContext)
         {
             _userManager = userManager;
             _groupsContext = groupContext;

@@ -25,11 +25,11 @@ namespace IdentityServer_WebApp.Pages.Clients
     [Authorize]
     public class CreateModel : PageModel
     {
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly UserManager<ApplicationUser> _userManager;
         private readonly ConfigurationDbContext _is4Context;
         private readonly ClientService _clientsContext;
 
-        public CreateModel(UserManager<IdentityUser> userManager, ConfigurationDbContext is4Context, ClientService clientsContext)
+        public CreateModel(UserManager<ApplicationUser> userManager, ConfigurationDbContext is4Context, ClientService clientsContext)
         {
             _userManager = userManager;
             _is4Context = is4Context;

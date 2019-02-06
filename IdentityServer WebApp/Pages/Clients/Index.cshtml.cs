@@ -18,11 +18,11 @@ namespace IdentityServer_WebApp.Pages.Clients
     [Authorize]
     public class IndexModel : PageModel
     {
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly UserManager<ApplicationUser> _userManager;
         private readonly ConfigurationDbContext _is4Context;
         public readonly ClientService ClientsContext;
         
-        public IndexModel(UserManager<IdentityUser> userManager, ConfigurationDbContext is4Context, ClientService clientsContext)
+        public IndexModel(UserManager<ApplicationUser> userManager, ConfigurationDbContext is4Context, ClientService clientsContext)
         {
             _userManager = userManager;
             _is4Context = is4Context;

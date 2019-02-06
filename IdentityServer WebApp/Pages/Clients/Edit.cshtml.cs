@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using IdentityServer4.EntityFramework.DbContexts;
 using IdentityServer_WebApp.Data;
+using IdentityServer_WebApp.Models;
 using IdentityServer_WebApp.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -19,11 +20,11 @@ namespace IdentityServer_WebApp.Pages.Clients
     [Authorize]
     public class EditModel : PageModel
     {
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly UserManager<ApplicationUser> _userManager;
         private readonly ConfigurationDbContext _context;
         private readonly ClientService _clientsContext;
 
-        public EditModel(UserManager<IdentityUser> userManager, ConfigurationDbContext context, ClientService clientsContext)
+        public EditModel(UserManager<ApplicationUser> userManager, ConfigurationDbContext context, ClientService clientsContext)
         {
             _userManager = userManager;
             _context = context;

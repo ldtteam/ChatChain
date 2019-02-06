@@ -16,11 +16,11 @@ namespace IdentityServer_WebApp.Pages.Clients
     [Authorize]
     public class DeleteModel : PageModel
     {
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly UserManager<ApplicationUser> _userManager;
         private readonly ConfigurationDbContext _is4Context;
         private readonly ClientService _clientsContext;
 
-        public DeleteModel(UserManager<IdentityUser> userManager, ConfigurationDbContext context, ClientService clientsContext)
+        public DeleteModel(UserManager<ApplicationUser> userManager, ConfigurationDbContext context, ClientService clientsContext)
         {
             _userManager = userManager;
             _is4Context = context;
