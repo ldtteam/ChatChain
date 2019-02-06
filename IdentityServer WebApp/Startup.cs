@@ -149,10 +149,10 @@ namespace IdentityServer_WebApp
             services.AddScoped<ClientService>();
             services.AddScoped<GroupService>();
 
-            services.AddTransient<IRepository, MongoRepository>();
-            services.AddTransient<IClientStore, CustomClientStore>();
-            services.AddTransient<IResourceStore, CustomResourceStore>();
-            services.AddTransient<IPersistedGrantStore, CustomPersistedGrantStore>();
+            services.AddScoped<MongoRepository>();
+            services.AddScoped<CustomClientStore>();
+            services.AddScoped<CustomResourceStore>();
+            services.AddScoped<CustomPersistedGrantStore>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
