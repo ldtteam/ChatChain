@@ -49,7 +49,7 @@ namespace IdentityServer_WebApp.Pages.Groups
             public string GroupName { get; set; }
         }
         
-        public async Task<IActionResult> OnPostAsync()
+        public IActionResult OnPost()
         {
             if (!ModelState.IsValid)
             {

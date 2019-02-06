@@ -33,7 +33,7 @@ namespace IdentityServer_WebApp.Pages.Groups
             public string GroupName { get; set; }
         }
         
-        public async Task<IActionResult> OnGetAsync(string id)
+        public IActionResult OnGet(string id)
         {
             if (id == null)
             {

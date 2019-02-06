@@ -29,7 +29,7 @@ namespace IdentityServer_WebApp.Pages.Groups
 
         public IList<Group> Groups { get; set; }
 
-        public async Task OnGetAsync()
+        public void OnGet()
         {
             Groups = new List<Group>();
 
