@@ -77,7 +77,7 @@ namespace IdentityServer_WebApp
             
             ConfigurationStoreOptions cso = new ConfigurationStoreOptions();
             
-            var identityServerDatabase = Environment.GetEnvironmentVariable("IDENTITY_SERVER_DATABASE");
+            /*var identityServerDatabase = Environment.GetEnvironmentVariable("IDENTITY_SERVER_DATABASE");
 
             if (identityServerDatabase != null && !identityServerDatabase.IsNullOrEmpty() )
             {
@@ -113,7 +113,7 @@ namespace IdentityServer_WebApp
                             sql => sql.MigrationsAssembly(migrationsAssembly));
                     });
                 
-            }
+            }*/
 
             var identityDatabase = Environment.GetEnvironmentVariable("IDENTITY_DATABASE");
             //var identityDatabase = Environment.GetEnvironmentVariable("IDENTITY_DATABASE");
