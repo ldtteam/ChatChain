@@ -1,4 +1,4 @@
-﻿@page "{id:int}"
+﻿@page
 @model EditModel
 @{
     ViewData["Title"] = "Edit";
@@ -12,7 +12,7 @@
     <div class="col-md-4">
         <form method="post">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="Client.Id"/>
+            <input type="hidden" asp-for="Client.ClientId"/>
             <div class="form-group">
                 <label asp-for="Client.ClientName" class="control-label"></label>
                 <input asp-for="Client.ClientName" class="form-control" />

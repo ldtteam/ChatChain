@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 using IdentityModel;
+using IdentityServer.Store;
 using IdentityServer4.EntityFramework.DbContexts;
 using IdentityServer4.EntityFramework.Entities;
 using IdentityServer4.EntityFramework.Mappers;
@@ -17,7 +18,7 @@ using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Client = IdentityServer4.EntityFramework.Entities.Client;
+using Client = IdentityServer4.Models.Client;
 using Secret = IdentityServer4.Models.Secret;
 
 namespace IdentityServer_WebApp.Pages.Clients
@@ -26,13 +27,13 @@ namespace IdentityServer_WebApp.Pages.Clients
     public class CreateModel : PageModel
     {
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly ConfigurationDbContext _is4Context;
+        private readonly CustomClientStore _clientStore;
         private readonly ClientService _clientsContext;
 
-        public CreateModel(UserManager<ApplicationUser> userManager, ConfigurationDbContext is4Context, ClientService clientsContext)
+        public CreateModel(UserManager<ApplicationUser> userManager, CustomClientStore clientStore, ClientService clientsContext)
         {
             _userManager = userManager;
-            _is4Context = is4Context;
+            _clientStore = clientStore;
             _clientsContext = clientsContext;
         }
         
@@ -69,7 +70,7 @@ namespace IdentityServer_WebApp.Pages.Clients
 
             var clientId = Guid.NewGuid().ToString();
 
-            var emptyClient = new IdentityServer4.Models.Client
+            var client = new Client
             {
                 ClientId = clientId,
                 ClientName = Input.ClientName,
@@ -87,18 +88,22 @@ namespace IdentityServer_WebApp.Pages.Clients
                 },
                 
                 AllowOfflineAccess = true
-            }.ToEntity();
+            };
             
-            _is4Context.Clients.Add(emptyClient);
-            await _is4Context.SaveChangesAsync();
+            //_is4Context.Clients.Add(emptyClient);
+            //await _is4Context.SaveChangesAsync();
 
-            Client is4Client = await _is4Context.Clients
-                .FirstOrDefaultAsync(c => c.ClientId == clientId);
+            _clientStore.AddClient(client);
+            
+            /*Client is4Client = await _is4Context.Clients
+                .FirstOrDefaultAsync(c => c.ClientId == clientId)*/;
+
+            var is4Client = await _clientStore.FindClientByIdAsync(clientId);
 
             var newClient = new Models.Client
             {
                 OwnerId = _userManager.GetUserAsync(User).Result.Id,
-                ClientId = is4Client.Id,
+                ClientId = is4Client.ClientId,
                 ClientGuid = is4Client.ClientId,
                 ClientName = is4Client.ClientName
             };

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using IdentityServer.Store;
 using IdentityServer4.EntityFramework.DbContexts;
 using IdentityServer4.Extensions;
 using IdentityServer_WebApp.Models;
@@ -14,7 +15,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using RabbitMQ.Client;
-using Client = IdentityServer4.EntityFramework.Entities.Client;
+using Client = IdentityServer4.Models.Client;
 
 namespace IdentityServer_WebApp.Pages.Groups
 {
@@ -22,13 +23,13 @@ namespace IdentityServer_WebApp.Pages.Groups
     public class DeleteModel : PageModel
     {
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly ConfigurationDbContext _is4Context;
+        private readonly CustomClientStore _clientStore;
         private readonly GroupService _groupsContext;
 
-        public DeleteModel(UserManager<ApplicationUser> userManager, ConfigurationDbContext is4Context, GroupService groupsContext)
+        public DeleteModel(UserManager<ApplicationUser> userManager, CustomClientStore clientStore, GroupService groupsContext)
         {
             _userManager = userManager;
-            _is4Context = is4Context;
+            _clientStore = clientStore;
             _groupsContext = groupsContext;
         }
         
@@ -55,7 +56,7 @@ namespace IdentityServer_WebApp.Pages.Groups
 
             foreach (var client in _groupsContext.GetClients(Group.Id.ToString()))
             {
-                var is4Client = await _is4Context.Clients.FirstAsync(c => c.Id == client.ClientId);
+                var is4Client = await _clientStore.FindClientByIdAsync(client.ClientId);//_is4Context.Clients.FirstAsync(c => c.Id == client.ClientId);
                 Clients.Add(is4Client.ClientName);
             }
 

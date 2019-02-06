@@ -54,7 +54,7 @@ namespace IdentityServer_WebApp.Services
             return _clients.Find(client => client.OwnerId == id).ToList();
         }
 
-        public Client GetFromClientId(int id)
+        public Client GetFromClientId(string id)
         {
             return _clients.Find(client => client.ClientId == id).FirstOrDefault();
         }

@@ -20,7 +20,6 @@
                 <th>Id</th>
                 <th>Client Name</th>
                 <th>Client Id</th>
-                <th>Created</th>
                 <th>Enabled</th>
             </tr>
             </thead>
@@ -29,7 +28,7 @@
                 {
                         <tr>
                             <td>
-                                @Html.DisplayFor(m => client.Id)
+                                @Html.DisplayFor(m => client.ClientId)
                             </td>
                             <td>
                                 @Html.DisplayFor(m => client.ClientName)
@@ -38,14 +37,11 @@
                                 @Html.DisplayFor(m => client.ClientId)
                             </td>
                             <td>
-                                @Html.DisplayFor(m => client.Created)
-                            </td>
-                            <td>
                                 @Html.DisplayFor(m => client.Enabled)
                             </td>
                             <td>
-                                <a asp-page="./Edit" asp-route-id="@client.Id">Edit</a>
-                                <a asp-page="./Delete" asp-route-id="@client.Id">Delete</a>
+                                <a asp-page="./Edit" asp-route-id="@client.ClientId">Edit</a>
+                                <a asp-page="./Delete" asp-route-id="@client.ClientId">Delete</a>
                             </td>
                         </tr>
                 }

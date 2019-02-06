@@ -1,11 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using IdentityServer.Interface;
+using Microsoft.Extensions.Options;
 using MongoDB.Bson;
 using MongoDB.Driver;
+using StackExchange.Redis;
 
-namespace IdentityServer.Repository
+namespace IdentityServer_WebApp.Repository
 {
     public class MongoRepository : IRepository
     {

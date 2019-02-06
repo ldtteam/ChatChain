@@ -5,9 +5,11 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using AspNetCore.Identity.Mongo;
+using IdentityServer.Store;
 using IdentityServer4.EntityFramework.DbContexts;
 using IdentityServer4.EntityFramework.Options;
 using IdentityServer4.Extensions;
+using IdentityServer4.Stores;
 using IdentityServer4.Test;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
@@ -18,6 +20,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using IdentityServer_WebApp.Data;
 using IdentityServer_WebApp.Models;
+using IdentityServer_WebApp.Repository;
 using IdentityServer_WebApp.Services;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -145,6 +148,11 @@ namespace IdentityServer_WebApp
 
             services.AddScoped<ClientService>();
             services.AddScoped<GroupService>();
+
+            services.AddTransient<IRepository, MongoRepository>();
+            services.AddTransient<IClientStore, CustomClientStore>();
+            services.AddTransient<IResourceStore, CustomResourceStore>();
+            services.AddTransient<IPersistedGrantStore, CustomPersistedGrantStore>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

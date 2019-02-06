@@ -4,6 +4,7 @@ using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
+using IdentityServer.Store;
 using IdentityServer4.EntityFramework.DbContexts;
 using IdentityServer4.EntityFramework.Entities;
 using IdentityServer_WebApp.Models;
@@ -25,22 +26,22 @@ namespace IdentityServer_WebApp.Pages.Groups
     public class ClientsModel : PageModel
     {
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly ConfigurationDbContext _is4Context;
+        private readonly CustomClientStore _clientStore;
         private readonly GroupService _groupsContext;
         public readonly ClientService ClientsContext;
         
-        public ClientsModel(UserManager<ApplicationUser> userManager, ConfigurationDbContext is4Context, GroupService groupsContext, ClientService clientsContext)
+        public ClientsModel(UserManager<ApplicationUser> userManager, CustomClientStore clientStore, GroupService groupsContext, ClientService clientsContext)
         {
             _userManager = userManager;
-            _is4Context = is4Context;
+            _clientStore = clientStore;
             _groupsContext = groupsContext;
             ClientsContext = clientsContext;
         }
 
-        public IList<Client> Clients { get; set; }
+        public IList<IdentityServer4.Models.Client> Clients { get; set; }
         public Group Group { get; set; }
         [BindProperty]
-        public int ClientId { get; set; }
+        public string ClientId { get; set; }
 
         public async Task<IActionResult> OnGetAsync(string id)
         {
@@ -51,9 +52,9 @@ namespace IdentityServer_WebApp.Pages.Groups
                 return RedirectToPage("./Index");
             }
             
-            Clients = new List<Client>();
+            Clients = new List<IdentityServer4.Models.Client>();
 
-            List<int> clientIds = new List<int>();
+            List<string> clientIds = new List<string>();
          
             foreach (var client in _groupsContext.GetClients(Group.Id.ToString()))
             {
@@ -62,7 +63,7 @@ namespace IdentityServer_WebApp.Pages.Groups
 
             foreach (var clientId in clientIds)
             {
-                var isClient = await _is4Context.Clients.Where(lclient => lclient.Id == clientId).FirstOrDefaultAsync();
+                var isClient = await _clientStore.FindClientByIdAsync(clientId);//_is4Context.Clients.Where(lclient => lclient.Id == clientId).FirstOrDefaultAsync();
                 var client = ClientsContext.GetFromClientId(clientId);
                 
                 if (isClient != null && client != null && client.OwnerId == _userManager.GetUserAsync(User).Result.Id)

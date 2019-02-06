@@ -1,8 +1,9 @@
 using System.Collections.Generic;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
+using IdentityServer.Store;
 using IdentityServer4.EntityFramework.DbContexts;
-using IdentityServer4.EntityFramework.Entities;
+using IdentityServer4.Stores;
 using IdentityServer_WebApp.Models;
 using IdentityServer_WebApp.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -11,7 +12,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Client = IdentityServer4.EntityFramework.Entities.Client;
+using Client = IdentityServer4.Models.Client;
 
 namespace IdentityServer_WebApp.Pages.Clients
 {
@@ -19,13 +20,13 @@ namespace IdentityServer_WebApp.Pages.Clients
     public class IndexModel : PageModel
     {
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly ConfigurationDbContext _is4Context;
+        private readonly CustomClientStore _clientStore;
         public readonly ClientService ClientsContext;
         
-        public IndexModel(UserManager<ApplicationUser> userManager, ConfigurationDbContext is4Context, ClientService clientsContext)
+        public IndexModel(UserManager<ApplicationUser> userManager, CustomClientStore clientStore, ClientService clientsContext)
         {
             _userManager = userManager;
-            _is4Context = is4Context;
+            _clientStore = clientStore;
             ClientsContext = clientsContext;
         }
 
@@ -35,9 +36,9 @@ namespace IdentityServer_WebApp.Pages.Clients
         {
             Clients = new List<Client>();
 
-            foreach (var client in await _is4Context.Clients.ToListAsync())
+            foreach (var client in await _clientStore.AllClients())
             {
-                var groupClient = ClientsContext.GetFromClientId(client.Id);
+                var groupClient = ClientsContext.GetFromClientId(client.ClientId);
 
                 if (groupClient != null && groupClient.OwnerId == _userManager.GetUserAsync(User).Result.Id)
                 {
