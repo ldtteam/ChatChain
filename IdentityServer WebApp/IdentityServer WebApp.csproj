@@ -10,7 +10,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="AspNet.Identity.MongoDB" Version="2.0.8" />
+        <PackageReference Include="AspNetCore.Identity.MongoDB" Version="1.0.0-rc3" />
         <PackageReference Include="EntityFramework" Version="6.2.0" />
         <PackageReference Include="IdentityServer4" Version="2.3.2" />
         <PackageReference Include="IdentityServer4.EntityFramework" Version="2.3.2" />
