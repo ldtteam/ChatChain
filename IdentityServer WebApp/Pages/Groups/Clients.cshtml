@@ -24,10 +24,10 @@
         <tbody>
         @foreach (var client in Model.Clients)
         {
-            Model.ClientId = client.Id;
+            Model.ClientId = client.ClientId;
             <tr>
                 <td>
-                    @Html.DisplayFor(m => client.Id)
+                    @Html.DisplayFor(m => client.ClientId)
                 </td>
                 <td>
                     @Html.DisplayFor(m => client.ClientName)
@@ -41,7 +41,7 @@
                 <td>
                     <form method="post">
                         <input type="hidden" asp-for="@Model.Group.Id"/>
-                        <input type="hidden" asp-for="@Model.ClientId" value="@client.Id"/>
+                        <input type="hidden" asp-for="@Model.ClientId" value="@client.ClientId"/>
                         <input type="submit" value="Remove" class="btn-link"/>
                     </form>
                 </td>

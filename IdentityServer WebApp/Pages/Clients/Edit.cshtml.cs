@@ -1,19 +1,12 @@
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
 using System.Threading.Tasks;
-using IdentityServer4.EntityFramework.DbContexts;
-using IdentityServer_WebApp.Data;
+using IdentityServer.Store;
 using IdentityServer_WebApp.Models;
 using IdentityServer_WebApp.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
-using Client = IdentityServer4.EntityFramework.Entities.Client;
+using Client = IdentityServer4.Models.Client;
 
 namespace IdentityServer_WebApp.Pages.Clients
 {
@@ -21,29 +14,31 @@ namespace IdentityServer_WebApp.Pages.Clients
     public class EditModel : PageModel
     {
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly ConfigurationDbContext _context;
+        private readonly CustomClientStore _clientStore;
         private readonly ClientService _clientsContext;
 
-        public EditModel(UserManager<ApplicationUser> userManager, ConfigurationDbContext context, ClientService clientsContext)
+        public EditModel(UserManager<ApplicationUser> userManager, CustomClientStore clientStore, ClientService clientsContext)
         {
             _userManager = userManager;
-            _context = context;
+            _clientStore = clientStore;
             _clientsContext = clientsContext;
         }
         
         [BindProperty]
         public Client Client { get; set; }
         
-        public async Task<IActionResult> OnGetAsync(int? id)
+        public async Task<IActionResult> OnGetAsync(string id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            Client = await _context.Clients.FindAsync(id);
-
-            var groupsClient = _clientsContext.GetFromClientId(id.Value);
+            //Client = await _context.Clients.FindAsync(id);
+            Client = await _clientStore.FindClientByIdAsync(id);
+            
+            
+            var groupsClient = _clientsContext.GetFromClientId(id);
 
             if (groupsClient.OwnerId != _userManager.GetUserAsync(User).Result.Id)
             {
@@ -58,7 +53,7 @@ namespace IdentityServer_WebApp.Pages.Clients
             return Page();
         }
         
-        public async Task<IActionResult> OnPostAsync(int? id)
+        public async Task<IActionResult> OnPostAsync(string id)
         {
             if (id == null)
             {
@@ -70,21 +65,20 @@ namespace IdentityServer_WebApp.Pages.Clients
                 return Page();
             }
             
-            var groupsClient = _clientsContext.GetFromClientId(id.Value);
+            var groupsClient = _clientsContext.GetFromClientId(id);
 
             if (groupsClient.OwnerId != _userManager.GetUserAsync(User).Result.Id)
             {
                 return RedirectToPage("./Index");
             }
 
-            var clientToUpdate = await _context.Clients.FindAsync(id);
+            var clientToUpdate = await _clientStore.FindClientByIdAsync(id);
             
             if (await TryUpdateModelAsync<Client>(
                 clientToUpdate,
                 "client",
                 c => c.ClientName , c => c.Enabled))
             {
-                await _context.SaveChangesAsync();
                 groupsClient.ClientName = clientToUpdate.ClientName;
                 _clientsContext.Update(groupsClient.Id.ToString(), groupsClient);
                 return RedirectToPage("./Index");

@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using IdentityServer.Store;
 using IdentityServer4.EntityFramework.DbContexts;
 using IdentityServer4.Extensions;
 using IdentityServer_WebApp.Models;
@@ -17,13 +18,13 @@ namespace IdentityServer_WebApp.Pages.Clients
     public class DeleteModel : PageModel
     {
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly ConfigurationDbContext _is4Context;
+        private readonly CustomClientStore _clientStore;
         private readonly ClientService _clientsContext;
 
-        public DeleteModel(UserManager<ApplicationUser> userManager, ConfigurationDbContext context, ClientService clientsContext)
+        public DeleteModel(UserManager<ApplicationUser> userManager, CustomClientStore clientStore, ClientService clientsContext)
         {
             _userManager = userManager;
-            _is4Context = context;
+            _clientStore = clientStore;
             _clientsContext = clientsContext;
         }
         
@@ -31,16 +32,16 @@ namespace IdentityServer_WebApp.Pages.Clients
         public Client Client { get; set; }
         public string ErrorMessage { get; set; }
         
-        public async Task<IActionResult> OnGetAsync(int? id)
+        public async Task<IActionResult> OnGetAsync(string id)
         {
             if (id == null)
             {
                 return RedirectToPage("./Index");
             }
 
-            Client = await _is4Context.Clients.AsNoTracking().FirstOrDefaultAsync(m => m.Id == id);
+            //Client = await _is4Context.Clients.AsNoTracking().FirstOrDefaultAsync(m => m.Clie == id);
 
-            var groupsClient = _clientsContext.GetFromClientId(id.Value);
+            var groupsClient = _clientsContext.GetFromClientId(id);
             
             Console.WriteLine("Get Subject Id: " + _userManager.GetUserAsync(User).Result.Id);
             
@@ -57,18 +58,20 @@ namespace IdentityServer_WebApp.Pages.Clients
             return Page();
         }
         
-        public async Task<IActionResult> OnPostAsync(int? id)
+        public async Task<IActionResult> OnPostAsync(string id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var client = await _is4Context.Clients
+            /*var client = await _is4Context.Clients
                 .AsNoTracking()
-                .FirstOrDefaultAsync(m => m.Id == id);
+                .FirstOrDefaultAsync(m => m.Id == id);*/
 
-            var groupClient = _clientsContext.GetFromClientId(id.Value);
+            var client = await _clientStore.FindClientByIdAsync(id);
+            
+            var groupClient = _clientsContext.GetFromClientId(id);
             
             if (groupClient != null && groupClient.OwnerId != _userManager.GetUserAsync(User).Result.Id)
             {
@@ -82,8 +85,7 @@ namespace IdentityServer_WebApp.Pages.Clients
 
             try
             {
-                _is4Context.Clients.Remove(client);
-                await _is4Context.SaveChangesAsync();
+                _clientStore.RemoveClient(client);
 
                 if (groupClient != null)
                 {

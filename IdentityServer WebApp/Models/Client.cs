@@ -9,7 +9,7 @@ namespace IdentityServer_WebApp.Models
         public ObjectId Id { get; set; }
         
         [BsonElement("ClientId")]
-        public int ClientId { get; set; }
+        public string ClientId { get; set; }
         
         [BsonElement("OwnerId")]
         public string OwnerId { get; set; }

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using IdentityModel;
+using IdentityServer.Store;
 using IdentityServer4.EntityFramework.DbContexts;
 using IdentityServer4.EntityFramework.Mappers;
 using IdentityServer4.Models;
@@ -21,7 +22,7 @@ using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using RabbitMQ.Client;
-using Client = IdentityServer4.EntityFramework.Entities.Client;
+using Client = IdentityServer4.Models.Client;
 using Secret = IdentityServer4.Models.Secret;
 
 namespace IdentityServer_WebApp.Pages.Groups
@@ -30,14 +31,14 @@ namespace IdentityServer_WebApp.Pages.Groups
     public class AddClientModel : PageModel
     {
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly ConfigurationDbContext _is4Context;
+        private readonly CustomClientStore _clientStore;
         private readonly GroupService _groupsContext;
         private readonly ClientService _clientsContext;
 
-        public AddClientModel(UserManager<ApplicationUser> userManager, ConfigurationDbContext is4Context, GroupService groupsContext, ClientService clientsContext)
+        public AddClientModel(UserManager<ApplicationUser> userManager, CustomClientStore clientStore, GroupService groupsContext, ClientService clientsContext)
         {
             _userManager = userManager;
-            _is4Context = is4Context;
+            _clientStore = clientStore;
             _groupsContext = groupsContext;
             _clientsContext = clientsContext;
         }
@@ -83,14 +84,14 @@ namespace IdentityServer_WebApp.Pages.Groups
 
                 if (!clientIds.Contains(client.Id.ToString()))
                 {
-                    var is4Client = await _is4Context.Clients.FirstOrDefaultAsync(c => c.Id == client.ClientId);
+                    var is4Client = await _clientStore.FindClientByIdAsync(client.ClientId);//_is4Context.Clients.FirstOrDefaultAsync(c => c.Id == client.ClientId);
 
                     if (is4Client != null)
                     {
                         clients.Add(new SelectListItem
                         {
                             Text = is4Client.ClientName,
-                            Value = is4Client.Id.ToString()
+                            Value = is4Client.ClientId
                         });
                     }
                 }
@@ -109,7 +110,7 @@ namespace IdentityServer_WebApp.Pages.Groups
             }
 
             Group = _groupsContext.Get(id);
-            var client = _clientsContext.GetFromClientId(int.Parse(Input.ClientId));
+            var client = _clientsContext.GetFromClientId(Input.ClientId);
 
             if (Group != null)
             {
