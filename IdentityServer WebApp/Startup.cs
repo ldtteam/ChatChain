@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using AspNetCore.Identity.MongoDB;
 using IdentityServer4.EntityFramework.DbContexts;
 using IdentityServer4.EntityFramework.Options;
 using IdentityServer4.Extensions;
@@ -21,6 +22,7 @@ using Microsoft.AspNetCore.DataProtection;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using MongoDB.Driver;
 using RabbitMQ.Client;
 using StackExchange.Redis;
 
@@ -112,23 +114,24 @@ namespace IdentityServer_WebApp
                 
             }
             
+            var identityDatabaseConnection = Environment.GetEnvironmentVariable("IDENTITY_DATABASE_CONNECTION");
             var identityDatabase = Environment.GetEnvironmentVariable("IDENTITY_DATABASE");
-            var identityConnection = Configuration.GetConnectionString("IdentityDatabase");
-            
-            if (identityDatabase != null && !identityDatabase.IsNullOrEmpty())
-            {
-                identityConnection = identityDatabase;
-            }
 
-            /*services.AddDefaultIdentity<IdentityUser>(options => options.Password.RequireNonAlphanumeric = false)
-                .AddEntityFrameworkStores<ApplicationDbContext>();*/
+            services.AddSingleton<IUserStore<MongoIdentityUser>>(
+                provider =>
+                {
+                    var client = new MongoClient(identityDatabaseConnection);
+                    var database = client.GetDatabase(identityDatabase);
 
-            Console.WriteLine(identityConnection);
-            Console.WriteLine(identityDatabase);
+                    return new MongoUserStore<MongoIdentityUser>(database);
+                });
+
+            services.AddDefaultIdentity<MongoIdentityUser>(options => options.Password.RequireNonAlphanumeric = false)
+                .AddEntityFrameworkStores<ApplicationDbContext>();
             
-            services.AddIdentityWithMongoStores(identityConnection)
+            /*services.AddIdentityWithMongoStores(identityConnection)
                 .AddDefaultTokenProviders()
-                .AddDefaultUI();
+                .AddDefaultUI();*/
             
             services.ConfigureApplicationCookie(options =>
             {
