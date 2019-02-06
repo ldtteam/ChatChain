@@ -55,7 +55,7 @@ namespace IdentityServer_WebApp.Pages.Groups
             return Page();
         }
         
-        public async Task<IActionResult> OnPostAsync(string id)
+        public IActionResult OnPost(string id)
         {
             Console.WriteLine("test123");
             if (!ModelState.IsValid)
