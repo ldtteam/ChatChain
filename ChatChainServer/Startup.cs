@@ -98,7 +98,7 @@ namespace ChatChainServer
             
             app.UseSignalR(routes =>
             {
-                routes.MapHub<ChatChainHub>("/");
+                routes.MapHub<ChatChainHub>("/hubs/chatchain");
             });
         }
     }
