@@ -72,9 +72,12 @@ namespace IdentityServer_WebApp.Pages.Clients
             var client = await _clientStore.FindClientByIdAsync(id);
             
             var groupClient = _clientsContext.GetFromClientId(id);
+
+            Console.WriteLine(groupClient != null);
             
             if (groupClient != null && groupClient.OwnerId != _userManager.GetUserAsync(User).Result.Id)
             {
+                Console.WriteLine(groupClient.OwnerId != _userManager.GetUserAsync(User).Result.Id);
                 return RedirectToPage("./Index");
             }
             
