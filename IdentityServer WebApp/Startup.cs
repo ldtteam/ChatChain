@@ -196,7 +196,7 @@ namespace IdentityServer_WebApp
 
             ConfigureMongoDriver2IgnoreExtraElements();
             
-            InitializeDatabase(app);
+            //InitializeDatabase(app);
         }
 
         /// <summary>
@@ -205,7 +205,7 @@ namespace IdentityServer_WebApp
         /// </summary>
         private static void ConfigureMongoDriver2IgnoreExtraElements()
         {
-            BsonClassMap.RegisterClassMap<Client>(cm =>
+            BsonClassMap.RegisterClassMap<IdentityServer4.Models.Client>(cm =>
             {
                 cm.AutoMap();
                 cm.SetIgnoreExtraElements(true);
