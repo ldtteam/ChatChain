@@ -68,7 +68,7 @@ namespace IdentityServer
                     options.IssuerUri = Environment.GetEnvironmentVariable("IDENTITY_SERVER_URL");
                     options.PublicOrigin = Environment.GetEnvironmentVariable("IDENTITY_SERVER_ORIGIN");
                 })
-                //.AddDeveloperSigningCredential()
+                .AddDeveloperSigningCredential()
                 /*.AddConfigurationStore(options =>
                     options.ConfigureDbContext = builder =>
                         builder.UseMySql(connectionString,
