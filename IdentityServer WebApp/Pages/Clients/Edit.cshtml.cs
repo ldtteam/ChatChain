@@ -34,10 +34,6 @@ namespace IdentityServer_WebApp.Pages.Clients
             [Required]
             [Display(Name = "Client Name")]
             public string ClientName { get; set; }
-
-            [Required] 
-            [Display(Name = "Enabled")] 
-            public bool Enabled { get; set; }
         }
         
         public async Task<IActionResult> OnGetAsync(string id)
@@ -65,8 +61,7 @@ namespace IdentityServer_WebApp.Pages.Clients
             
             Input = new InputModel
             {
-                ClientName = Client.ClientName,
-                Enabled = Client.Enabled
+                ClientName = Client.ClientName
             };
 
             return Page();
@@ -94,7 +89,6 @@ namespace IdentityServer_WebApp.Pages.Clients
             var clientToUpdate = await _clientStore.FindClientByIdAsync(id);
 
             clientToUpdate.ClientName = Input.ClientName;
-            clientToUpdate.Enabled = Input.Enabled;
             
             _clientStore.UpdateClient(clientToUpdate);
 
