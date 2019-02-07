@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using Microsoft.CodeAnalysis.Classification;
 
 namespace IdentityServer_WebApp.Repository
 {
@@ -17,5 +18,6 @@ namespace IdentityServer_WebApp.Repository
         void Add<T>(T item) where T : class, new();
         void Add<T>(IEnumerable<T> items) where T : class, new();
         bool CollectionExists<T>() where T : class, new();
+        void Update<T>(Expression<Func<T, bool>> expression, T item) where T : class, new();
     }
 }

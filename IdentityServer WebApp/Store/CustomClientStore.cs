@@ -38,5 +38,10 @@ namespace IdentityServer.Store
         {
             _dbRepository.Add(client);
         }
+
+        public void UpdateClient(Client client)
+        {
+            _dbRepository.Update(c => c.ClientId == client.ClientId, client);
+        }
     }
 }
