@@ -6,7 +6,9 @@ using System.Text;
 using System.Threading.Tasks;
 using AspNetCore.Identity.Mongo;
 using IdentityServer.Store;
+using IdentityServer.Utils;
 using IdentityServer4.EntityFramework.DbContexts;
+using IdentityServer4.EntityFramework.Entities;
 using IdentityServer4.EntityFramework.Options;
 using IdentityServer4.Extensions;
 using IdentityServer4.Stores;
@@ -30,6 +32,7 @@ using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
 using RabbitMQ.Client;
 using StackExchange.Redis;
+using Client = IdentityServer_WebApp.Models.Client;
 
 namespace IdentityServer_WebApp
 {
@@ -192,6 +195,8 @@ namespace IdentityServer_WebApp
             app.UseMvc();
 
             ConfigureMongoDriver2IgnoreExtraElements();
+            
+            InitializeDatabase(app);
         }
 
         /// <summary>
@@ -206,18 +211,38 @@ namespace IdentityServer_WebApp
                 cm.SetIgnoreExtraElements(true);
             });
         }
-
-        private static void UpdateDatabase(IApplicationBuilder app)
+        
+        private void InitializeDatabase(IApplicationBuilder app)
         {
-            using (var serviceScope = app.ApplicationServices
-                .GetRequiredService<IServiceScopeFactory>()
-                .CreateScope())
+            bool createdNewRepository = false;
+            var repository = app.ApplicationServices.GetService<IRepository>();
+
+            //  --IdentityResource
+            if (!repository.CollectionExists<IdentityResource>())
             {
-                using (var context = serviceScope.ServiceProvider.GetService<ApplicationDbContext>())
+                foreach (var res in Config.GetIdentityResources())
                 {
-                    context.Database.EnsureCreated();
-                    //context.Database.Migrate();
+                    repository.Add(res);
                 }
+                createdNewRepository = true;
+            }
+
+
+            //  --ApiResource
+            if (!repository.CollectionExists<ApiResource>())
+            {
+                foreach (var api in Config.GetApis())
+                {
+                    repository.Add(api);
+                }
+                createdNewRepository = true;
+            }
+
+            // If it's a new Repository (database), need to restart the website to configure Mongo to ignore Extra Elements.
+            if (createdNewRepository)
+            {
+                var newRepositoryMsg = $"Mongo Repository created/populated! Please restart you website, so Mongo driver will be configured  to ignore Extra Elements.";
+                throw new Exception(newRepositoryMsg);
             }
         }
     }
