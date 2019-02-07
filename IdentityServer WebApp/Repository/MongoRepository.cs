@@ -21,7 +21,6 @@ namespace IdentityServer_WebApp.Repository
         {
             _client = new MongoClient(Environment.GetEnvironmentVariable("IDENTITY_SERVER_DATABASE_CONNECTION"));
             _database = _client.GetDatabase(Environment.GetEnvironmentVariable("IDENTITY_SERVER_DATABASE"));
-            
         }
 
         public IQueryable<T> All<T>() where T : class, new()

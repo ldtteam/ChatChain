@@ -26,6 +26,7 @@ using Microsoft.AspNetCore.DataProtection;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
 using RabbitMQ.Client;
 using StackExchange.Redis;
@@ -189,8 +190,23 @@ namespace IdentityServer_WebApp
             app.UseAuthentication();
 
             app.UseMvc();
+
+            ConfigureMongoDriver2IgnoreExtraElements();
         }
-        
+
+        /// <summary>
+        /// Configure Classes to ignore Extra Elements (e.g. _Id) when deserializing
+        /// As we are using "IdentityServer4.Models" we cannot add something like "[BsonIgnore]"
+        /// </summary>
+        private static void ConfigureMongoDriver2IgnoreExtraElements()
+        {
+            BsonClassMap.RegisterClassMap<Client>(cm =>
+            {
+                cm.AutoMap();
+                cm.SetIgnoreExtraElements(true);
+            });
+        }
+
         private static void UpdateDatabase(IApplicationBuilder app)
         {
             using (var serviceScope = app.ApplicationServices
