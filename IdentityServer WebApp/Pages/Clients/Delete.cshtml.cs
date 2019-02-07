@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
-using Client = IdentityServer4.EntityFramework.Entities.Client;
+using Client = IdentityServer4.Models.Client;
 
 namespace IdentityServer_WebApp.Pages.Clients
 {
@@ -41,6 +41,8 @@ namespace IdentityServer_WebApp.Pages.Clients
 
             //Client = await _is4Context.Clients.AsNoTracking().FirstOrDefaultAsync(m => m.Clie == id);
 
+            Client = await _clientStore.FindClientByIdAsync(id);
+            
             var groupsClient = _clientsContext.GetFromClientId(id);
             
             Console.WriteLine("Get Subject Id: " + _userManager.GetUserAsync(User).Result.Id);
