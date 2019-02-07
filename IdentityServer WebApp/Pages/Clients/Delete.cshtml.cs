@@ -44,7 +44,7 @@ namespace IdentityServer_WebApp.Pages.Clients
             var groupsClient = _clientsContext.GetFromClientId(id);
             
             Console.WriteLine("Get Subject Id: " + _userManager.GetUserAsync(User).Result.Id);
-            Console.WriteLine("Subject: " + groupsClient.OwnerId != _userManager.GetUserAsync(User).Result.Id);
+            Console.WriteLine("Subject: " + groupsClient.OwnerId);
             Console.WriteLine("Client: " + Client);
             
             if (groupsClient.OwnerId != _userManager.GetUserAsync(User).Result.Id)
