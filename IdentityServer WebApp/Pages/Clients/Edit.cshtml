@@ -14,15 +14,15 @@
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="Client.ClientId"/>
             <div class="form-group">
-                <label asp-for="Client.ClientName" class="control-label"></label>
-                <input asp-for="Client.ClientName" class="form-control" />
-                <span asp-validation-for="Client.ClientName" class="text-danger"></span>
+                <label asp-for="Input.ClientName" class="control-label"></label>
+                <input asp-for="Input.ClientName" value="@Model.Client.ClientName"/>
+                <span asp-validation-for="Input.ClientName" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="Client.Enabled" class="control-label"></label>
-                <input asp-for="Client.Enabled"/>
+                <label asp-for="Input.Enabled" class="control-label"></label>
+                <input asp-for="Input.Enabled" value="@Model.Client.Enabled"/>
                 <label class="text-danger">Disabling a client Will Not take affect until after it or the api restarts</label>
-                <span asp-validation-for="Client.Enabled" class="text-danger"></span>
+                <span asp-validation-for="Input.Enabled" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-default" />

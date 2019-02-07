@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 using IdentityServer.Store;
 using IdentityServer_WebApp.Models;
@@ -24,8 +25,20 @@ namespace IdentityServer_WebApp.Pages.Clients
             _clientsContext = clientsContext;
         }
         
-        [BindProperty]
         public Client Client { get; set; }
+        [BindProperty]
+        public InputModel Input { get; set; }
+        
+        public class InputModel
+        {
+            [Required]
+            [Display(Name = "Client Name")]
+            public string ClientName { get; set; }
+
+            [Required] 
+            [Display(Name = "Enabled")] 
+            public bool Enabled { get; set; }
+        }
         
         public async Task<IActionResult> OnGetAsync(string id)
         {
@@ -49,6 +62,12 @@ namespace IdentityServer_WebApp.Pages.Clients
             {
                 return NotFound();
             }
+            
+            Input = new InputModel
+            {
+                ClientName = Client.ClientName,
+                Enabled = Client.Enabled
+            };
 
             return Page();
         }
@@ -73,18 +92,13 @@ namespace IdentityServer_WebApp.Pages.Clients
             }
 
             var clientToUpdate = await _clientStore.FindClientByIdAsync(id);
-            
-            if (await TryUpdateModelAsync<Client>(
-                clientToUpdate,
-                "client",
-                c => c.ClientName , c => c.Enabled))
-            {
-                groupsClient.ClientName = clientToUpdate.ClientName;
-                _clientsContext.Update(groupsClient.Id.ToString(), groupsClient);
-                return RedirectToPage("./Index");
-            }
 
-            return Page();
+            clientToUpdate.ClientName = Input.ClientName;
+            clientToUpdate.Enabled = Input.Enabled;
+            
+            _clientStore.UpdateClient(clientToUpdate);
+
+            return RedirectToPage("./Index");
         } 
     }
 }

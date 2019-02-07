@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using Microsoft.Extensions.Options;
 using MongoDB.Bson;
 using MongoDB.Driver;
@@ -49,7 +50,11 @@ namespace IdentityServer_WebApp.Repository
             var filter = new BsonDocument();
             var totalCount = collection.Count(filter);
             return (totalCount > 0) ? true : false;
+        }
 
+        public void Update<T>(Expression<Func<T, bool>> expression, T item) where T : class, new()
+        {
+            _database.GetCollection<T>(typeof(T).Name).ReplaceOne(expression, item);
         }
 
         public void Add<T>(T item) where T : class, new()
