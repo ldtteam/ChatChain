@@ -9,7 +9,7 @@ namespace ChatChainServer.Models
         public ObjectId Id { get; set; }
         
         [BsonElement("ClientId")]
-        public int ClientId { get; set; }
+        public string ClientId { get; set; }
         
         [BsonElement("OwnerId")]
         public string OwnerId { get; set; }
@@ -21,6 +21,6 @@ namespace ChatChainServer.Models
         public string ClientName { get; set; }
         
         [BsonElement("GroupIds")]
-        public List<ObjectId> GroupIds { get; set; } = new List<ObjectId>();
+        public List<ObjectId> GroupIds { get; set;  } = new List<ObjectId>();
     }
 }
