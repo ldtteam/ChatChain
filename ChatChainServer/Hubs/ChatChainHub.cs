@@ -76,7 +76,7 @@ namespace ChatChainServer.Hubs
             if (group != null && client != null && group.ClientIds.Contains(client.Id))
             {
                 _logger.LogInformation($"Client Id: {client.ClientId} SendToSelf: {message.SendToSelf}");
-                foreach (var fClient in _groupsContext.GetClients(group.GroupId))
+                foreach (var fClient in _groupsContext.GetClients(group.Id.ToString()))
                 {
                     _logger.LogInformation($"fClient Name: {fClient.ClientName} fClient ID: {fClient.ClientId}");   
                     if (!fClient.ClientId.Equals(client.ClientId) || message.SendToSelf)
