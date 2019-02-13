@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using System.Threading.Tasks;
+using ChatChainServer.Models;
 using ChatChainServer.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
@@ -61,7 +62,7 @@ namespace ChatChainServer.Hubs
             public string Channel { get; set; }
             public User User { get; set; }
             public string Message { get; set; }
-            public string SendingClient { get; set; }
+            public Client SendingClient { get; set; }
             public bool SendToSelf { get; set; }
         }
 
@@ -75,6 +76,7 @@ namespace ChatChainServer.Hubs
             
             if (group != null && client != null && group.ClientIds.Contains(client.Id))
             {
+                message.SendingClient = client;
                 _logger.LogInformation($"Client Id: {client.ClientId} SendToSelf: {message.SendToSelf}");
                 foreach (var fClient in _groupsContext.GetClients(group.Id.ToString()))
                 {
