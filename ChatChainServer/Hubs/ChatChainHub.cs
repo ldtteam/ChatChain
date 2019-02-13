@@ -37,12 +37,12 @@ namespace ChatChainServer.Hubs
             }
             _logger.LogInformation($"Claims: {Context.User.Claims}");
 
-            foreach (var group in _clientsContext.GetGroups(_clientsContext.GetFromClientGuid(Context.UserIdentifier).Id
+            /*foreach (var group in _clientsContext.GetGroups(_clientsContext.GetFromClientGuid(Context.UserIdentifier).Id
                 .ToString()))
             {
                 _logger.LogInformation($" Adding Client {Context.UserIdentifier} to group {group.GroupId}");
                 Groups.AddToGroupAsync(Context.ConnectionId, group.GroupId);
-            }
+            }*/
             
             return base.OnConnectedAsync();
         }
@@ -62,6 +62,7 @@ namespace ChatChainServer.Hubs
             public User User { get; set; }
             public string Message { get; set; }
             public string SendingClient { get; set; }
+            public bool SendToSelf { get; set; }
         }
 
         public async Task SendGenericMessage(GenericMessage message)
@@ -71,14 +72,21 @@ namespace ChatChainServer.Hubs
 
             var group = _groupsContext.GetFromGuid(message.Channel);
             var client = _clientsContext.GetFromClientGuid(Context.UserIdentifier);
-
+            
             if (group != null && client != null && group.ClientIds.Contains(client.Id))
             {
-                message.SendingClient = _clientsContext.GetFromClientGuid(Context.UserIdentifier).ClientName;
+                foreach (var fClient in _groupsContext.GetClients(group.GroupId))
+                {
+                    if (!fClient.ClientId.Equals(client.ClientId) || message.SendToSelf)
+                    {
+                        await Clients.User(fClient.ClientGuid).SendAsync("ReceiveGenericMessage", message);
+                    }
+                }
                 
-                await Clients.Group(message.Channel).SendAsync("ReceiveGenericMessage", message);
+                /*message.SendingClient = _clientsContext.GetFromClientGuid(Context.UserIdentifier).ClientName;
+                
+                await Clients.Group(message.Channel).SendAsync("ReceiveGenericMessage", message);*/
             }
-
         }
     }
 }
