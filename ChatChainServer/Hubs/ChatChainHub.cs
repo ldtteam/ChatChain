@@ -75,8 +75,10 @@ namespace ChatChainServer.Hubs
             
             if (group != null && client != null && group.ClientIds.Contains(client.Id))
             {
+                _logger.LogInformation($"Client Id: {client.ClientId} SendToSelf: {message.SendToSelf}");
                 foreach (var fClient in _groupsContext.GetClients(group.GroupId))
                 {
+                    _logger.LogInformation($"fClient Name: {fClient.ClientName} fClient ID: {fClient.ClientId}");   
                     if (!fClient.ClientId.Equals(client.ClientId) || message.SendToSelf)
                     {
                         await Clients.User(fClient.ClientGuid).SendAsync("ReceiveGenericMessage", message);
