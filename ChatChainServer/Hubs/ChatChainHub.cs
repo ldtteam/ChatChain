@@ -61,6 +61,7 @@ namespace ChatChainServer.Hubs
             public string Channel { get; set; }
             public User User { get; set; }
             public string Message { get; set; }
+            public string SendingClient { get; set; }
         }
 
         public async Task SendGenericMessage(GenericMessage message)
@@ -73,9 +74,9 @@ namespace ChatChainServer.Hubs
 
             if (group != null && client != null && group.ClientIds.Contains(client.Id))
             {
-                _logger.LogInformation("Made it here!");
-                await Clients.Group(message.Channel).SendAsync("ReceiveGenericMessage", $"{message.Channel}",
-                    $"{_clientsContext.GetFromClientGuid(Context.UserIdentifier).ClientName}", message.User, $"{message.Message}");
+                message.SendingClient = _clientsContext.GetFromClientGuid(Context.UserIdentifier).ClientName;
+                
+                await Clients.Group(message.Channel).SendAsync("ReceiveGenericMessage", message);
             }
 
         }
