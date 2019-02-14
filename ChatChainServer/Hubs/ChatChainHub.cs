@@ -37,13 +37,6 @@ namespace ChatChainServer.Hubs
                 _logger.LogInformation($"identity: {identity.Name}");
             }
             _logger.LogInformation($"Claims: {Context.User.Claims}");
-
-            /*foreach (var group in _clientsContext.GetGroups(_clientsContext.GetFromClientGuid(Context.UserIdentifier).Id
-                .ToString()))
-            {
-                _logger.LogInformation($" Adding Client {Context.UserIdentifier} to group {group.GroupId}");
-                Groups.AddToGroupAsync(Context.ConnectionId, group.GroupId);
-            }*/
             
             return base.OnConnectedAsync();
         }
@@ -87,10 +80,6 @@ namespace ChatChainServer.Hubs
                         await Clients.User(fClient.ClientGuid).SendAsync("ReceiveGenericMessage", message);
                     }
                 }
-                
-                /*message.SendingClient = _clientsContext.GetFromClientGuid(Context.UserIdentifier).ClientName;
-                
-                await Clients.Group(message.Channel).SendAsync("ReceiveGenericMessage", message);*/
             }
         }
     }
