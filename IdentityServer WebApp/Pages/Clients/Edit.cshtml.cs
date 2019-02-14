@@ -91,6 +91,7 @@ namespace IdentityServer_WebApp.Pages.Clients
             clientToUpdate.ClientName = Input.ClientName;
             
             _clientStore.UpdateClient(clientToUpdate);
+            _clientsContext.Update(groupsClient.Id.ToString(), groupsClient);
 
             return RedirectToPage("./Index");
         } 
