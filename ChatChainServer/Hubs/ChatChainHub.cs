@@ -59,7 +59,7 @@ namespace ChatChainServer.Hubs
         
         public class GenericMessage
         {
-            public string Channel { get; set; }
+            public Group Group { get; set; }
             public User User { get; set; }
             public string Message { get; set; }
             public Client SendingClient { get; set; }
@@ -68,15 +68,16 @@ namespace ChatChainServer.Hubs
 
         public async Task SendGenericMessage(GenericMessage message)
         {
-            _logger.LogInformation($"Client of Name: {Context.UserIdentifier} had author: {message.User.Name} send \"{message.Message}\" in channel: {message.Channel}");
+            _logger.LogInformation($"Client of Name: {Context.UserIdentifier} had author: {message.User.Name} send \"{message.Message}\" in channel: {message.Group.GroupId}");
             _logger.LogInformation($"Client: {Context.ConnectionId}, User: {Context.UserIdentifier}");
 
-            var group = _groupsContext.GetFromGuid(message.Channel);
+            var group = _groupsContext.GetFromGuid(message.Group.GroupId);
             var client = _clientsContext.GetFromClientGuid(Context.UserIdentifier);
             
             if (group != null && client != null && group.ClientIds.Contains(client.Id))
             {
                 message.SendingClient = client;
+                message.Group = group;
                 _logger.LogInformation($"Client Id: {client.ClientId} SendToSelf: {message.SendToSelf}");
                 foreach (var fClient in _groupsContext.GetClients(group.Id.ToString()))
                 {
