@@ -89,8 +89,9 @@ namespace IdentityServer_WebApp.Pages.Clients
             var clientToUpdate = await _clientStore.FindClientByIdAsync(id);
 
             clientToUpdate.ClientName = Input.ClientName;
-            
             _clientStore.UpdateClient(clientToUpdate);
+            
+            groupsClient.ClientName = Input.ClientName;
             _clientsContext.Update(groupsClient.Id.ToString(), groupsClient);
 
             return RedirectToPage("./Index");
