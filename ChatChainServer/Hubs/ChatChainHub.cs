@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using ChatChainServer.Models;
@@ -61,8 +62,7 @@ namespace ChatChainServer.Hubs
 
         public async Task SendGenericMessage(GenericMessage message)
         {
-            _logger.LogInformation($"Client of Name: {Context.UserIdentifier} had author: {message.User.Name} send \"{message.Message}\" in channel: {message.Group.GroupId}");
-            _logger.LogInformation($"Client: {Context.ConnectionId}, User: {Context.UserIdentifier}");
+            _logger.LogInformation($"Client {Context.UserIdentifier} had author: {message.User.Name} send \"{message.Message}\" in channel: {message.Group.GroupId}");
 
             var group = _groupsContext.GetFromGuid(message.Group.GroupId);
             var client = _clientsContext.GetFromClientGuid(Context.UserIdentifier);
@@ -71,16 +71,35 @@ namespace ChatChainServer.Hubs
             {
                 message.SendingClient = client;
                 message.Group = group;
-                _logger.LogInformation($"Client Id: {client.ClientId} SendToSelf: {message.SendToSelf}");
                 foreach (var fClient in _groupsContext.GetClients(group.Id.ToString()))
                 {
-                    _logger.LogInformation($"fClient Name: {fClient.ClientName} fClient ID: {fClient.ClientId}");   
                     if (!fClient.ClientId.Equals(client.ClientId) || message.SendToSelf)
                     {
                         await Clients.User(fClient.ClientGuid).SendAsync("ReceiveGenericMessage", message);
                     }
                 }
             }
+        }
+
+        public class GetGroupsResponseMessage
+        {
+            public List<Group> Groups { get; set; }
+        }
+
+        public async Task GetGroups()
+        {
+            _logger.LogInformation($"Client {Context.UserIdentifier} requested their groups");
+            
+            var response = new GetGroupsResponseMessage();
+
+            var client = _clientsContext.GetFromClientGuid(Context.UserIdentifier);
+
+            if (client != null)
+            {
+                response.Groups = _clientsContext.GetGroups(client.Id.ToString());
+            }
+
+            await Clients.Caller.SendAsync("GetGroupsResponse", response);
         }
     }
 }
