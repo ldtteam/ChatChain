@@ -107,7 +107,7 @@ namespace ChatChainServer.Hubs
             public Client Client { get; set; }
         }
 
-        public async Task GetMyClient()
+        public async Task GetClient()
         {
             _logger.LogInformation($"Client {Context.UserIdentifier} requested their Client");
             
