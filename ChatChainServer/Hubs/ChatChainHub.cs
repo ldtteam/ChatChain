@@ -101,5 +101,27 @@ namespace ChatChainServer.Hubs
 
             await Clients.Caller.SendAsync("GetGroupsResponse", response);
         }
+
+        public class GetClientResponseMessage
+        {
+            public Client Client { get; set; }
+        }
+
+        public async Task GetMyClient()
+        {
+            _logger.LogInformation($"Client {Context.UserIdentifier} requested their Client");
+            
+            var response = new GetClientResponseMessage();
+
+            var client = _clientsContext.GetFromClientGuid(Context.UserIdentifier);
+
+            if (client != null)
+            {
+                response.Client = client;
+            }
+
+            await Clients.Caller.SendAsync("GetClientResponse", response);
+        }
+        
     }
 }
