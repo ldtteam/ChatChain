@@ -43,7 +43,7 @@ namespace ChatChainServer.Hubs
             
             return base.OnConnectedAsync();
         }
-
+/*
         public override Task OnDisconnectedAsync(Exception exception)
         {
             if (!hasSentLeaveMessage)
@@ -55,7 +55,7 @@ namespace ChatChainServer.Hubs
             }
             
             return base.OnDisconnectedAsync(exception);
-        }
+        }*/
         // ClientType is what ChatChain extension is connecting. E.G. "ChatChainDC", These should be Unique!
         // ClientName is the name of the specific client connecting. E.G. "Minecolonies Test Server", These should be Unique!d
         // Channel is used to specify a chat channel. E.G. "staff" channel.
