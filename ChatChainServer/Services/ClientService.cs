@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using ChatChainServer.Models;
 using IdentityServer4.Extensions;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Bson;
@@ -35,11 +36,6 @@ namespace ChatChainServer.Services
             _groups = database.GetCollection<Group>("Groups");
 
             _services = services;
-        }
-
-        public List<Client> Get()
-        {
-            return _clients.Find(client => true).ToList();
         }
 
         public Client Get(string id)
