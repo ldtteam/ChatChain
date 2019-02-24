@@ -81,7 +81,7 @@ namespace ChatChainServer.Hubs
             }
         }
 
-        public async Task SendClientEventMessage(EventMessage message)
+        public async Task SendClientEventMessage(ClientEventMessage message)
         {
             _logger.LogInformation($"Client {Context.UserIdentifier} sent event: {message.Event}");
 
@@ -89,7 +89,7 @@ namespace ChatChainServer.Hubs
 
             if (client != null)
             {
-                if (message.Event.Equals(ClientEvent.STOP))
+                if (message.Event.Equals(ClientEvent.Stop))
                 {
                     hasSentLeaveMessage = true;
                 }
