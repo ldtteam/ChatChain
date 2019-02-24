@@ -18,7 +18,7 @@ namespace ChatChainServer.Hubs
         private readonly GroupService _groupsContext;
         private readonly ClientService _clientsContext;
 
-        private Boolean hasSentLeaveMessage = false;
+        private Boolean _hasSentLeaveMessage;
 
         public ChatChainHub(ILogger<ChatChainHub> logger, GroupService groupsContext, ClientService clientsContext)
         {
@@ -43,19 +43,20 @@ namespace ChatChainServer.Hubs
             
             return base.OnConnectedAsync();
         }
-/*
+
         public override Task OnDisconnectedAsync(Exception exception)
         {
-            if (!hasSentLeaveMessage)
+            if (!_hasSentLeaveMessage)
             {
-                var message = new EventMessage();
-                message.Event = ClientEvent.STOP;
+                var message = new ClientEventMessage();
+                message.Event = "STOP";
                 message.SendToSelf = false;
                 SendClientEventMessage(message).GetAwaiter();
             }
             
             return base.OnDisconnectedAsync(exception);
-        }*/
+        }
+        
         // ClientType is what ChatChain extension is connecting. E.G. "ChatChainDC", These should be Unique!
         // ClientName is the name of the specific client connecting. E.G. "Minecolonies Test Server", These should be Unique!d
         // Channel is used to specify a chat channel. E.G. "staff" channel.
@@ -89,9 +90,9 @@ namespace ChatChainServer.Hubs
 
             if (client != null)
             {
-                if (message.Event.Equals(ClientEvent.Stop))
+                if (message.Event.Equals("STOP"))
                 {
-                    hasSentLeaveMessage = true;
+                    _hasSentLeaveMessage = true;
                 }
                 message.SendingClient = client;
                 foreach (var fClient in _clientsContext.GetFromOwnerId(client.OwnerId))
