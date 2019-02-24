@@ -1,7 +1,7 @@
-using System.Collections.Generic;
+using System;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using ChatChainServer.Models;
+using ChatChainServer.Models.MessageObjects;
 using ChatChainServer.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
@@ -17,6 +17,8 @@ namespace ChatChainServer.Hubs
         private readonly ILogger<ChatChainHub> _logger;
         private readonly GroupService _groupsContext;
         private readonly ClientService _clientsContext;
+
+        private Boolean hasSentLeaveMessage = false;
 
         public ChatChainHub(ILogger<ChatChainHub> logger, GroupService groupsContext, ClientService clientsContext)
         {
@@ -41,24 +43,22 @@ namespace ChatChainServer.Hubs
             
             return base.OnConnectedAsync();
         }
-        
+
+        public override Task OnDisconnectedAsync(Exception exception)
+        {
+            if (!hasSentLeaveMessage)
+            {
+                var message = new EventMessage();
+                message.Event = ClientEvent.STOP;
+                message.SendToSelf = false;
+                SendClientEventMessage(message).GetAwaiter();
+            }
+            
+            return base.OnDisconnectedAsync(exception);
+        }
         // ClientType is what ChatChain extension is connecting. E.G. "ChatChainDC", These should be Unique!
         // ClientName is the name of the specific client connecting. E.G. "Minecolonies Test Server", These should be Unique!d
         // Channel is used to specify a chat channel. E.G. "staff" channel.
-
-        public class User
-        {
-            public string Name { get; set; }
-        }
-        
-        public class GenericMessage
-        {
-            public Group Group { get; set; }
-            public User User { get; set; }
-            public string Message { get; set; }
-            public Client SendingClient { get; set; }
-            public bool SendToSelf { get; set; }
-        }
 
         public async Task SendGenericMessage(GenericMessage message)
         {
@@ -81,9 +81,27 @@ namespace ChatChainServer.Hubs
             }
         }
 
-        public class GetGroupsResponseMessage
+        public async Task SendClientEventMessage(EventMessage message)
         {
-            public List<Group> Groups { get; set; }
+            _logger.LogInformation($"Client {Context.UserIdentifier} sent event: {message.Event}");
+
+            var client = _clientsContext.GetFromClientGuid(Context.UserIdentifier);
+
+            if (client != null)
+            {
+                if (message.Event.Equals(ClientEvent.STOP))
+                {
+                    hasSentLeaveMessage = true;
+                }
+                message.SendingClient = client;
+                foreach (var fClient in _clientsContext.GetFromOwnerId(client.OwnerId))
+                {
+                    if (!fClient.ClientId.Equals(client.ClientId) || message.SendToSelf)
+                    {
+                        await Clients.User(fClient.ClientGuid).SendAsync("ReceiveClientEventMessage", message);
+                    }
+                }
+            }
         }
 
         public async Task GetGroups()
@@ -99,14 +117,9 @@ namespace ChatChainServer.Hubs
                 response.Groups = _clientsContext.GetGroups(client.Id.ToString());
             }
 
-            await Clients.Caller.SendAsync("GetGroupsResponse", response);
+            await Clients.Caller.SendAsync("ReceiveGroups", response);
         }
-
-        public class GetClientResponseMessage
-        {
-            public Client Client { get; set; }
-        }
-
+        
         public async Task GetClient()
         {
             _logger.LogInformation($"Client {Context.UserIdentifier} requested their Client");
@@ -120,7 +133,7 @@ namespace ChatChainServer.Hubs
                 response.Client = client;
             }
 
-            await Clients.Caller.SendAsync("GetClientResponse", response);
+            await Clients.Caller.SendAsync("ReceiveClient", response);
         }
         
     }
