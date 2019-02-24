@@ -18,7 +18,7 @@ namespace ChatChainServer.Hubs
         private readonly GroupService _groupsContext;
         private readonly ClientService _clientsContext;
 
-        private Boolean _hasSentLeaveMessage;
+        private bool _hasSentLeaveMessage = false;
 
         public ChatChainHub(ILogger<ChatChainHub> logger, GroupService groupsContext, ClientService clientsContext)
         {
@@ -52,6 +52,7 @@ namespace ChatChainServer.Hubs
                 message.Event = "STOP";
                 message.SendToSelf = false;
                 SendClientEventMessage(message).GetAwaiter();
+                _logger.LogInformation("Sent Client Event STOP message");
             }
             
             return base.OnDisconnectedAsync(exception);
