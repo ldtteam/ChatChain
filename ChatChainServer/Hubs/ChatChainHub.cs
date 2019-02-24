@@ -18,7 +18,7 @@ namespace ChatChainServer.Hubs
         private readonly GroupService _groupsContext;
         private readonly ClientService _clientsContext;
 
-        //private Boolean hasSentLeaveMessage = false;
+        private Boolean hasSentLeaveMessage = false;
 
         public ChatChainHub(ILogger<ChatChainHub> logger, GroupService groupsContext, ClientService clientsContext)
         {
@@ -80,7 +80,7 @@ namespace ChatChainServer.Hubs
                 }
             }
         }
-/*
+
         public async Task SendClientEventMessage(EventMessage message)
         {
             _logger.LogInformation($"Client {Context.UserIdentifier} sent event: {message.Event}");
@@ -102,7 +102,7 @@ namespace ChatChainServer.Hubs
                     }
                 }
             }
-        }*/
+        }
 
         public async Task GetGroups()
         {
