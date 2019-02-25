@@ -100,6 +100,7 @@ namespace ChatChainServer.Hubs
                 {
                     if (!fClient.ClientId.Equals(client.ClientId) || message.SendToSelf)
                     {
+                        _logger.LogInformation($"Sending {message.Event} to client: {fClient.ClientName}");
                         await Clients.User(fClient.ClientGuid).SendAsync("ReceiveClientEventMessage", message);
                     }
                 }
