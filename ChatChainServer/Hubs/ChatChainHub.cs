@@ -44,18 +44,36 @@ namespace ChatChainServer.Hubs
             return base.OnConnectedAsync();
         }
 
-        public override Task OnDisconnectedAsync(Exception exception)
+        public override async Task OnDisconnectedAsync(Exception exception)
         {
             if (!_hasSentLeaveMessage)
             {
                 var message = new ClientEventMessage();
                 message.Event = "STOP";
                 message.SendToSelf = false;
-                SendClientEventMessage(message).GetAwaiter();
+                var client = _clientsContext.GetFromClientGuid(Context.UserIdentifier);
+
+                if (client != null)
+                {
+                    if (message.Event.Equals("STOP"))
+                    {
+                        _hasSentLeaveMessage = true;
+                    }
+
+                    message.SendingClient = client;
+                    foreach (var fClient in _clientsContext.GetFromOwnerId(client.OwnerId))
+                    {
+                        if (!fClient.ClientId.Equals(client.ClientId) || message.SendToSelf)
+                        {
+                            _logger.LogInformation($"Sending {message.Event} to client: {fClient.ClientName}");
+                            await Clients.User(fClient.ClientGuid).SendAsync("ReceiveClientEventMessage", message);
+                        }
+                    }
+                }
                 _logger.LogInformation("Sent Client Event STOP message");
             }
             
-            return base.OnDisconnectedAsync(exception);
+            await base.OnDisconnectedAsync(exception);
         }
         
         // ClientType is what ChatChain extension is connecting. E.G. "ChatChainDC", These should be Unique!
@@ -95,6 +113,7 @@ namespace ChatChainServer.Hubs
                 {
                     _hasSentLeaveMessage = true;
                 }
+
                 message.SendingClient = client;
                 foreach (var fClient in _clientsContext.GetFromOwnerId(client.OwnerId))
                 {
