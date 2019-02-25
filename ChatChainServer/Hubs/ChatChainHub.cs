@@ -51,7 +51,7 @@ namespace ChatChainServer.Hubs
                 var message = new ClientEventMessage();
                 message.Event = "STOP";
                 message.SendToSelf = false;
-                var client = _clientsContext.GetFromClientGuid(Context.UserIdentifier);
+                /*var client = _clientsContext.GetFromClientGuid(Context.UserIdentifier);
 
                 if (client != null)
                 {
@@ -69,7 +69,8 @@ namespace ChatChainServer.Hubs
                             await Clients.User(fClient.ClientGuid).SendAsync("ReceiveClientEventMessage", message);
                         }
                     }
-                }
+                }*/
+                await SendClientEventMessage(message);
                 _logger.LogInformation("Sent Client Event STOP message");
             }
             
