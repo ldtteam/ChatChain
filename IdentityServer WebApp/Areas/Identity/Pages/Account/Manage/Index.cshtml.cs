@@ -131,11 +131,13 @@ namespace IdentityServer_WebApp.Areas.Identity.Pages.Account.Manage
             var userId = await _userManager.GetUserIdAsync(user);
             var email = await _userManager.GetEmailAsync(user);
             var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            Console.WriteLine($"testing: {userId} - {email} - {code}");
             var callbackUrl = Url.Page(
                 "/Account/ConfirmEmail",
                 pageHandler: null,
                 values: new { userId = userId, code = code },
                 protocol: Request.Scheme);
+            Console.WriteLine($"testing2: {callbackUrl} - {_emailSender}");
             await _emailSender.SendEmailAsync(
                 email,
                 "Confirm your email",
