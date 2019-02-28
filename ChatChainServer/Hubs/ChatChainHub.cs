@@ -18,7 +18,7 @@ namespace ChatChainServer.Hubs
         private readonly GroupService _groupsContext;
         private readonly ClientService _clientsContext;
 
-        private bool _hasSentLeaveMessage = false;
+        private bool _hasSentLeaveMessage;
 
         public ChatChainHub(ILogger<ChatChainHub> logger, GroupService groupsContext, ClientService clientsContext)
         {
@@ -48,38 +48,13 @@ namespace ChatChainServer.Hubs
         {
             if (!_hasSentLeaveMessage)
             {
-                var message = new ClientEventMessage();
-                message.Event = "STOP";
-                message.SendToSelf = false;
-                /*var client = _clientsContext.GetFromClientGuid(Context.UserIdentifier);
-
-                if (client != null)
-                {
-                    if (message.Event.Equals("STOP"))
-                    {
-                        _hasSentLeaveMessage = true;
-                    }
-
-                    message.SendingClient = client;
-                    foreach (var fClient in _clientsContext.GetFromOwnerId(client.OwnerId))
-                    {
-                        if (!fClient.ClientId.Equals(client.ClientId) || message.SendToSelf)
-                        {
-                            _logger.LogInformation($"Sending {message.Event} to client: {fClient.ClientName}");
-                            await Clients.User(fClient.ClientGuid).SendAsync("ReceiveClientEventMessage", message);
-                        }
-                    }
-                }*/
+                var message = new ClientEventMessage {Event = "STOP", SendToSelf = false};
                 await SendClientEventMessage(message);
                 _logger.LogInformation("Sent Client Event STOP message");
             }
             
             await base.OnDisconnectedAsync(exception);
         }
-        
-        // ClientType is what ChatChain extension is connecting. E.G. "ChatChainDC", These should be Unique!
-        // ClientName is the name of the specific client connecting. E.G. "Minecolonies Test Server", These should be Unique!d
-        // Channel is used to specify a chat channel. E.G. "staff" channel.
 
         public async Task SendGenericMessage(GenericMessage message)
         {
@@ -120,13 +95,32 @@ namespace ChatChainServer.Hubs
                 {
                     if (!fClient.ClientId.Equals(client.ClientId) || message.SendToSelf)
                     {
-                        _logger.LogInformation($"Sending {message.Event} to client: {fClient.ClientName}");
                         await Clients.User(fClient.ClientGuid).SendAsync("ReceiveClientEventMessage", message);
                     }
                 }
             }
         }
 
+        public async Task SendUserEventMessage(UserEventMessage message)
+        {
+            _logger.LogInformation($"Client {Context.UserIdentifier} with user: {message.User.Name} sent event: {message.Event}");
+
+            var client = _clientsContext.GetFromClientGuid(Context.UserIdentifier);
+
+            if (client != null)
+            {
+                message.SendingClient = client;
+
+                foreach (var fClient in _clientsContext.GetFromOwnerId(client.OwnerId))
+                {
+                    if (!fClient.ClientId.Equals(client.ClientId) || message.SendToSelf)
+                    {
+                        await Clients.User(fClient.ClientGuid).SendAsync("ReceiveUserEventMessage", message);
+                    }
+                }
+            }
+        }
+        
         public async Task GetGroups()
         {
             _logger.LogInformation($"Client {Context.UserIdentifier} requested their groups");
