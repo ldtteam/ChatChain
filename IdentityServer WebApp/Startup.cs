@@ -87,10 +87,10 @@ namespace IdentityServer_WebApp
             services.AddIdentityMongoDbProvider<ApplicationUser, ApplicationRole>(identityOptions =>
             {
                 identityOptions.Password.RequireNonAlphanumeric = false;
-                if (!emailUsername.IsNullOrEmpty())
+                /*if (!emailUsername.IsNullOrEmpty())
                 {
                     identityOptions.SignIn.RequireConfirmedEmail = true;
-                }
+                }*/
             }, mongoIdentityOptions => { mongoIdentityOptions.ConnectionString = identityDatabase; });
 
             services.ConfigureApplicationCookie(options =>
