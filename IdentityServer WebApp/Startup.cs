@@ -25,6 +25,7 @@ using IdentityServer_WebApp.Models;
 using IdentityServer_WebApp.Repository;
 using IdentityServer_WebApp.Services;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -49,7 +50,7 @@ namespace IdentityServer_WebApp
         public void ConfigureServices(IServiceCollection services)
         {
             var redisConnectionVariable = Environment.GetEnvironmentVariable("REDIS_STACK_EXCHANGE");
-            
+
             if (redisConnectionVariable != null && !redisConnectionVariable.IsNullOrEmpty())
             {
                 var redis = ConnectionMultiplexer.Connect(redisConnectionVariable);
@@ -57,7 +58,7 @@ namespace IdentityServer_WebApp
                     .PersistKeysToStackExchangeRedis(redis, "DataProtection-Keys")
                     .SetApplicationName("WebApp");
             }
-            
+
             services.Configure<CookiePolicyOptions>(options =>
             {
                 // This lambda determines whether user consent for non-essential cookies is needed for a given request.
@@ -65,80 +66,33 @@ namespace IdentityServer_WebApp
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
 
-/*            var identityDatabase = Environment.GetEnvironmentVariable("IDENTITY_DATABASE");
-
-            if (identityDatabase != null && !identityDatabase.IsNullOrEmpty())
+            var emailUsername = Environment.GetEnvironmentVariable("EMAIL_USERNAME");
+            if (!emailUsername.IsNullOrEmpty())
             {
-                services.AddDbContext<ApplicationDbContext>(options =>
-                    options.UseMySql(
-                        identityDatabase));
+                var emailPassword = Environment.GetEnvironmentVariable("EMAIL_PASSWORD");
+                var emailHost = Environment.GetEnvironmentVariable("EMAIL_HOST");
+                var emailPort = int.Parse(Environment.GetEnvironmentVariable("EMAIL_PORT"));
+                var emailSSL = bool.Parse(Environment.GetEnvironmentVariable("EMAIL_ENABLE_SSL"));
+
+                services.AddTransient<IEmailSender, EmailSender>(i =>
+                    new EmailSender(emailHost, emailPort, emailSSL, emailUsername, emailPassword));
             }
             else
             {
-                services.AddDbContext<ApplicationDbContext>(options =>
-                    options.UseMySql(
-                        Configuration.GetConnectionString("IdentityDatabase")));
-            }*/
-            
-            var migrationsAssembly = typeof(Startup).GetTypeInfo().Assembly.GetName().Name;
-            
-            ConfigurationStoreOptions cso = new ConfigurationStoreOptions();
-            
-            /*var identityServerDatabase = Environment.GetEnvironmentVariable("IDENTITY_SERVER_DATABASE");
-
-            if (identityServerDatabase != null && !identityServerDatabase.IsNullOrEmpty() )
-            {
-                cso.ConfigureDbContext = builder =>
-                {
-                    builder.UseMySql(
-                        identityServerDatabase,
-                        sql => sql.MigrationsAssembly(migrationsAssembly));
-                };
-                services.AddSingleton(cso);
-                services.AddDbContext<ConfigurationDbContext>(
-                    builder =>
-                    {
-                        builder.UseMySql(
-                            identityServerDatabase,
-                            sql => sql.MigrationsAssembly(migrationsAssembly));
-                    });
+                services.AddTransient<IEmailSender, EmailSender>();
             }
-            else
-            {
-                cso.ConfigureDbContext = builder =>
-                {
-                    builder.UseMySql(
-                        Configuration.GetConnectionString("IdentityServerDatabase"),
-                        sql => sql.MigrationsAssembly(migrationsAssembly));
-                };
-                services.AddSingleton(cso);
-                services.AddDbContext<ConfigurationDbContext>(
-                    builder =>
-                    {
-                        builder.UseMySql(
-                            Configuration.GetConnectionString("IdentityServerDatabase"),
-                            sql => sql.MigrationsAssembly(migrationsAssembly));
-                    });
-                
-            }*/
 
             var identityDatabase = Environment.GetEnvironmentVariable("IDENTITY_DATABASE");
-            //var identityDatabase = Environment.GetEnvironmentVariable("IDENTITY_DATABASE");
 
-            //services.AddDefaultIdentity<IdentityUser>(options => options.Password.RequireNonAlphanumeric = false);
-                //.AddEntityFrameworkStores<ApplicationDbContext>();
-            
             services.AddIdentityMongoDbProvider<ApplicationUser, ApplicationRole>(identityOptions =>
+            {
+                identityOptions.Password.RequireNonAlphanumeric = false;
+                if (!emailUsername.IsNullOrEmpty())
                 {
-                    identityOptions.Password.RequireNonAlphanumeric = false;
-                }, mongoIdentityOptions => {
-                    mongoIdentityOptions.ConnectionString = identityDatabase;
-                });
-            
-            /*services.AddIdentityWithMongoStores(identityConnection)
-                .AddDefaultTokenProviders()
-                .AddDefaultUI();*/
-            
+                    identityOptions.SignIn.RequireConfirmedEmail = true;
+                }
+            }, mongoIdentityOptions => { mongoIdentityOptions.ConnectionString = identityDatabase; });
+
             services.ConfigureApplicationCookie(options =>
             {
                 options.Cookie.HttpOnly = true;
@@ -147,7 +101,7 @@ namespace IdentityServer_WebApp
                 options.LoginPath = "/Identity/Account/Login";
                 options.AccessDeniedPath = "/Identity/Account/AccessDenied";
             });
-            
+
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
             services.AddScoped<ClientService>();
@@ -155,8 +109,6 @@ namespace IdentityServer_WebApp
 
             services.AddTransient<IRepository, MongoRepository>();
             services.AddScoped<CustomClientStore>();
-            //services.AddScoped<CustomResourceStore>();
-            //services.AddScoped<CustomPersistedGrantStore>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
