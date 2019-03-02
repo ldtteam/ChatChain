@@ -2,23 +2,22 @@ using System.Net;
 using System.Net.Mail;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity.UI.Services;
-using Microsoft.Extensions.Options;
 
 namespace IdentityServer_WebApp.Services
 {
     public class EmailSender : IEmailSender
     {
 
-        private string _host;
-        private int _port;
-        private bool _enableSSL;
-        private string _userName;
-        private string _password;
+        private readonly string _host;
+        private readonly int _port;
+        private readonly bool _enableSsl;
+        private readonly string _userName;
+        private readonly string _password;
         
-        public EmailSender(string host, int port, bool enableSSL, string userName, string password) {
+        public EmailSender(string host, int port, bool enableSsl, string userName, string password) {
             _host = host;
             _port = port;
-            _enableSSL = enableSSL;
+            _enableSsl = enableSsl;
             _userName = userName;
             _password = password;
         }
@@ -27,7 +26,7 @@ namespace IdentityServer_WebApp.Services
         {
             var client = new SmtpClient(_host, _port) {
                 Credentials = new NetworkCredential(_userName, _password),
-                EnableSsl = _enableSSL
+                EnableSsl = _enableSsl
             };
             return client.SendMailAsync(
                 new MailMessage(_userName, email, subject, htmlMessage)

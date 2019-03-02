@@ -43,7 +43,6 @@ namespace IdentityServer_WebApp.Pages.Clients
                 return NotFound();
             }
 
-            //Client = await _context.Clients.FindAsync(id);
             Client = await _clientStore.FindClientByIdAsync(id);
             
             

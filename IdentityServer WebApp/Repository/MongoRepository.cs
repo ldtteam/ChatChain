@@ -2,26 +2,22 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using Microsoft.Extensions.Options;
 using MongoDB.Bson;
 using MongoDB.Driver;
-using StackExchange.Redis;
 
 namespace IdentityServer_WebApp.Repository
 {
     public class MongoRepository : IRepository
     {
-        protected static IMongoClient _client;
-        protected static IMongoDatabase _database;
+        private static IMongoDatabase _database;
 
         /// <summary>
         /// This Contructor leverages  .NET Core built-in DI
         /// </summary>
-        /// <param name="optionsAccessor">Injected by .NET Core built-in Depedency Injection</param>
         public MongoRepository()
         {
-            _client = new MongoClient(Environment.GetEnvironmentVariable("IDENTITY_SERVER_DATABASE_CONNECTION"));
-            _database = _client.GetDatabase(Environment.GetEnvironmentVariable("IDENTITY_SERVER_DATABASE"));
+            IMongoClient client = new MongoClient(Environment.GetEnvironmentVariable("IDENTITY_SERVER_DATABASE_CONNECTION"));
+            _database = client.GetDatabase(Environment.GetEnvironmentVariable("IDENTITY_SERVER_DATABASE"));
         }
 
         public IQueryable<T> All<T>() where T : class, new()
@@ -29,17 +25,16 @@ namespace IdentityServer_WebApp.Repository
             return _database.GetCollection<T>(typeof(T).Name).AsQueryable();
         }
 
-        public IQueryable<T> Where<T>(System.Linq.Expressions.Expression<Func<T, bool>> expression) where T : class, new()
+        public IQueryable<T> Where<T>(Expression<Func<T, bool>> expression) where T : class, new()
         {
             return All<T>().Where(expression);
         }
 
-        public void Delete<T>(System.Linq.Expressions.Expression<Func<T, bool>> predicate) where T : class, new()
+        public void Delete<T>(Expression<Func<T, bool>> predicate) where T : class, new()
         {
-            var result = _database.GetCollection<T>(typeof(T).Name).DeleteMany(predicate);
-
+            _database.GetCollection<T>(typeof(T).Name).DeleteMany(predicate);
         }
-        public T Single<T>(System.Linq.Expressions.Expression<Func<T, bool>> expression) where T : class, new()
+        public T Single<T>(Expression<Func<T, bool>> expression) where T : class, new()
         {
             return All<T>().Where(expression).SingleOrDefault();
         }
@@ -48,8 +43,8 @@ namespace IdentityServer_WebApp.Repository
         {
             var collection = _database.GetCollection<T>(typeof(T).Name);
             var filter = new BsonDocument();
-            var totalCount = collection.Count(filter);
-            return (totalCount > 0) ? true : false;
+            var totalCount = collection.CountDocuments(filter);
+            return totalCount > 0;
         }
 
         public void Update<T>(Expression<Func<T, bool>> expression, T item) where T : class, new()

@@ -1,8 +1,6 @@
 using System;
 using System.Threading.Tasks;
 using IdentityServer.Store;
-using IdentityServer4.EntityFramework.DbContexts;
-using IdentityServer4.Extensions;
 using IdentityServer_WebApp.Models;
 using IdentityServer_WebApp.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -39,8 +37,6 @@ namespace IdentityServer_WebApp.Pages.Clients
                 return RedirectToPage("./Index");
             }
 
-            //Client = await _is4Context.Clients.AsNoTracking().FirstOrDefaultAsync(m => m.Clie == id);
-
             Client = await _clientStore.FindClientByIdAsync(id);
             
             var groupsClient = _clientsContext.GetFromClientId(id);
@@ -69,10 +65,6 @@ namespace IdentityServer_WebApp.Pages.Clients
                 return NotFound();
             }
 
-            /*var client = await _is4Context.Clients
-                .AsNoTracking()
-                .FirstOrDefaultAsync(m => m.Id == id);*/
-
             var client = await _clientStore.FindClientByIdAsync(id);
             
             var groupClient = _clientsContext.GetFromClientId(id);
@@ -100,11 +92,11 @@ namespace IdentityServer_WebApp.Pages.Clients
                 }
                 return RedirectToPage("./Index");
             }
-            catch (DbUpdateException /* ex */)
+            catch (DbUpdateException)
             {
                 //Log the error (uncomment ex variable name and write a log.)
                 return RedirectToAction("./Delete",
-                    new { id = id, saveChangesError = true });
+                    new {id, saveChangesError = true });
             }
         }
     }

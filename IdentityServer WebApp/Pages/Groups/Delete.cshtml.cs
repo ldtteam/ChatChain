@@ -1,11 +1,6 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using IdentityServer.Store;
-using IdentityServer4.EntityFramework.DbContexts;
-using IdentityServer4.Extensions;
 using IdentityServer_WebApp.Models;
 using IdentityServer_WebApp.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -13,9 +8,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
-using RabbitMQ.Client;
-using Client = IdentityServer4.Models.Client;
 
 namespace IdentityServer_WebApp.Pages.Groups
 {
@@ -97,7 +89,7 @@ namespace IdentityServer_WebApp.Pages.Groups
             {
                 //Log the error (uncomment ex variable name and write a log.)
                 return RedirectToAction("./Delete",
-                    new { id = id, saveChangesError = true });
+                    new { id, saveChangesError = true });
             }
         }
     }

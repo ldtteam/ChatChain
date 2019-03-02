@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
@@ -47,7 +46,6 @@ namespace IdentityServer_WebApp.Areas.Identity.Pages.Account
             public string Email { get; set; }
             
             [Required]
-            //[StringLength(25, ErrorMessage = "The {0] must be at least {2} and at max {1} characters long.", MinimumLength = 2)]
             [DataType(DataType.Text)]
             [Display(Name = "Username")]
             public string Username { get; set; }
@@ -83,9 +81,9 @@ namespace IdentityServer_WebApp.Areas.Identity.Pages.Account
                     var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                     var callbackUrl = Url.Page(
                         "/Account/ConfirmEmail",
-                        pageHandler: null,
-                        values: new { userId = user.Id, code = code },
-                        protocol: Request.Scheme);
+                        null,
+                        new { userId = user.Id, code },
+                        Request.Scheme);
 
                     if (!Environment.GetEnvironmentVariable("EMAIL_USERNAME").IsNullOrEmpty())
                     {

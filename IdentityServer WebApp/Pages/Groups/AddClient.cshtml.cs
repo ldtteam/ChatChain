@@ -1,29 +1,14 @@
-using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using IdentityModel;
 using IdentityServer.Store;
-using IdentityServer4.EntityFramework.DbContexts;
-using IdentityServer4.EntityFramework.Mappers;
-using IdentityServer4.Models;
 using IdentityServer_WebApp.Models;
 using IdentityServer_WebApp.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Internal;
-using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
-using RabbitMQ.Client;
-using Client = IdentityServer4.Models.Client;
-using Secret = IdentityServer4.Models.Secret;
 
 namespace IdentityServer_WebApp.Pages.Groups
 {
@@ -80,11 +65,10 @@ namespace IdentityServer_WebApp.Pages.Groups
 
             foreach (var client in _clientsContext.GetFromOwnerId(_userManager.GetUserAsync(User).Result.Id))
             {
-                //if (!_clientsContext.GetGroups(client.Id.ToString()).Contains(Group)) continue;
 
                 if (!clientIds.Contains(client.Id.ToString()))
                 {
-                    var is4Client = await _clientStore.FindClientByIdAsync(client.ClientId);//_is4Context.Clients.FirstOrDefaultAsync(c => c.Id == client.ClientId);
+                    var is4Client = await _clientStore.FindClientByIdAsync(client.ClientId);
 
                     if (is4Client != null)
                     {
@@ -114,8 +98,6 @@ namespace IdentityServer_WebApp.Pages.Groups
 
             if (Group != null)
             {
-                //_groupsContext.AddClient(Group.Id, client.Id);
-                //_clientsContext.AddGroup(client.Id, Group.Id);
                 _groupsContext.AddClient(Group.Id, client.Id);
                 return RedirectToPage("./Clients", new { id = Group.Id} );
             }

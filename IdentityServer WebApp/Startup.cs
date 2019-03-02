@@ -1,39 +1,20 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using AspNetCore.Identity.Mongo;
 using IdentityServer.Store;
-using IdentityServer.Utils;
-using IdentityServer4.EntityFramework.DbContexts;
-using IdentityServer4.EntityFramework.Entities;
-using IdentityServer4.EntityFramework.Options;
 using IdentityServer4.Extensions;
-using IdentityServer4.Stores;
-using IdentityServer4.Test;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using IdentityServer_WebApp.Data;
 using IdentityServer_WebApp.Models;
 using IdentityServer_WebApp.Repository;
 using IdentityServer_WebApp.Services;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity.UI.Services;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Bson.Serialization;
-using MongoDB.Driver;
-using RabbitMQ.Client;
 using StackExchange.Redis;
-using Client = IdentityServer_WebApp.Models.Client;
 
 namespace IdentityServer_WebApp
 {
@@ -72,10 +53,10 @@ namespace IdentityServer_WebApp
                 var emailPassword = Environment.GetEnvironmentVariable("EMAIL_PASSWORD");
                 var emailHost = Environment.GetEnvironmentVariable("EMAIL_HOST");
                 var emailPort = int.Parse(Environment.GetEnvironmentVariable("EMAIL_PORT"));
-                var emailSSL = bool.Parse(Environment.GetEnvironmentVariable("EMAIL_ENABLE_SSL"));
+                var emailSsl = bool.Parse(Environment.GetEnvironmentVariable("EMAIL_ENABLE_SSL"));
 
                 services.AddTransient<IEmailSender, EmailSender>(i =>
-                    new EmailSender(emailHost, emailPort, emailSSL, emailUsername, emailPassword));
+                    new EmailSender(emailHost, emailPort, emailSsl, emailUsername, emailPassword));
             }
             else
             {
@@ -162,40 +143,6 @@ namespace IdentityServer_WebApp
                 cm.AutoMap();
                 cm.SetIgnoreExtraElements(true);
             });
-        }
-        
-        private void InitializeDatabase(IApplicationBuilder app)
-        {
-            bool createdNewRepository = false;
-            var repository = app.ApplicationServices.GetService<IRepository>();
-
-            //  --IdentityResource
-            if (!repository.CollectionExists<IdentityResource>())
-            {
-                foreach (var res in Config.GetIdentityResources())
-                {
-                    repository.Add(res);
-                }
-                createdNewRepository = true;
-            }
-
-
-            //  --ApiResource
-            if (!repository.CollectionExists<ApiResource>())
-            {
-                foreach (var api in Config.GetApis())
-                {
-                    repository.Add(api);
-                }
-                createdNewRepository = true;
-            }
-
-            // If it's a new Repository (database), need to restart the website to configure Mongo to ignore Extra Elements.
-            if (createdNewRepository)
-            {
-                var newRepositoryMsg = $"Mongo Repository created/populated! Please restart you website, so Mongo driver will be configured  to ignore Extra Elements.";
-                throw new Exception(newRepositoryMsg);
-            }
         }
     }
 }

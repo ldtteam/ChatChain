@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -11,7 +10,7 @@ namespace IdentityServer.Store
 {
     public class CustomResourceStore : IResourceStore
     {
-        protected IRepository _dbRepository;
+        private readonly IRepository _dbRepository;
 
         public CustomResourceStore(IRepository repository)
         {

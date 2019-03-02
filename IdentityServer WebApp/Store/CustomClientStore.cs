@@ -8,7 +8,7 @@ namespace IdentityServer.Store
 {
     public class CustomClientStore : IdentityServer4.Stores.IClientStore
     {
-        protected IRepository _dbRepository;
+        private readonly IRepository _dbRepository;
 
         public CustomClientStore(IRepository repository)
         {
