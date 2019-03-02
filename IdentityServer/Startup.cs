@@ -1,27 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Reflection;
-using System.Threading.Tasks;
-using IdentityServer.Data;
 using IdentityServer.Extension;
 using IdentityServer.Interface;
-using IdentityServer.Models;
 using IdentityServer.Utils;
-using IdentityServer4.EntityFramework.DbContexts;
-using IdentityServer4.EntityFramework.Mappers;
 using IdentityServer4.Extensions;
 using IdentityServer4.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.HttpOverrides;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Bson.Serialization;
@@ -51,17 +36,7 @@ namespace IdentityServer
                     .SetApplicationName("IdentityServer");
             }
             
-            var migrationsAssembly = typeof(Startup).GetTypeInfo().Assembly.GetName().Name;
-            
             services.AddMvc();
-
-            /*var environmentConnectionString = Environment.GetEnvironmentVariable("IDENTITY_SERVER_DATABASE");
-            var connectionString = Configuration.GetConnectionString("IdentityServerDatabase");
-
-            if (environmentConnectionString != null && !environmentConnectionString.IsNullOrEmpty())
-            {
-                connectionString = environmentConnectionString;
-            }*/
 
             services.AddIdentityServer(options =>
                 {
@@ -69,20 +44,6 @@ namespace IdentityServer
                     options.PublicOrigin = Environment.GetEnvironmentVariable("IDENTITY_SERVER_ORIGIN");
                 })
                 .AddDeveloperSigningCredential()
-                /*.AddConfigurationStore(options =>
-                    options.ConfigureDbContext = builder =>
-                        builder.UseMySql(connectionString,
-                            sql => sql.MigrationsAssembly(migrationsAssembly)))
-                .AddOperationalStore(options =>
-                {
-                    options.ConfigureDbContext = builder =>
-                        builder.UseMySql(connectionString,
-                            sql => sql.MigrationsAssembly(migrationsAssembly));
-
-                    // this enables automatic token cleanup. this is optional.
-                    options.EnableTokenCleanup = true;
-                    options.TokenCleanupInterval = 30;
-                });*/
                 .AddMongoRepository()
                 .AddClients()
                 .AddIdentityApiResources()
@@ -169,7 +130,6 @@ namespace IdentityServer
                 createdNewRepository = true;
             }
 
-
             //  --ApiResource
             if (!repository.CollectionExists<ApiResource>())
             {
@@ -183,7 +143,7 @@ namespace IdentityServer
             // If it's a new Repository (database), need to restart the website to configure Mongo to ignore Extra Elements.
             if (createdNewRepository)
             {
-                var newRepositoryMsg = $"Mongo Repository created/populated! Please restart you website, so Mongo driver will be configured  to ignore Extra Elements.";
+                var newRepositoryMsg = "Mongo Repository created/populated! Please restart you website, so Mongo driver will be configured  to ignore Extra Elements.";
                 throw new Exception(newRepositoryMsg);
             }
         }

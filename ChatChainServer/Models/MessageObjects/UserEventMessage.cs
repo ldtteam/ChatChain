@@ -1,4 +1,3 @@
-using System;
 
 namespace ChatChainServer.Models.MessageObjects
 {

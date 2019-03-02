@@ -1,6 +1,5 @@
 using System;
 using System.ComponentModel.DataAnnotations;
-using System.Threading.Tasks;
 using IdentityServer_WebApp.Models;
 using IdentityServer_WebApp.Services;
 using Microsoft.AspNetCore.Authorization;

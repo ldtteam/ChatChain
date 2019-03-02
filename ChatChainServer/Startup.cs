@@ -1,18 +1,15 @@
 using System;
-using System.Collections.Generic;
 using ChatChainServer.Hubs;
 using ChatChainServer.Services;
 using ChatChainServer.Utils;
 using IdentityServer4.Extensions;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Logging;
-using StackExchange.Redis;
 
 namespace ChatChainServer
 {
@@ -22,8 +19,7 @@ namespace ChatChainServer
         {
             Configuration = configuration;
         }
-
-        public static readonly Dictionary<string, List<string>> ClientIds = new Dictionary<string, List<string>>();
+        
         private IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.

@@ -1,12 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
 using System.Threading.Tasks;
 using IdentityServer.Store;
-using IdentityServer4.EntityFramework.DbContexts;
-using IdentityServer4.EntityFramework.Entities;
 using IdentityServer_WebApp.Models;
 using IdentityServer_WebApp.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -14,11 +9,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
-using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
-using RabbitMQ.Client;
-using Client = IdentityServer4.EntityFramework.Entities.Client;
 
 namespace IdentityServer_WebApp.Pages.Groups
 {
@@ -28,14 +18,14 @@ namespace IdentityServer_WebApp.Pages.Groups
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly CustomClientStore _clientStore;
         private readonly GroupService _groupsContext;
-        public readonly ClientService ClientsContext;
+        private readonly ClientService _clientsContext;
         
         public ClientsModel(UserManager<ApplicationUser> userManager, CustomClientStore clientStore, GroupService groupsContext, ClientService clientsContext)
         {
             _userManager = userManager;
             _clientStore = clientStore;
             _groupsContext = groupsContext;
-            ClientsContext = clientsContext;
+            _clientsContext = clientsContext;
         }
 
         public IList<IdentityServer4.Models.Client> Clients { get; set; }
@@ -63,24 +53,14 @@ namespace IdentityServer_WebApp.Pages.Groups
 
             foreach (var clientId in clientIds)
             {
-                var isClient = await _clientStore.FindClientByIdAsync(clientId);//_is4Context.Clients.Where(lclient => lclient.Id == clientId).FirstOrDefaultAsync();
-                var client = ClientsContext.GetFromClientId(clientId);
+                var isClient = await _clientStore.FindClientByIdAsync(clientId);
+                var client = _clientsContext.GetFromClientId(clientId);
                 
                 if (isClient != null && client != null && client.OwnerId == _userManager.GetUserAsync(User).Result.Id)
                 {
                     Clients.Add(isClient);
                 }    
             }
-            
-            /*foreach (var client in await _is4Context.Clients.ToListAsync())
-            {
-                var groupClient = await _groupsContext.Clients.FirstAsync(c => c.ClientId == client.Id);
-
-                if (groupClient.OwnerId == _userManager.GetUserAsync(User).Result.Id && clientIds.Contains(client.Id))
-                {
-                    Clients.Add(client);
-                }
-            }*/
 
             return Page();
         }
@@ -93,40 +73,16 @@ namespace IdentityServer_WebApp.Pages.Groups
             
             Group = _groupsContext.Get(id);
 
-            var groupClient = ClientsContext.GetFromClientId(ClientId);
+            var groupClient = _clientsContext.GetFromClientId(ClientId);
             
             if (Group.OwnerId != _userManager.GetUserAsync(User).Result.Id || groupClient.OwnerId != _userManager.GetUserAsync(User).Result.Id)
             {
                 return RedirectToPage("./Index");
             }
             
-            var clientId = groupClient.Id;
-            
             try
             {
                 _groupsContext.RemoveClient(Group.Id, groupClient.Id);
-                
-                /*using(var connection = _connectionFactory.CreateConnection())
-                using (var channel = connection.CreateModel())
-                {
-                    Console.WriteLine("test12345");
-                    channel.ExchangeDeclare("task_queue", "fanout");
-
-                    var messageEnt = new EventMessage
-                    {
-                        EventName = EventMessage.RemoveClientEvent,
-                        GroupId = Group.GroupId,
-                        ClientId = clientGroup.Client.ClientGuid
-                    };
-                    
-                    var message = JsonConvert.SerializeObject(messageEnt);
-                    var body = Encoding.UTF8.GetBytes(message);
-
-                    channel.BasicPublish(exchange: "task_queue",
-                        routingKey: "",
-                        basicProperties: null,
-                        body: body);
-                }*/
                 
                 return RedirectToPage("./Clients", new { id = Group.Id});
             }

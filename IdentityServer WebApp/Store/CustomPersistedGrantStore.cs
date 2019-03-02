@@ -9,7 +9,7 @@ namespace IdentityServer.Store
 {
     public class CustomPersistedGrantStore: IPersistedGrantStore
     {
-        protected IRepository _dbRepository;
+        private readonly IRepository _dbRepository;
 
         public CustomPersistedGrantStore(IRepository repository)
         {
@@ -48,7 +48,7 @@ namespace IdentityServer.Store
 
         public Task StoreAsync(PersistedGrant grant)
         {
-            _dbRepository.Add<PersistedGrant>(grant);
+            _dbRepository.Add(grant);
             return Task.FromResult(0);
         }
         

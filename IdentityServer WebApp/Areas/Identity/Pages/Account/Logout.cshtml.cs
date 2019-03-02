@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using IdentityServer_WebApp.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -35,10 +32,7 @@ namespace IdentityServer_WebApp.Areas.Identity.Pages.Account
             {
                 return LocalRedirect(returnUrl);
             }
-            else
-            {
-                return Page();
-            }
+            return Page();
         }
     }
 }
