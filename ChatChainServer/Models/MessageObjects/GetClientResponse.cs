@@ -1,6 +1,6 @@
 namespace ChatChainServer.Models.MessageObjects
 {
-    public class GetClientResponseMessage
+    public class GetClientResponse
     {
         public Client Client { get; set; }
     }
