@@ -125,7 +125,7 @@ namespace ChatChainServer.Hubs
         {
             _logger.LogInformation($"Client {Context.UserIdentifier} requested their groups");
             
-            var response = new GetGroupsResponseMessage();
+            var response = new GetGroupsResponse();
 
             var client = _clientsContext.GetFromClientGuid(Context.UserIdentifier);
 
@@ -141,7 +141,7 @@ namespace ChatChainServer.Hubs
         {
             _logger.LogInformation($"Client {Context.UserIdentifier} requested their Client");
             
-            var response = new GetClientResponseMessage();
+            var response = new GetClientResponse();
 
             var client = _clientsContext.GetFromClientGuid(Context.UserIdentifier);
 
