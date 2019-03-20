@@ -79,7 +79,7 @@ namespace ChatChainServer.Hubs
 
         public async Task SendClientEventMessage(ClientEventMessage message)
         {
-            _logger.LogInformation($"Client {Context.UserIdentifier} sent event: {message.Event}");
+            _logger.LogInformation($"Client {Context.UserIdentifier} sent event: {message.Event} with extra data: {message.ExtraEventData}");
 
             var client = _clientsContext.GetFromClientGuid(Context.UserIdentifier);
 
@@ -103,7 +103,7 @@ namespace ChatChainServer.Hubs
 
         public async Task SendUserEventMessage(UserEventMessage message)
         {
-            _logger.LogInformation($"Client {Context.UserIdentifier} with user: {message.User.Name} sent event: {message.Event}");
+            _logger.LogInformation($"Client {Context.UserIdentifier} with user: {message.User.Name} sent event: {message.Event} with extra data: {message.ExtraEventData}");
 
             var client = _clientsContext.GetFromClientGuid(Context.UserIdentifier);
 
