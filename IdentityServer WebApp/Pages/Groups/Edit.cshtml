@@ -14,9 +14,14 @@
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="Group.Id"/>
             <div class="form-group">
-                    <label asp-for="Input.GroupName" class="control-label"></label>
-                    <input asp-for="Input.GroupName" value="@Model.Group.GroupName"/>
-                    <span asp-validation-for="Input.GroupName" class="text-danger"></span>
+                <label asp-for="Input.GroupName" class="control-label"></label>
+                <input asp-for="Input.GroupName" value="@Model.Group.GroupName"/>
+                <span asp-validation-for="Input.GroupName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Input.GroupDescription" class="control-label"></label>
+                <input asp-for="Input.GroupDescription" value="@Model.Group.GroupDescription"/>
+                <span asp-validation-for="Input.GroupDescription" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-default" />

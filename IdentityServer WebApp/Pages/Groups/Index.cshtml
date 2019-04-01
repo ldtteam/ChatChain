@@ -18,6 +18,7 @@
             <th>Database Id</th>
             <th>Group Name</th>
             <th>Group Id</th>
+            <th>Group Description</th>
             <th>Clients</th>
         </tr>
         </thead>
@@ -33,6 +34,9 @@
                 </td>
                 <td>
                     @Html.DisplayFor(m => group.GroupId)
+                </td>
+                <td>
+                    @Html.DisplayFor(m => group.GroupDescription)
                 </td>
                 <td>
                     <a asp-page="./Clients" asp-route-id="@group.Id.ToString()">View Clients</a>

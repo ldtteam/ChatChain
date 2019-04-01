@@ -1,6 +1,4 @@
 @page
-@using IdentityServer4.EntityFramework.Entities
-@using Client = IdentityServer4.EntityFramework.Entities.Client
 @model IndexModel
 
 @{
@@ -19,6 +17,7 @@
             <tr>
                 <th>Id</th>
                 <th>Client Name</th>
+                <th>Client Description</th>
             </tr>
             </thead>
             <tbody>
@@ -30,6 +29,9 @@
                             </td>
                             <td>
                                 @Html.DisplayFor(m => client.ClientName)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(m => client.ClientDescription)
                             </td>
                             <td>
                                 <a asp-page="./Edit" asp-route-id="@client.ClientId">Edit</a>

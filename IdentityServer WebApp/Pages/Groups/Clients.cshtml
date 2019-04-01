@@ -17,6 +17,7 @@
         <tr>
             <th>Client Id</th>
             <th>Client Name</th>
+            <th>Client Description</th>
         </tr>
         </thead>
         <tbody>
@@ -29,6 +30,9 @@
                 </td>
                 <td>
                     @Html.DisplayFor(m => client.ClientName)
+                </td>
+                <td>
+                    @Html.DisplayFor(m => client.ClientDescription)
                 </td>
                 <td>
                     <form method="post">

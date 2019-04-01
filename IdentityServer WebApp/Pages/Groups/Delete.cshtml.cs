@@ -48,7 +48,7 @@ namespace IdentityServer_WebApp.Pages.Groups
 
             foreach (var client in _groupsContext.GetClients(Group.Id.ToString()))
             {
-                var is4Client = await _clientStore.FindClientByIdAsync(client.ClientId);//_is4Context.Clients.FirstAsync(c => c.Id == client.ClientId);
+                var is4Client = await _clientStore.FindClientByIdAsync(client.ClientId);
                 Clients.Add(is4Client.ClientName);
             }
 

@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
-using Client = IdentityServer4.Models.Client;
 
 namespace IdentityServer_WebApp.Pages.Clients
 {
@@ -16,13 +15,13 @@ namespace IdentityServer_WebApp.Pages.Clients
     public class DeleteModel : PageModel
     {
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly CustomClientStore _clientStore;
+        private readonly CustomClientStore _is4ClientStore;
         private readonly ClientService _clientsContext;
 
-        public DeleteModel(UserManager<ApplicationUser> userManager, CustomClientStore clientStore, ClientService clientsContext)
+        public DeleteModel(UserManager<ApplicationUser> userManager, CustomClientStore is4ClientStore, ClientService clientsContext)
         {
             _userManager = userManager;
-            _clientStore = clientStore;
+            _is4ClientStore = is4ClientStore;
             _clientsContext = clientsContext;
         }
         
@@ -37,20 +36,9 @@ namespace IdentityServer_WebApp.Pages.Clients
                 return RedirectToPage("./Index");
             }
 
-            Client = await _clientStore.FindClientByIdAsync(id);
+            Client = _clientsContext.GetFromClientId(id);
             
-            var groupsClient = _clientsContext.GetFromClientId(id);
-            
-            Console.WriteLine("Get Subject Id: " + _userManager.GetUserAsync(User).Result.Id);
-            Console.WriteLine("Subject: " + groupsClient.OwnerId);
-            Console.WriteLine("Client: " + Client);
-            
-            if (groupsClient.OwnerId != _userManager.GetUserAsync(User).Result.Id)
-            {
-                return RedirectToPage("./Index");
-            }
-            
-            if (Client == null)
+            if (Client == null || Client.OwnerId != _userManager.GetUserAsync(User).Result.Id)
             {
                 return RedirectToPage("./Index");
             }
@@ -65,15 +53,12 @@ namespace IdentityServer_WebApp.Pages.Clients
                 return NotFound();
             }
 
-            var client = await _clientStore.FindClientByIdAsync(id);
+            var client = await _is4ClientStore.FindClientByIdAsync(id);
             
             var groupClient = _clientsContext.GetFromClientId(id);
-
-            Console.WriteLine(groupClient != null);
             
             if (groupClient != null && groupClient.OwnerId != _userManager.GetUserAsync(User).Result.Id)
             {
-                Console.WriteLine(groupClient.OwnerId != _userManager.GetUserAsync(User).Result.Id);
                 return RedirectToPage("./Index");
             }
             
@@ -84,7 +69,7 @@ namespace IdentityServer_WebApp.Pages.Clients
 
             try
             {
-                _clientStore.RemoveClient(client);
+                _is4ClientStore.RemoveClient(client);
 
                 if (groupClient != null)
                 {

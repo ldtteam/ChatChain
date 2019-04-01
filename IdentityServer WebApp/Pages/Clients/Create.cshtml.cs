@@ -38,6 +38,11 @@ namespace IdentityServer_WebApp.Pages.Clients
             [DataType(DataType.Text)]
             [Display(Name = "Client Name")]
             public string ClientName { get; set; }
+            
+            [Required]
+            [DataType(DataType.MultilineText)]
+            [Display(Name = "Client Description")]
+            public string ClientDescription { get; set; }
 
             [Required]
             [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
@@ -89,7 +94,8 @@ namespace IdentityServer_WebApp.Pages.Clients
                 OwnerId = _userManager.GetUserAsync(User).Result.Id,
                 ClientId = is4Client.ClientId,
                 ClientGuid = is4Client.ClientId,
-                ClientName = is4Client.ClientName
+                ClientName = is4Client.ClientName,
+                ClientDescription = Input.ClientDescription
             };
 
             _clientsContext.Create(newClient);
