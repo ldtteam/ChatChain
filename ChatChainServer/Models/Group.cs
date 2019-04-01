@@ -14,6 +14,9 @@ namespace ChatChainServer.Models
         [BsonElement("GroupName")]
         public string GroupName { get; set; }
         
+        [BsonElement("GroupDescription")]
+        public string GroupDescription { get; set; }
+        
         [BsonElement("OwnerId")]
         public string OwnerId { get; set; }
         

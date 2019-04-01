@@ -20,6 +20,9 @@ namespace ChatChainServer.Models
         [BsonElement("ClientName")]
         public string ClientName { get; set; }
         
+        [BsonElement("ClientDescription")]
+        public string ClientDescription { get; set; }
+        
         [BsonElement("GroupIds")]
         public List<ObjectId> GroupIds { get; set;  } = new List<ObjectId>();
     }
