@@ -4,6 +4,13 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace IdentityServer_WebApp.Models
 {
+    /**
+     * ---- IMPORTANT ----
+     *
+     * ALL CHANGES TO THIS FILE MUST BE RECIPROCATED IN THE ChatChainServer PROJECT
+     *
+     * ---- IMPORTANT ----
+     */
     public class Client
     {
         public ObjectId Id { get; set; }
