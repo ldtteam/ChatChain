@@ -30,6 +30,11 @@ namespace IdentityServer_WebApp.Pages.Groups
             [Required]
             [Display(Name = "Group Name")]
             public string GroupName { get; set; }
+            
+            [Required]
+            [DataType(DataType.MultilineText)]
+            [Display(Name = "Group Description")]
+            public string GroupDescription { get; set; }
         }
         
         public IActionResult OnGet(string id)
@@ -48,7 +53,8 @@ namespace IdentityServer_WebApp.Pages.Groups
 
             Input = new InputModel
             {
-                GroupName = Group.GroupName
+                GroupName = Group.GroupName,
+                GroupDescription = Group.GroupDescription
             };
 
             return Page();
@@ -56,13 +62,10 @@ namespace IdentityServer_WebApp.Pages.Groups
         
         public IActionResult OnPost(string id)
         {
-            Console.WriteLine("test123");
             if (!ModelState.IsValid)
             {
                 return Page();
             }
-
-            Console.WriteLine("test1234");
             
             Group = _groupsContext.Get(id);
             
@@ -70,13 +73,12 @@ namespace IdentityServer_WebApp.Pages.Groups
             {
                 return RedirectToPage("./Index");
             }
-            Console.WriteLine("test1235");
 
             var groupToUpdate = _groupsContext.Get(id);
 
             groupToUpdate.GroupName = Input.GroupName;
-
-            Console.WriteLine($"Group Name: {groupToUpdate.GroupName}");
+            groupToUpdate.GroupDescription = Input.GroupDescription;
+            
             _groupsContext.Update(groupToUpdate.Id.ToString(), groupToUpdate);
             
             return RedirectToPage("./Index");

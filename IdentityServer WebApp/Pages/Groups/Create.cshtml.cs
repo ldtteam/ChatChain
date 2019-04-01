@@ -30,6 +30,11 @@ namespace IdentityServer_WebApp.Pages.Groups
             [DataType(DataType.Text)]
             [Display(Name = "Group Name")]
             public string GroupName { get; set; }
+            
+            [Required]
+            [DataType(DataType.MultilineText)]
+            [Display(Name = "Group Description")]
+            public string GroupDescription { get; set; }
         }
         
         public IActionResult OnPost()
@@ -45,6 +50,7 @@ namespace IdentityServer_WebApp.Pages.Groups
             {
                 GroupId = groupId,
                 GroupName = Input.GroupName,
+                GroupDescription = Input.GroupDescription,
                 OwnerId = _userManager.GetUserAsync(User).Result.Id
             };
             

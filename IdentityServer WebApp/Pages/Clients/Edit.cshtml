@@ -19,6 +19,11 @@
                 <span asp-validation-for="Input.ClientName" class="text-danger"></span>
             </div>
             <div class="form-group">
+                <label asp-for="Input.ClientDescription" class="control-label"></label>
+                <input asp-for="Input.ClientDescription" value="@Model.Client.ClientDescription"/>
+                <span asp-validation-for="Input.ClientDescription" class="text-danger"></span>
+            </div>
+            <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-default" />
             </div>
         </form>

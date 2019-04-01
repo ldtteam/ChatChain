@@ -16,24 +16,22 @@ namespace IdentityServer_WebApp.Pages.Groups
     public class ClientsModel : PageModel
     {
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly CustomClientStore _clientStore;
         private readonly GroupService _groupsContext;
         private readonly ClientService _clientsContext;
         
-        public ClientsModel(UserManager<ApplicationUser> userManager, CustomClientStore clientStore, GroupService groupsContext, ClientService clientsContext)
+        public ClientsModel(UserManager<ApplicationUser> userManager, GroupService groupsContext, ClientService clientsContext)
         {
             _userManager = userManager;
-            _clientStore = clientStore;
             _groupsContext = groupsContext;
             _clientsContext = clientsContext;
         }
 
-        public IList<IdentityServer4.Models.Client> Clients { get; set; }
+        public IList<Client> Clients { get; set; }
         public Group Group { get; set; }
         [BindProperty]
         public string ClientId { get; set; }
 
-        public async Task<IActionResult> OnGetAsync(string id)
+        public IActionResult OnGet(string id)
         {
             Group = _groupsContext.Get(id);
 
@@ -42,24 +40,14 @@ namespace IdentityServer_WebApp.Pages.Groups
                 return RedirectToPage("./Index");
             }
             
-            Clients = new List<IdentityServer4.Models.Client>();
+            Clients = new List<Client>();
 
-            List<string> clientIds = new List<string>();
-         
             foreach (var client in _groupsContext.GetClients(Group.Id.ToString()))
             {
-                clientIds.Add(client.ClientId);
-            }
-
-            foreach (var clientId in clientIds)
-            {
-                var isClient = await _clientStore.FindClientByIdAsync(clientId);
-                var client = _clientsContext.GetFromClientId(clientId);
-                
-                if (isClient != null && client != null && client.OwnerId == _userManager.GetUserAsync(User).Result.Id)
+                if (client.OwnerId == _userManager.GetUserAsync(User).Result.Id)
                 {
-                    Clients.Add(isClient);
-                }    
+                    Clients.Add(client);
+                }
             }
 
             return Page();
@@ -67,10 +55,6 @@ namespace IdentityServer_WebApp.Pages.Groups
         
         public IActionResult OnPost(string id)
         {
-            
-            Console.WriteLine($"Group Id: {id}");
-            Console.WriteLine($"Client Id: {ClientId}");
-            
             Group = _groupsContext.Get(id);
 
             var groupClient = _clientsContext.GetFromClientId(ClientId);

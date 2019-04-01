@@ -26,6 +26,12 @@
             @Html.DisplayFor(m => m.Group.GroupName)
         </dd>
         <dt>
+            @Html.DisplayNameFor(m => m.Group.GroupDescription)
+        </dt>
+        <dd>
+            @Html.DisplayFor(m => m.Group.GroupDescription)
+        </dd>
+        <dt>
             @Html.DisplayNameFor(m => m.Clients)
         </dt>
         @foreach (var client in Model.Clients)

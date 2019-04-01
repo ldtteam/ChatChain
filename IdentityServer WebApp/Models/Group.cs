@@ -17,6 +17,9 @@ namespace IdentityServer_WebApp.Models
         [BsonElement("OwnerId")]
         public string OwnerId { get; set; }
         
+        [BsonElement("GroupDescription")]
+        public string GroupDescription { get; set; }
+        
         [BsonElement("ClientIds")]
         public List<ObjectId> ClientIds { get; set; } = new List<ObjectId>();
     }

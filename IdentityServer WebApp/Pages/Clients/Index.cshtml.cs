@@ -6,7 +6,6 @@ using IdentityServer_WebApp.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Client = IdentityServer4.Models.Client;
 
 namespace IdentityServer_WebApp.Pages.Clients
 {
@@ -14,27 +13,25 @@ namespace IdentityServer_WebApp.Pages.Clients
     public class IndexModel : PageModel
     {
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly CustomClientStore _clientStore;
+        private readonly CustomClientStore _is4ClientStore;
         public readonly ClientService ClientsContext;
         
-        public IndexModel(UserManager<ApplicationUser> userManager, CustomClientStore clientStore, ClientService clientsContext)
+        public IndexModel(UserManager<ApplicationUser> userManager, CustomClientStore is4ClientStore, ClientService clientsContext)
         {
             _userManager = userManager;
-            _clientStore = clientStore;
+            _is4ClientStore = is4ClientStore;
             ClientsContext = clientsContext;
         }
 
         public IList<Client> Clients { get; set; }
 
-        public async Task OnGetAsync()
+        public void OnGet()
         {
             Clients = new List<Client>();
 
-            foreach (var client in await _clientStore.AllClients())
+            foreach (var client in ClientsContext.Get())
             {
-                var groupClient = ClientsContext.GetFromClientId(client.ClientId);
-
-                if (groupClient != null && groupClient.OwnerId == _userManager.GetUserAsync(User).Result.Id)
+                if (client != null && client.OwnerId == _userManager.GetUserAsync(User).Result.Id)
                 {
                     Clients.Add(client);
                 }
