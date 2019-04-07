@@ -17,9 +17,9 @@ namespace IdentityServer_WebApp.Areas.Identity.Pages.Account.Manage
         private readonly IEmailSender _emailSender;
 
         public IndexModel(
+            IEmailSender emailSender,
             UserManager<ApplicationUser> userManager,
-            SignInManager<ApplicationUser> signInManager,
-            IEmailSender emailSender)
+            SignInManager<ApplicationUser> signInManager)
         {
             _userManager = userManager;
             _signInManager = signInManager;
