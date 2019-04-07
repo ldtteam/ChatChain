@@ -58,10 +58,6 @@ namespace IdentityServer_WebApp
                 services.AddTransient<IEmailSender, EmailSender>(i =>
                     new EmailSender(emailHost, emailPort, emailSsl, emailUsername, emailPassword));
             }
-            else
-            {
-                services.AddTransient<IEmailSender, EmailSender>();
-            }
 
             var identityDatabase = Environment.GetEnvironmentVariable("IDENTITY_DATABASE");
 
