@@ -32,6 +32,17 @@ namespace IdentityServer_WebApp.Areas.Identity.Pages.Account
             _logger = logger;
             _emailSender = emailSender;
         }
+        
+        public RegisterModel(
+            UserManager<ApplicationUser> userManager,
+            SignInManager<ApplicationUser> signInManager,
+            ILogger<RegisterModel> logger)
+        {
+            _userManager = userManager;
+            _signInManager = signInManager;
+            _logger = logger;
+            _emailSender = null;
+        }
 
         [BindProperty]
         public InputModel Input { get; set; }
@@ -76,17 +87,17 @@ namespace IdentityServer_WebApp.Areas.Identity.Pages.Account
                 var result = await _userManager.CreateAsync(user, Input.Password);
                 if (result.Succeeded)
                 {
-                    _logger.LogInformation("User created a new account with password.");
+                    _logger.LogInformation($"User {Input.Username} created a new account.");
 
-                    var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                    var callbackUrl = Url.Page(
+                    if (_emailSender != null)
+                    {
+                        var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                        var callbackUrl = Url.Page(
                         "/Account/ConfirmEmail",
                         null,
                         new { userId = user.Id, code },
                         Request.Scheme);
 
-                    if (!Environment.GetEnvironmentVariable("EMAIL_USERNAME").IsNullOrEmpty())
-                    {
                         await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
                             $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
                     }
