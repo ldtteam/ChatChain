@@ -9,7 +9,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Client", "Client\Client.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IdentityServer", "IdentityServer\IdentityServer.csproj", "{9EDFF919-735A-4056-8EAB-FCDBA059035C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IdentityServer WebApp", "IdentityServer WebApp\IdentityServer WebApp.csproj", "{57FCBDA3-818C-4919-B38B-B876A392E195}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApp", "WebApp\WebApp.csproj", "{57FCBDA3-818C-4919-B38B-B876A392E195}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
