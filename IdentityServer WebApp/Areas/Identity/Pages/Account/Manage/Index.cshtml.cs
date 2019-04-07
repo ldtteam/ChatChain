@@ -17,22 +17,13 @@ namespace IdentityServer_WebApp.Areas.Identity.Pages.Account.Manage
         private readonly IEmailSender _emailSender;
 
         public IndexModel(
-            IEmailSender emailSender,
             UserManager<ApplicationUser> userManager,
-            SignInManager<ApplicationUser> signInManager)
+            SignInManager<ApplicationUser> signInManager,
+            IEmailSender emailSender = null)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _emailSender = emailSender;
-        }
-
-        public IndexModel(
-            UserManager<ApplicationUser> userManager,
-            SignInManager<ApplicationUser> signInManager)
-        {
-            _userManager = userManager;
-            _signInManager = signInManager;
-            _emailSender = null;
         }
 
         public string Username { get; set; }
