@@ -288,3 +288,5 @@ __pycache__/
 *.xsd.cs
 
 *.db
+WebApp/make.ps1
+docker-compose.yml

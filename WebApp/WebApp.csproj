@@ -31,4 +31,55 @@
       <_ContentIncludedByDefault Remove="Areas\Clients\Pages\Index.cshtml" />
     </ItemGroup>
 
+    <ItemGroup>
+      <None Include="wwwroot\lib\bulma\bulma.css.map" />
+      <None Include="wwwroot\lib\bulma\sass\.DS_Store" />
+      <None Include="wwwroot\lib\bulma\sass\base\generic.sass" />
+      <None Include="wwwroot\lib\bulma\sass\base\helpers.sass" />
+      <None Include="wwwroot\lib\bulma\sass\base\minireset.sass" />
+      <None Include="wwwroot\lib\bulma\sass\base\_all.sass" />
+      <None Include="wwwroot\lib\bulma\sass\components\breadcrumb.sass" />
+      <None Include="wwwroot\lib\bulma\sass\components\card.sass" />
+      <None Include="wwwroot\lib\bulma\sass\components\dropdown.sass" />
+      <None Include="wwwroot\lib\bulma\sass\components\level.sass" />
+      <None Include="wwwroot\lib\bulma\sass\components\list.sass" />
+      <None Include="wwwroot\lib\bulma\sass\components\media.sass" />
+      <None Include="wwwroot\lib\bulma\sass\components\menu.sass" />
+      <None Include="wwwroot\lib\bulma\sass\components\message.sass" />
+      <None Include="wwwroot\lib\bulma\sass\components\modal.sass" />
+      <None Include="wwwroot\lib\bulma\sass\components\navbar.sass" />
+      <None Include="wwwroot\lib\bulma\sass\components\pagination.sass" />
+      <None Include="wwwroot\lib\bulma\sass\components\panel.sass" />
+      <None Include="wwwroot\lib\bulma\sass\components\tabs.sass" />
+      <None Include="wwwroot\lib\bulma\sass\components\_all.sass" />
+      <None Include="wwwroot\lib\bulma\sass\elements\box.sass" />
+      <None Include="wwwroot\lib\bulma\sass\elements\button.sass" />
+      <None Include="wwwroot\lib\bulma\sass\elements\container.sass" />
+      <None Include="wwwroot\lib\bulma\sass\elements\content.sass" />
+      <None Include="wwwroot\lib\bulma\sass\elements\form.sass" />
+      <None Include="wwwroot\lib\bulma\sass\elements\icon.sass" />
+      <None Include="wwwroot\lib\bulma\sass\elements\image.sass" />
+      <None Include="wwwroot\lib\bulma\sass\elements\notification.sass" />
+      <None Include="wwwroot\lib\bulma\sass\elements\other.sass" />
+      <None Include="wwwroot\lib\bulma\sass\elements\progress.sass" />
+      <None Include="wwwroot\lib\bulma\sass\elements\table.sass" />
+      <None Include="wwwroot\lib\bulma\sass\elements\tag.sass" />
+      <None Include="wwwroot\lib\bulma\sass\elements\title.sass" />
+      <None Include="wwwroot\lib\bulma\sass\elements\_all.sass" />
+      <None Include="wwwroot\lib\bulma\sass\grid\columns.sass" />
+      <None Include="wwwroot\lib\bulma\sass\grid\tiles.sass" />
+      <None Include="wwwroot\lib\bulma\sass\grid\_all.sass" />
+      <None Include="wwwroot\lib\bulma\sass\layout\footer.sass" />
+      <None Include="wwwroot\lib\bulma\sass\layout\hero.sass" />
+      <None Include="wwwroot\lib\bulma\sass\layout\section.sass" />
+      <None Include="wwwroot\lib\bulma\sass\layout\_all.sass" />
+      <None Include="wwwroot\lib\bulma\sass\utilities\animations.sass" />
+      <None Include="wwwroot\lib\bulma\sass\utilities\controls.sass" />
+      <None Include="wwwroot\lib\bulma\sass\utilities\derived-variables.sass" />
+      <None Include="wwwroot\lib\bulma\sass\utilities\functions.sass" />
+      <None Include="wwwroot\lib\bulma\sass\utilities\initial-variables.sass" />
+      <None Include="wwwroot\lib\bulma\sass\utilities\mixins.sass" />
+      <None Include="wwwroot\lib\bulma\sass\utilities\_all.sass" />
+    </ItemGroup>
+
 </Project>
