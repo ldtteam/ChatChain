@@ -10,7 +10,7 @@ using Microsoft.Extensions.Logging;
 namespace ChatChainServer.Hubs
 {
 
-    //Test Commit For TeamCity Setup -- one more test, another, another, anotherrrr
+    //Test Commit For TeamCity Setup -- one more test, another, another, another, another
 
     [Authorize]
     public class ChatChainHub:Hub
