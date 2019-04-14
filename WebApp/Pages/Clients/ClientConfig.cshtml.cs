@@ -81,9 +81,9 @@ namespace WebApp.Pages.Clients
                 return RedirectToPage("./Index");
             }
 
-            var clientConfig = _clientsContext.GetClientConfig(Client.Id);
-            clientConfig.ClientEventGroups = SelectedGroups.ToList();
-            _clientConfigsContext.Update(clientConfig.Id, clientConfig);
+            //var clientConfig = _clientsContext.GetClientConfig(Client.Id);
+            //clientConfig.ClientEventGroups = SelectedGroups.ToList();
+            //_clientConfigsContext.Update(clientConfig.Id, clientConfig);
             
             return RedirectToPage("./Index");
         }
