@@ -54,7 +54,9 @@ namespace WebApp.Pages.Clients
             Client = _clientsContext.Get(clientId); //if the clientConfig was created we need to update this to get the ID for it.
             
             GroupOptions = new SelectList(_clientsContext.GetGroups(Client.Id), nameof(Group.Id), nameof(Group.GroupName));
-            if (_clientsContext.GetClientConfig(Client.Id).clientEventGroups != null)
+            Console.WriteLine("Client Config: " + _clientsContext.GetClientConfig(Client.Id));
+            Console.WriteLine("Client Config Event Groups: " + _clientsContext.GetClientConfig(Client.Id).clientEventGroups);
+            if (_clientsContext.GetClientConfig(Client.Id) != null)
             {
                 SelectedGroups = _clientsContext.GetClientConfig(Client.Id).clientEventGroups.ToArray();
             }
