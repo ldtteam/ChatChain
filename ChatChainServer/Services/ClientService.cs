@@ -36,12 +36,10 @@ namespace ChatChainServer.Services
 
             _services = services;
         }
-
-        public Client Get(string id)
+        
+        public Client Get(ObjectId id)
         {
-            var docId = new ObjectId(id);
-
-            return _clients.Find(client => client.Id == docId).FirstOrDefault();
+            return _clients.Find(client => client.Id == id).FirstOrDefault();
         }
 
         public IEnumerable<Client> GetFromOwnerId(string id)
@@ -59,11 +57,9 @@ namespace ChatChainServer.Services
             _clients.InsertOne(client);
         }
 
-        public void Update(string id, Client clientIn)
+        public void Update(ObjectId id, Client clientIn)
         {
-            var docId = new ObjectId(id);
-
-            _clients.ReplaceOne(client => client.Id == docId, clientIn);
+            _clients.ReplaceOne(client => client.Id == id, clientIn);
         }
 
         public void Remove(Client clientIn)
@@ -71,18 +67,20 @@ namespace ChatChainServer.Services
             _clients.DeleteOne(client => client.Id == clientIn.Id);
         }
 
-        public void Remove(string id)
+        public void Remove(ObjectId id)
         {
-            var docId = new ObjectId(id);
-            
-            _clients.DeleteOne(client => client.Id == docId);
+            _clients.DeleteOne(client => client.Id == id);
+        }
+        
+        public ClientConfig GetClientConfig(ObjectId id)
+        {
+            var client = Get(id);
+            return _services.GetRequiredService<ClientConfigService>().Get(client.ClientConfigId);
         }
 
-        public List<Group> GetGroups(string id)
+        public List<Group> GetGroups(ObjectId id)
         {
-            var docId = new ObjectId(id);
-
-            return _groups.Find(group => group.ClientIds.Contains(docId)).ToList();
+            return _groups.Find(group => group.ClientIds.Contains(id)).ToList();
         }
         
         public void AddGroup(ObjectId clientId, ObjectId groupId, bool addClientToGroup = true)
@@ -95,7 +93,7 @@ namespace ChatChainServer.Services
             
             var groupIds = new List<ObjectId>(client.GroupIds) {group.Id};
             client.GroupIds = groupIds;
-            Update(client.Id.ToString(), client);
+            Update(client.Id, client);
 
             if (!addClientToGroup) return;
 
@@ -111,7 +109,7 @@ namespace ChatChainServer.Services
             if (client == null || group == null) return;
             
             client.GroupIds.Remove(group.Id);
-            Update(client.Id.ToString(), client);
+            Update(client.Id, client);
 
             if (!removeClientFromGroup) return;
 

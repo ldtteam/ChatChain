@@ -45,7 +45,6 @@ namespace WebApp.Pages.Clients
             
             if (_clientConfigsContext.Get(Client.ClientConfigId) == null)
             {
-                Console.WriteLine("Creating Client Config");
                 var newConfig = new Models.ClientConfig
                 {
                     ClientId = Client.Id
@@ -53,8 +52,6 @@ namespace WebApp.Pages.Clients
                 _clientConfigsContext.Create(newConfig);
             }
             GroupOptions = new SelectList(_clientsContext.GetGroups(Client.Id), nameof(Group.Id), nameof(Group.GroupName));
-            
-            Console.WriteLine("Client Config: " + _clientsContext.GetClientConfig(Client.Id));
             
             var clientEventGroupIds = new List<string>();
 

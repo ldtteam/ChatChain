@@ -59,6 +59,7 @@ namespace ChatChainServer
             
             services.AddScoped<ClientService>();
             services.AddScoped<GroupService>();
+            services.AddScoped<ClientConfigService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
