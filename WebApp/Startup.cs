@@ -6,9 +6,9 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using IdentityServer_WebApp.Models;
-using IdentityServer_WebApp.Repository;
-using IdentityServer_WebApp.Services;
+using WebApp.Models;
+using WebApp.Repository;
+using WebApp.Services;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.Extensions.Configuration;
@@ -16,7 +16,7 @@ using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Bson.Serialization;
 using StackExchange.Redis;
 
-namespace IdentityServer_WebApp
+namespace WebApp
 {
     public class Startup
     {

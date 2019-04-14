@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
-namespace IdentityServer_WebApp.Models
+namespace WebApp.Models
 {
     /**
      * ---- IMPORTANT ----

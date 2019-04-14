@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace IdentityServer_WebApp.Pages
+namespace WebApp.Pages
 {
     [Authorize]
     public class AboutModel : PageModel

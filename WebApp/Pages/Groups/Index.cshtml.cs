@@ -1,11 +1,11 @@
 using System.Collections.Generic;
-using IdentityServer_WebApp.Models;
-using IdentityServer_WebApp.Services;
+using WebApp.Models;
+using WebApp.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace IdentityServer_WebApp.Pages.Groups
+namespace WebApp.Pages.Groups
 {
     [Authorize]
     public class GroupsModel : PageModel
