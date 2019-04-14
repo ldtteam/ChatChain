@@ -28,6 +28,7 @@ namespace WebApp.Pages.Clients
         }
 
         public Client Client { get; set; }
+        [BindProperty]
         public ObjectId[] SelectedGroups { get; set; }
         public SelectList GroupOptions { get; set; }
 
