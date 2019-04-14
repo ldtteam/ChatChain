@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Threading.Tasks;
 using IdentityServer4.Extensions;
 using WebApp.Models;
@@ -52,12 +54,32 @@ namespace WebApp.Pages.Clients
             Client = _clientsContext.Get(clientId); //if the clientConfig was created we need to update this to get the ID for it.
             
             GroupOptions = new SelectList(_clientsContext.GetGroups(Client.Id), nameof(Group.Id), nameof(Group.GroupName));
-        
+            SelectedGroups = _clientsContext.GetClientConfig(Client.Id).clientEventGroups.ToArray();
+            
             return Page();
         }
         
         public async Task<IActionResult> OnPostAsync(string clientId)
         {
+            Console.WriteLine("List: " + SelectedGroups);
+            
+            if (clientId.IsNullOrEmpty())
+            {
+                return RedirectToPage("./Index");
+            }
+
+            Client = _clientsContext.Get(clientId);
+
+            if (_clientConfigsContext.Get(Client.ClientConfigId) == null)
+            {
+                Console.WriteLine("ClientConfig is null for client: " + clientId);
+                return RedirectToPage("./Index");
+            }
+
+            var clientConfig = _clientsContext.GetClientConfig(Client.Id);
+            clientConfig.clientEventGroups = SelectedGroups.ToList();
+            _clientConfigsContext.Update(clientConfig.Id, clientConfig);
+            
             return Page();
         }
     }
