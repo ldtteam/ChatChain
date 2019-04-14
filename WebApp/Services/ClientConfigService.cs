@@ -40,17 +40,21 @@ namespace WebApp.Services
             return _clientConfigs.Find(config => config.Id == id).FirstOrDefault();
         }
 
+        public ClientConfig GetForClientId(ObjectId id)
+        {
+            return _clientConfigs.Find(config => config.Id == id).FirstOrDefault();
+        }
+
         public void Create(ClientConfig clientConfig)
         {
-            var objectId = new ObjectId();
-            clientConfig.Id = objectId;
             _clientConfigs.InsertOne(clientConfig);
-            Console.WriteLine("Config Creation: " + Get(objectId).Id);
-            Console.WriteLine("Config Creation: " + Get(objectId).ClientId);
+            var clientId = clientConfig.ClientId;
+            Console.WriteLine("Config Creation: " + GetForClientId(clientId).Id);
+            Console.WriteLine("Config Creation: " + GetForClientId(clientId).ClientId);
             
             
             var clientToUpdate = _services.GetRequiredService<ClientService>().Get(clientConfig.ClientId);
-            clientToUpdate.ClientConfigId = objectId;
+            clientToUpdate.ClientConfigId = GetForClientId(clientId).Id;
             _services.GetRequiredService<ClientService>().Update(clientToUpdate.Id, clientToUpdate);
             Console.WriteLine("Config Creation Client: " + _services.GetRequiredService<ClientService>().Get(clientConfig.ClientId).Id);
             Console.WriteLine("Config Creation Client: " + _services.GetRequiredService<ClientService>().Get(clientConfig.ClientId).ClientId);
