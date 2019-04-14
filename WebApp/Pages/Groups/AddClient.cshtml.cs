@@ -94,7 +94,7 @@ namespace WebApp.Pages.Groups
             }
 
             Group = _groupsContext.Get(id);
-            var client = _clientsContext.GetFromClientId(Input.ClientId);
+            var client = _clientsContext.Get(Input.ClientId);
 
             if (Group != null)
             {

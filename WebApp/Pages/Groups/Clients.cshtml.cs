@@ -57,7 +57,7 @@ namespace WebApp.Pages.Groups
         {
             Group = _groupsContext.Get(id);
 
-            var groupClient = _clientsContext.GetFromClientId(ClientId);
+            var groupClient = _clientsContext.Get(ClientId);
             
             if (Group.OwnerId != _userManager.GetUserAsync(User).Result.Id || groupClient.OwnerId != _userManager.GetUserAsync(User).Result.Id)
             {
