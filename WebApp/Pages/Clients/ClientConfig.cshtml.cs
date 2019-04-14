@@ -29,7 +29,9 @@ namespace WebApp.Pages.Clients
 
         public Client Client { get; set; }
         [BindProperty]
-        public String[] SelectedGroups { get; set; }
+        public String[] SelectedClientEventGroups { get; set; }
+        [BindProperty]
+        public String[] SelectedUserEventGroups { get; set; }
         public SelectList GroupOptions { get; set; }
 
         public async Task<IActionResult> OnGetAsync(string clientId)
@@ -54,16 +56,24 @@ namespace WebApp.Pages.Clients
             
             Console.WriteLine("Client Config: " + _clientsContext.GetClientConfig(Client.Id));
             
-            var groupIdStrings = new List<string>();
+            var clientEventGroupIds = new List<string>();
 
             foreach (var groupId in _clientsContext.GetClientConfig(Client.Id).ClientEventGroups)
             {
-                groupIdStrings.Add(groupId.ToString());
+                clientEventGroupIds.Add(groupId.ToString());
+            }
+
+            var userEventGroupIds = new List<string>();
+            
+            foreach (var groupId in _clientsContext.GetClientConfig(Client.Id).UserEventGroups)
+            {
+                userEventGroupIds.Add(groupId.ToString());
             }
             
             if (_clientsContext.GetClientConfig(Client.Id) != null)
             {
-                SelectedGroups = groupIdStrings.ToArray();
+                SelectedClientEventGroups = clientEventGroupIds.ToArray();
+                SelectedUserEventGroups = userEventGroupIds.ToArray();
             }
 
             return Page();
@@ -71,11 +81,6 @@ namespace WebApp.Pages.Clients
         
         public async Task<IActionResult> OnPostAsync(string clientId)
         {
-            foreach (var group in SelectedGroups)
-            {
-                Console.WriteLine("Group: " + group);
-            }
-            
             if (clientId.IsNullOrEmpty())
             {
                 return RedirectToPage("./Index");
@@ -89,10 +94,12 @@ namespace WebApp.Pages.Clients
                 return RedirectToPage("./Index");
             }
 
-            var groupIds = SelectedGroups.Select(group => new ObjectId(group)).ToList();
+            var clientEventGroupIds = SelectedClientEventGroups.Select(group => new ObjectId(group)).ToList();
+            var userEventGroupIds = SelectedUserEventGroups.Select(group => new ObjectId(group)).ToList();
 
             var clientConfig = _clientsContext.GetClientConfig(Client.Id);
-            clientConfig.ClientEventGroups = groupIds;
+            clientConfig.ClientEventGroups = clientEventGroupIds;
+            clientConfig.UserEventGroups = userEventGroupIds;
             _clientConfigsContext.Update(clientConfig.Id, clientConfig);
             
             return RedirectToPage("./Index");
