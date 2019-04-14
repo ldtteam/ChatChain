@@ -54,19 +54,27 @@ namespace WebApp.Pages.Clients
             
             Console.WriteLine("Client Config: " + _clientsContext.GetClientConfig(Client.Id));
             
-            /*Console.WriteLine("Client Config Event Groups: " + _clientsContext.GetClientConfig(Client.Id).ClientEventGroups);
+            var groupIdStrings = new List<string>();
+
+            foreach (var groupId in _clientsContext.GetClientConfig(Client.Id).ClientEventGroups)
+            {
+                groupIdStrings.Add(groupId.ToString());
+            }
+            
             if (_clientsContext.GetClientConfig(Client.Id) != null)
             {
-                SelectedGroups = _clientsContext.GetClientConfig(Client.Id).ClientEventGroups.ToArray();
-            }*/
+                SelectedGroups = groupIdStrings.ToArray();
+            }
 
             return Page();
         }
         
         public async Task<IActionResult> OnPostAsync(string clientId)
         {
-            if (SelectedGroups.Length > 0)
-                Console.WriteLine("List: " + SelectedGroups[0]);
+            foreach (var group in SelectedGroups)
+            {
+                Console.WriteLine("Group: " + group);
+            }
             
             if (clientId.IsNullOrEmpty())
             {
@@ -81,9 +89,11 @@ namespace WebApp.Pages.Clients
                 return RedirectToPage("./Index");
             }
 
-            //var clientConfig = _clientsContext.GetClientConfig(Client.Id);
-            //clientConfig.ClientEventGroups = SelectedGroups.ToList();
-            //_clientConfigsContext.Update(clientConfig.Id, clientConfig);
+            var groupIds = SelectedGroups.Select(group => new ObjectId(group)).ToList();
+
+            var clientConfig = _clientsContext.GetClientConfig(Client.Id);
+            clientConfig.ClientEventGroups = groupIds;
+            _clientConfigsContext.Update(clientConfig.Id, clientConfig);
             
             return RedirectToPage("./Index");
         }
