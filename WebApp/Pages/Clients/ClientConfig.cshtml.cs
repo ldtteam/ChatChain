@@ -29,7 +29,7 @@ namespace WebApp.Pages.Clients
 
         public Client Client { get; set; }
         [BindProperty]
-        public ObjectId[] SelectedGroups { get; set; }
+        public String[] SelectedGroups { get; set; }
         public SelectList GroupOptions { get; set; }
 
         public async Task<IActionResult> OnGetAsync(string clientId)
@@ -54,11 +54,11 @@ namespace WebApp.Pages.Clients
             
             Console.WriteLine("Client Config: " + _clientsContext.GetClientConfig(Client.Id));
             
-            Console.WriteLine("Client Config Event Groups: " + _clientsContext.GetClientConfig(Client.Id).ClientEventGroups);
+            /*Console.WriteLine("Client Config Event Groups: " + _clientsContext.GetClientConfig(Client.Id).ClientEventGroups);
             if (_clientsContext.GetClientConfig(Client.Id) != null)
             {
                 SelectedGroups = _clientsContext.GetClientConfig(Client.Id).ClientEventGroups.ToArray();
-            }
+            }*/
 
             return Page();
         }
