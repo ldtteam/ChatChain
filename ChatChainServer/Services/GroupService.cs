@@ -42,11 +42,9 @@ namespace ChatChainServer.Services
             return _groups.Find(group => true).ToList();
         }
 
-        public Group Get(string id)
+        public Group Get(ObjectId id)
         {
-            var docId = new ObjectId(id);
-
-            return _groups.Find(group => group.Id == docId).FirstOrDefault();
+            return _groups.Find(group => group.Id == id).FirstOrDefault();
         }
         
         public Group GetFromGuid(string id)
@@ -59,11 +57,9 @@ namespace ChatChainServer.Services
             _groups.InsertOne(group);
         }
 
-        public void Update(string id, Group groupIn)
+        public void Update(ObjectId id, Group groupIn)
         {
-            var docId = new ObjectId(id);
-
-            _groups.ReplaceOne(group => group.Id == docId, groupIn);
+            _groups.ReplaceOne(group => group.Id == id, groupIn);
         }
 
         public void Remove(Group groupIn)
@@ -71,18 +67,14 @@ namespace ChatChainServer.Services
             _groups.DeleteOne(group => group.Id == groupIn.Id);
         }
 
-        public void Remove(string id)
+        public void Remove(ObjectId id)
         {
-            var docId = new ObjectId(id);
-            
-            _groups.DeleteOne(group => group.Id == docId);
+            _groups.DeleteOne(group => group.Id == id);
         }
 
-        public List<Client> GetClients(string groupId)
+        public List<Client> GetClients(ObjectId id)
         {
-            var docId = new ObjectId(groupId);
-
-            return _clients.Find(client => client.GroupIds.Contains(docId)).ToList();
+            return _clients.Find(client => client.GroupIds.Contains(id)).ToList();
         }
 
         public void AddClient(ObjectId groupId, ObjectId clientId, bool addGroupToClient = true)
@@ -95,7 +87,7 @@ namespace ChatChainServer.Services
 
             var clientIds = new List<ObjectId>(group.ClientIds) {client.Id};
             group.ClientIds = clientIds;
-            Update(group.Id.ToString(), group);
+            Update(group.Id, group);
             
             if (!addGroupToClient) return;
 
@@ -111,7 +103,7 @@ namespace ChatChainServer.Services
             if (group == null || client == null) return;
             
             group.ClientIds.Remove(client.Id);
-            Update(group.Id.ToString(), group);
+            Update(group.Id, group);
             
             if (!removeGroupFromClient) return;
 

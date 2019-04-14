@@ -4,10 +4,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Bson;
 using MongoDB.Driver;
-using WebApp.Models;
+using ChatChainServer.Models;
 using IConfiguration = Microsoft.Extensions.Configuration.IConfiguration;
 
-namespace WebApp.Services
+namespace ChatChainServer.Services
 {
     public class ClientConfigService
     {
