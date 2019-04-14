@@ -54,18 +54,19 @@ namespace WebApp.Pages.Clients
             
             Console.WriteLine("Client Config: " + _clientsContext.GetClientConfig(Client.Id));
             
-            /*Console.WriteLine("Client Config Event Groups: " + _clientsContext.GetClientConfig(Client.Id).clientEventGroups);
+            Console.WriteLine("Client Config Event Groups: " + _clientsContext.GetClientConfig(Client.Id).ClientEventGroups);
             if (_clientsContext.GetClientConfig(Client.Id) != null)
             {
-                SelectedGroups = _clientsContext.GetClientConfig(Client.Id).clientEventGroups.ToArray();
-            }*/
+                SelectedGroups = _clientsContext.GetClientConfig(Client.Id).ClientEventGroups.ToArray();
+            }
 
             return Page();
         }
         
         public async Task<IActionResult> OnPostAsync(string clientId)
         {
-            Console.WriteLine("List: " + SelectedGroups);
+            if (SelectedGroups.Length > 0)
+                Console.WriteLine("List: " + SelectedGroups[0]);
             
             if (clientId.IsNullOrEmpty())
             {
@@ -84,7 +85,7 @@ namespace WebApp.Pages.Clients
             clientConfig.ClientEventGroups = SelectedGroups.ToList();
             _clientConfigsContext.Update(clientConfig.Id, clientConfig);
             
-            return Page();
+            return RedirectToPage("./Index");
         }
     }
 }
