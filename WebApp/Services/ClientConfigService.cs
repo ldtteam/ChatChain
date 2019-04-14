@@ -49,6 +49,7 @@ namespace WebApp.Services
         {
             _clientConfigs.InsertOne(clientConfig);
             var clientId = clientConfig.ClientId;
+            Console.WriteLine("Config Creation: " + GetForClientId(clientId));
             Console.WriteLine("Config Creation: " + GetForClientId(clientId).Id);
             Console.WriteLine("Config Creation: " + GetForClientId(clientId).ClientId);
             
@@ -56,6 +57,7 @@ namespace WebApp.Services
             var clientToUpdate = _services.GetRequiredService<ClientService>().Get(clientConfig.ClientId);
             clientToUpdate.ClientConfigId = GetForClientId(clientId).Id;
             _services.GetRequiredService<ClientService>().Update(clientToUpdate.Id, clientToUpdate);
+            Console.WriteLine("Config Creation Client: " + _services.GetRequiredService<ClientService>().Get(clientConfig.ClientId));
             Console.WriteLine("Config Creation Client: " + _services.GetRequiredService<ClientService>().Get(clientConfig.ClientId).Id);
             Console.WriteLine("Config Creation Client: " + _services.GetRequiredService<ClientService>().Get(clientConfig.ClientId).ClientId);
             Console.WriteLine("Config Creation Client: " + _services.GetRequiredService<ClientService>().Get(clientConfig.ClientId).ClientConfigId);
