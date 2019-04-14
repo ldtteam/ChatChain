@@ -83,6 +83,7 @@ namespace WebApp
 
             services.AddScoped<ClientService>();
             services.AddScoped<GroupService>();
+            services.AddScoped<ClientConfigService>();
 
             services.AddTransient<IRepository, MongoRepository>();
             services.AddScoped<CustomClientStore>();
