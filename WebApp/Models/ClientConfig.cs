@@ -20,10 +20,10 @@ namespace WebApp.Models
         public ObjectId ClientId { get; set; }
 
         [BsonElement("ClientEventGroups")]
-        public List<ObjectId> clientEventGroups { get; set; }
+        public List<ObjectId> ClientEventGroups { get; set; } = new List<ObjectId>();
 
         [BsonElement("UserEventGroups")]
-        public List<ObjectId> userEventGroups { get; set; }
+        public List<ObjectId> UserEventGroups { get; set; } = new List<ObjectId>();
 
     }
 }
