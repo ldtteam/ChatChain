@@ -16,21 +16,19 @@
 </head>
 <body>
     <nav class="navbar is-primary">
-        <div class="container">
-            <div class="navbar-brand">
-                <a asp-page="/Index" class="navbar-item is-size-4 is-marginless"><strong>Chat</strong>Chain</a>
-                <button class="button navbar-burger" data-target="navMenu">
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                </button>
-            </div>
+        <div class="navbar-brand">
+            <a asp-page="/Index" class="navbar-item is-size-4 is-marginless"><strong>Chat</strong>Chain</a>
+            <button class="button navbar-burger is-primary" data-target="navMenu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
 
-            <div class="navbar-menu" id="navMenu">
-                <div class="navbar-end">
-                    <partial name="_ClientsPartial" />
-                    <partial name="_LoginPartial" />
-                </div>
+        <div class="navbar-menu is-primary" id="navMenu">
+            <div class="navbar-end">
+                <partial name="_ClientsPartial" />
+                <partial name="_LoginPartial" />
             </div>
         </div>
     </nav>
@@ -39,10 +37,7 @@
 
     <div>
         @RenderBody()
-        <hr />
-        <footer>
-            <p>&copy; 2019 - ChatChain</p>
-        </footer>
+        <!-- If you want a footer - put it here! -->
     </div>
 
     <environment include="Development">
