@@ -42,7 +42,7 @@ namespace WebApp.Services
 
         public ClientConfig GetForClientId(ObjectId id)
         {
-            return _clientConfigs.Find(config => config.Id == id).FirstOrDefault();
+            return _clientConfigs.Find(config => config.ClientId == id).FirstOrDefault();
         }
 
         public void Create(ClientConfig clientConfig)
