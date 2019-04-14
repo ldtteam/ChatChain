@@ -43,17 +43,12 @@ namespace WebApp.Pages.Clients
             if (_clientConfigsContext.Get(Client.ClientConfigId) == null)
             {
                 Console.WriteLine("Creating Client Config");
-                ObjectId configId = new ObjectId();
                 var newConfig = new Models.ClientConfig
                 {
-                    Id = configId,
                     ClientId = Client.Id
                 };
                 _clientConfigsContext.Create(newConfig);
             }
-            
-            Client = _clientsContext.Get(clientId); //if the clientConfig was created we need to update this to get the ID for it.
-            
             GroupOptions = new SelectList(_clientsContext.GetGroups(Client.Id), nameof(Group.Id), nameof(Group.GroupName));
             
             Console.WriteLine("Client Config: " + _clientsContext.GetClientConfig(Client.Id));
@@ -85,7 +80,7 @@ namespace WebApp.Pages.Clients
             }
 
             var clientConfig = _clientsContext.GetClientConfig(Client.Id);
-            clientConfig.clientEventGroups = SelectedGroups.ToList();
+            clientConfig.ClientEventGroups = SelectedGroups.ToList();
             _clientConfigsContext.Update(clientConfig.Id, clientConfig);
             
             return Page();
