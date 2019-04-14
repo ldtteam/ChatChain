@@ -1,15 +1,15 @@
 using System;
 using System.Threading.Tasks;
 using IdentityServer.Store;
-using IdentityServer_WebApp.Models;
-using IdentityServer_WebApp.Services;
+using WebApp.Models;
+using WebApp.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 
-namespace IdentityServer_WebApp.Pages.Clients
+namespace WebApp.Pages.Clients
 {
     [Authorize]
     public class DeleteModel : PageModel

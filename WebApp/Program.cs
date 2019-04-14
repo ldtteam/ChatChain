@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 
-namespace IdentityServer_WebApp
+namespace WebApp
 {
     public class Program
     {

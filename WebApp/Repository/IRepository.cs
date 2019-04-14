@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 
-namespace IdentityServer_WebApp.Repository
+namespace WebApp.Repository
 {
     /// <summary>
     /// Basic interface with a few methods for adding, deleting, and querying data.

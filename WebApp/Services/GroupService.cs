@@ -1,13 +1,13 @@
 using System;
 using System.Collections.Generic;
 using IdentityServer4.Extensions;
-using IdentityServer_WebApp.Models;
+using WebApp.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Bson;
 using MongoDB.Driver;
 
-namespace IdentityServer_WebApp.Services
+namespace WebApp.Services
 {
     public class GroupService
     {

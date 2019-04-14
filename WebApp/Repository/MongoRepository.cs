@@ -5,7 +5,7 @@ using System.Linq.Expressions;
 using MongoDB.Bson;
 using MongoDB.Driver;
 
-namespace IdentityServer_WebApp.Repository
+namespace WebApp.Repository
 {
     public class MongoRepository : IRepository
     {

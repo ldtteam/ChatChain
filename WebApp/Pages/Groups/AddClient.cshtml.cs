@@ -2,15 +2,15 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 using IdentityServer.Store;
-using IdentityServer_WebApp.Models;
-using IdentityServer_WebApp.Services;
+using WebApp.Models;
+using WebApp.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
-namespace IdentityServer_WebApp.Pages.Groups
+namespace WebApp.Pages.Groups
 {
     [Authorize]
     public class AddClientModel : PageModel
