@@ -49,7 +49,7 @@ namespace WebApp.Pages.Clients
                 return NotFound();
             }
 
-            Client = _clientsContext.GetFromClientId(id);
+            Client = _clientsContext.Get(id);
            
             if (Client == null || Client.OwnerId != _userManager.GetUserAsync(User).Result.Id)
             {
@@ -77,7 +77,7 @@ namespace WebApp.Pages.Clients
                 return Page();
             }
             
-            var groupsClient = _clientsContext.GetFromClientId(id);
+            var groupsClient = _clientsContext.Get(id);
 
             if (groupsClient.OwnerId != _userManager.GetUserAsync(User).Result.Id)
             {
@@ -91,7 +91,7 @@ namespace WebApp.Pages.Clients
             
             groupsClient.ClientName = Input.ClientName;
             groupsClient.ClientDescription = Input.ClientDescription;
-            _clientsContext.Update(groupsClient.Id.ToString(), groupsClient);
+            _clientsContext.Update(groupsClient.Id, groupsClient);
 
             return RedirectToPage("./Index");
         } 
