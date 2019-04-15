@@ -93,6 +93,14 @@ body, .navbar-end, .navbar-menu {
     background-size: cover;
 }
 
+/* Small Logo */
+.small-logo {
+    max-height: 1.75em;
+    width: auto;
+    height: auto;
+    margin-right: 10px;
+}
+
 /* For Non-Mobile Devices */
 @media screen and (min-width: 720px) {
     .is-limited-width-desktop {
