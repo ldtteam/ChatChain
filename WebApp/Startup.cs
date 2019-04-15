@@ -20,7 +20,7 @@ namespace WebApp
 {
     public class Startup
     {
-        //quick test for CI
+        //quick test for CI -- 2
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
