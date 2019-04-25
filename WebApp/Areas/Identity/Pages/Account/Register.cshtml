@@ -4,37 +4,53 @@
     ViewData["Title"] = "Register";
 }
 
-<h2>@ViewData["Title"]</h2>
+<style>body>.navbar {filter: blur(5px);}</style>
 
-<div class="row">
-    <div class="col-md-4">
-        <form asp-route-returnUrl="@Model.ReturnUrl" method="post">
-            <h4>Create a new account.</h4>
-            <hr />
-            <div asp-validation-summary="All" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="Input.Email"></label>
-                <input asp-for="Input.Email" class="form-control" />
-                <span asp-validation-for="Input.Email" class="text-danger"></span>
+<div class="hero is-fullheight-with-navbar is-primary">
+    <section class="full-page-form-background">
+        <form asp-route-returnUrl="@Model.ReturnUrl" class="floating-form" method="post">
+            <a class="delete is-pulled-right" aria-label="Close" asp-page="./../Index"></a>
+
+            <h4 class="is-size-4">Sign up to <strong>Chat</strong>Chain</h4>
+            <p class="has-text-white has-bottom-margin">Please use the form below to sign up for ChatChain</p>
+            <div asp-validation-summary="All" class="has-text-warning"></div>
+
+            <div class="field">
+                <label asp-for="Input.Email" class="label has-text-white">Email *</label>
+                <div class="control">
+                    <input asp-for="Input.Email" type="email" placeholder="Enter your email" class="input has-background-primary has-text-white" />
+                    <span asp-validation-for="Input.Email" class="has-text-danger"></span>
+                </div>
             </div>
-            <div class="form-group">
-                <label asp-for="Input.Username"></label>
-                <input asp-for="Input.Username" class="form-control" />
-                <span asp-validation-for="Input.Username" class="text-danger"></span>
+
+            <div class="field">
+                <label asp-for="Input.Username" class="label has-text-white">Username *</label>
+                <div class="control">
+                    <input asp-for="Input.Username" class="input has-background-primary has-text-white" type="text" placeholder="Choose a username" />
+                    <span asp-validation-for="Input.Username" class="has-text-danger"></span>
+                </div>
             </div>
-            <div class="form-group">
-                <label asp-for="Input.Password"></label>
-                <input asp-for="Input.Password" class="form-control" />
-                <span asp-validation-for="Input.Password" class="text-danger"></span>
+
+            <div class="field">
+                <label asp-for="Input.Password" class="label has-text-white">Password *</label>
+                <div class="control">
+                    <input asp-for="Input.Password" class="input has-background-primary has-text-white" type="password" placeholder="Choose a password" />
+                    <span asp-validation-for="Input.Password" class="has-text-danger"></span>
+                </div>
             </div>
-            <div class="form-group">
-                <label asp-for="Input.ConfirmPassword"></label>
-                <input asp-for="Input.ConfirmPassword" class="form-control" />
-                <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
+
+            <div class="field">
+                <label asp-for="Input.ConfirmPassword" class="label has-text-white">Confirm Password *</label>
+                <div class="control">
+                    <input asp-for="Input.ConfirmPassword" class="input has-background-primary has-text-white" type="password" placeholder="Confirm your password" />
+                    <span asp-validation-for="Input.ConfirmPassword" class="has-text-danger"></span>
+                </div>
             </div>
-            <button type="submit" class="btn btn-default">Register</button>
+            <div class="field has-text-centered">
+                <button type="submit" class="button is-danger is-wider has-text-centered">Register</button>
+            </div>
         </form>
-    </div>
+    </section>
 </div>
 
 @section Scripts {
