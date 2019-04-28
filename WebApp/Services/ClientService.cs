@@ -12,6 +12,7 @@ namespace WebApp.Services
     public class ClientService
     {
         private readonly IMongoCollection<Client> _clients;
+        private readonly IMongoCollection<ClientConfig> _clientConfigs;
         private readonly IMongoCollection<Group> _groups;
         private readonly IServiceProvider _services;
 
@@ -33,6 +34,7 @@ namespace WebApp.Services
             var database = client.GetDatabase("ChatChainGroups");
             _clients = database.GetCollection<Client>("Clients");
             _groups = database.GetCollection<Group>("Groups");
+            _clientConfigs = database.GetCollection<ClientConfig>("ClientConfigs");
 
             _services = services;
         }
@@ -41,22 +43,20 @@ namespace WebApp.Services
         {
             return _clients.Find(client => true).ToList();
         }
-
-        public Client Get(string id)
-        {
-            var docId = new ObjectId(id);
-
-            return _clients.Find(client => client.Id == docId).FirstOrDefault();
-        }
-
+        
         public List<Client> GetFromOwnerId(string id)
         {
             return _clients.Find(client => client.OwnerId == id).ToList();
         }
-
-        public Client GetFromClientId(string id)
+        
+        public Client Get(ObjectId id)
         {
-            return _clients.Find(client => client.ClientId == id).FirstOrDefault();
+            return _clients.Find(client => client.Id == id).FirstOrDefault();
+        }
+        
+        public Client Get(string clientId)
+        {
+            return _clients.Find(client => client.ClientId == clientId).FirstOrDefault();
         }
 
         public void Create(Client client)
@@ -64,11 +64,9 @@ namespace WebApp.Services
             _clients.InsertOne(client);
         }
 
-        public void Update(string id, Client clientIn)
+        public void Update(ObjectId id, Client clientIn)
         {
-            var docId = new ObjectId(id);
-
-            _clients.ReplaceOne(client => client.Id == docId, clientIn);
+            _clients.ReplaceOne(client => client.Id == id, clientIn);
         }
 
         public void Remove(Client clientIn)
@@ -76,18 +74,15 @@ namespace WebApp.Services
             _clients.DeleteOne(client => client.Id == clientIn.Id);
         }
 
-        public void Remove(string id)
+        public ClientConfig GetClientConfig(ObjectId id)
         {
-            var docId = new ObjectId(id);
-            
-            _clients.DeleteOne(client => client.Id == docId);
+            var client = Get(id);
+            return _services.GetRequiredService<ClientConfigService>().Get(client.ClientConfigId);
         }
-
-        public List<Group> GetGroups(string id)
+        
+        public List<Group> GetGroups(ObjectId id)
         {
-            var docId = new ObjectId(id);
-
-            return _groups.Find(group => group.ClientIds.Contains(docId)).ToList();
+            return _groups.Find(group => group.ClientIds.Contains(id)).ToList();
         }
         
         public void AddGroup(ObjectId clientId, ObjectId groupId, bool addClientToGroup = true)
@@ -100,7 +95,7 @@ namespace WebApp.Services
             
             var groupIds = new List<ObjectId>(client.GroupIds) {group.Id};
             client.GroupIds = groupIds;
-            Update(client.Id.ToString(), client);
+            Update(client.Id, client);
 
             if (!addClientToGroup) return;
 
@@ -116,7 +111,7 @@ namespace WebApp.Services
             if (client == null || group == null) return;
             
             client.GroupIds.Remove(group.Id);
-            Update(client.Id.ToString(), client);
+            Update(client.Id, client);
 
             if (!removeClientFromGroup) return;
 

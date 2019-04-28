@@ -34,6 +34,7 @@
                                 @Html.DisplayFor(m => client.ClientDescription)
                             </td>
                             <td>
+                                <a asp-page="./ClientConfig" asp-route-clientId="@client.ClientId">Config</a>
                                 <a asp-page="./Edit" asp-route-id="@client.ClientId">Edit</a>
                                 <a asp-page="./Delete" asp-route-id="@client.ClientId">Delete</a>
                             </td>

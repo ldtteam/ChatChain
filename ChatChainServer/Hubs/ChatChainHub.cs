@@ -10,8 +10,6 @@ using Microsoft.Extensions.Logging;
 namespace ChatChainServer.Hubs
 {
 
-    //Test Commit For TeamCity Setup -- one more test, another, another, another, another
-
     [Authorize]
     public class ChatChainHub:Hub
     {
@@ -69,7 +67,7 @@ namespace ChatChainServer.Hubs
             {
                 message.SendingClient = client;
                 message.Group = group;
-                foreach (var fClient in _groupsContext.GetClients(group.Id.ToString()))
+                foreach (var fClient in _groupsContext.GetClients(group.Id))
                 {
                     if (!fClient.ClientId.Equals(client.ClientId) || message.SendToSelf)
                     {
@@ -93,11 +91,22 @@ namespace ChatChainServer.Hubs
                 }
 
                 message.SendingClient = client;
-                foreach (var fClient in _clientsContext.GetFromOwnerId(client.OwnerId))
+                if (_clientsContext.GetClientConfig(client.Id) != null)
                 {
-                    if (!fClient.ClientId.Equals(client.ClientId) || message.SendToSelf)
+                    foreach (var fGroupId in _clientsContext.GetClientConfig(client.Id).ClientEventGroups)
                     {
-                        await Clients.User(fClient.ClientGuid).SendAsync("ReceiveClientEventMessage", message);
+                        var group = _groupsContext.Get(fGroupId);
+                        
+                        if (group == null) continue;
+                        message.Group = group;
+                        foreach (var fClient in _groupsContext.GetClients(group.Id))
+                        {
+                            if (!fClient.ClientId.Equals(client.ClientId) || message.SendToSelf)
+                            {
+                                await Clients.User(fClient.ClientGuid)
+                                    .SendAsync("ReceiveClientEventMessage", message);
+                            }
+                        }
                     }
                 }
             }
@@ -113,11 +122,22 @@ namespace ChatChainServer.Hubs
             {
                 message.SendingClient = client;
 
-                foreach (var fClient in _clientsContext.GetFromOwnerId(client.OwnerId))
+                if (_clientsContext.GetClientConfig(client.Id) != null)
                 {
-                    if (!fClient.ClientId.Equals(client.ClientId) || message.SendToSelf)
+                    foreach (var fGroupId in _clientsContext.GetClientConfig(client.Id).UserEventGroups)
                     {
-                        await Clients.User(fClient.ClientGuid).SendAsync("ReceiveUserEventMessage", message);
+                        var group = _groupsContext.Get(fGroupId);
+                        
+                        if (group == null) continue;
+                        message.Group = group;
+                        foreach (var fClient in _groupsContext.GetClients(group.Id))
+                        {
+                            if (!fClient.ClientId.Equals(client.ClientId) || message.SendToSelf)
+                            {
+                                await Clients.User(fClient.ClientGuid)
+                                    .SendAsync("ReceiveUserEventMessage", message);
+                            }
+                        }
                     }
                 }
             }
@@ -133,7 +153,7 @@ namespace ChatChainServer.Hubs
 
             if (client != null)
             {
-                response.Groups = _clientsContext.GetGroups(client.Id.ToString());
+                response.Groups = _clientsContext.GetGroups(client.Id);
             }
 
             await Clients.Caller.SendAsync("ReceiveGroups", response);

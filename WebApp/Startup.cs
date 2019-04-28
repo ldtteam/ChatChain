@@ -20,6 +20,7 @@ namespace WebApp
 {
     public class Startup
     {
+        //quick test for CI -- 5
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -83,6 +84,7 @@ namespace WebApp
 
             services.AddScoped<ClientService>();
             services.AddScoped<GroupService>();
+            services.AddScoped<ClientConfigService>();
 
             services.AddTransient<IRepository, MongoRepository>();
             services.AddScoped<CustomClientStore>();

@@ -36,7 +36,7 @@ namespace WebApp.Pages.Clients
                 return RedirectToPage("./Index");
             }
 
-            Client = _clientsContext.GetFromClientId(id);
+            Client = _clientsContext.Get(id);
             
             if (Client == null || Client.OwnerId != _userManager.GetUserAsync(User).Result.Id)
             {
@@ -55,7 +55,7 @@ namespace WebApp.Pages.Clients
 
             var client = await _is4ClientStore.FindClientByIdAsync(id);
             
-            var groupClient = _clientsContext.GetFromClientId(id);
+            var groupClient = _clientsContext.Get(id);
             
             if (groupClient != null && groupClient.OwnerId != _userManager.GetUserAsync(User).Result.Id)
             {
