@@ -19,16 +19,14 @@ namespace ChatChainServer.Hubs
         private readonly ILogger<ChatChainHub> _logger;
         private readonly GroupService _groupsContext;
         private readonly ClientService _clientsContext;
-        private readonly ClientConfigService _clientConfigsContext;
 
         private bool _hasSentLeaveMessage;
 
-        public ChatChainHub(ILogger<ChatChainHub> logger, GroupService groupsContext, ClientService clientsContext, ClientConfigService clientConfigsContext)
+        public ChatChainHub(ILogger<ChatChainHub> logger, GroupService groupsContext, ClientService clientsContext)
         {
             _logger = logger;
             _groupsContext = groupsContext;
             _clientsContext = clientsContext;
-            _clientConfigsContext = clientConfigsContext;
         }
 
         public override Task OnConnectedAsync()
