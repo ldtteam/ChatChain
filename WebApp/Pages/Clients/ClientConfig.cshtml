@@ -12,11 +12,11 @@
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="Client.ClientId"/>
             <div class="form-group">
-                <label class="control-label">Client Event Groups: </label>
+                <label class="control-label">Which Groups to send Client Events to: </label>
                 <select asp-for="SelectedClientEventGroups" asp-items="Model.GroupOptions"></select>
             </div>
             <div class="form-group">
-                <label class="control-label">User Event Groups: </label>
+                <label class="control-label">Which Groups to send User Events to: </label>
                 <select asp-for="SelectedUserEventGroups" asp-items="Model.GroupOptions"></select>
             </div>
             <div class="form-group">
