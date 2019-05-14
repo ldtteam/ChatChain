@@ -1,16 +1,20 @@
 ﻿using System;
+using AspNetCore.Identity.Mongo;
 using IdentityServer.Extension;
 using IdentityServer.Interface;
+using IdentityServer.Models;
 using IdentityServer.Utils;
 using IdentityServer4.Extensions;
 using IdentityServer4.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Bson.Serialization;
 using StackExchange.Redis;
+using WebApp.Models;
 
 namespace IdentityServer
 {
@@ -37,17 +41,26 @@ namespace IdentityServer
             }
             
             services.AddMvc();
+            
+            var identityDatabase = Environment.GetEnvironmentVariable("IDENTITY_DATABASE");
+            
+            services.AddIdentityMongoDbProvider<ApplicationUser, ApplicationRole>(identityOptions =>
+            {
+                identityOptions.Password.RequireNonAlphanumeric = false;
+            }, mongoIdentityOptions => { mongoIdentityOptions.ConnectionString = identityDatabase; })
+                .AddIdentity<ApplicationUser, ApplicationRole>();
 
             services.AddIdentityServer(options =>
                 {
                     options.IssuerUri = Environment.GetEnvironmentVariable("IDENTITY_SERVER_URL");
                     options.PublicOrigin = Environment.GetEnvironmentVariable("IDENTITY_SERVER_ORIGIN");
                 })
-                .AddDeveloperSigningCredential()
+                //.AddDeveloperSigningCredential()
                 .AddMongoRepository()
                 .AddClients()
                 .AddIdentityApiResources()
-                .AddPersistedGrants();
+                .AddPersistedGrants()
+                .AddAspNetIdentity<ApplicationUser>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

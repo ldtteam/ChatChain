@@ -13,7 +13,6 @@
         <PackageReference Include="AspNetCore.Identity.Mongo" Version="5.0.0.12" />
         <PackageReference Include="EntityFramework" Version="6.2.0" />
         <PackageReference Include="IdentityServer4" Version="2.3.2" />
-        <PackageReference Include="IdentityServer4.EntityFramework" Version="2.3.2" />
         <PackageReference Include="Microsoft.AspNetCore.App" />
         <PackageReference Include="Microsoft.AspNetCore.Cryptography.Internal" Version="2.2.0" />
         <PackageReference Include="Microsoft.AspNetCore.DataProtection.Abstractions" Version="2.2.0" />
