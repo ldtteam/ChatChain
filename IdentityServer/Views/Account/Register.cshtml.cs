@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
 
-namespace WebApp.Areas.Identity.Pages.Account
+namespace IdentityServer.Views.Account
 {
     [AllowAnonymous]
     public class RegisterModel : PageModel
