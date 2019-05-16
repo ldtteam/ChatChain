@@ -12,17 +12,17 @@ using Microsoft.Extensions.Logging;
 namespace IdentityServer.Views.Account
 {
     [AllowAnonymous]
-    public class RegisterModel : PageModel
+    public class Register : PageModel
     {
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly ILogger<RegisterModel> _logger;
+        private readonly ILogger<Register> _logger;
         private readonly IEmailSender _emailSender;
 
-        public RegisterModel(
+        public Register(
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
-            ILogger<RegisterModel> logger,
+            ILogger<Register> logger,
             IEmailSender emailSender = null)
         {
             _userManager = userManager;
