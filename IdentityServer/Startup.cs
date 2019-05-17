@@ -47,8 +47,7 @@ namespace IdentityServer
             services.AddIdentityMongoDbProvider<ApplicationUser, ApplicationRole>(identityOptions =>
             {
                 identityOptions.Password.RequireNonAlphanumeric = false;
-            }, mongoIdentityOptions => { mongoIdentityOptions.ConnectionString = identityDatabase; })
-                .AddIdentity<ApplicationUser, ApplicationRole>();
+            }, mongoIdentityOptions => { mongoIdentityOptions.ConnectionString = identityDatabase; });
 
             services.AddIdentityServer(options =>
                 {
