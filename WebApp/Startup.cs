@@ -1,12 +1,11 @@
 using System;
-using AspNetCore.Identity.Mongo;
+using System.IdentityModel.Tokens.Jwt;
 using IdentityServer.Store;
 using IdentityServer4.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using WebApp.Models;
 using WebApp.Repository;
 using WebApp.Services;
 using Microsoft.AspNetCore.DataProtection;
@@ -59,17 +58,34 @@ namespace WebApp
                 services.AddTransient<IEmailSender, EmailSender>(i =>
                     new EmailSender(emailHost, emailPort, emailSsl, emailUsername, emailPassword));
             }
+            
+            JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
+            
+            services.AddAuthentication(options =>
+                {
+                    options.DefaultScheme = "Cookies";
+                    options.DefaultChallengeScheme = "oidc";
+                })
+                .AddCookie("Cookies")
+                .AddOpenIdConnect("oidc", options =>
+                {
+                    options.Authority = Environment.GetEnvironmentVariable("IDENTITY_SERVER_URL");;
+                    options.RequireHttpsMetadata = false;
 
-            var identityDatabase = Environment.GetEnvironmentVariable("IDENTITY_DATABASE");
+                    options.ClientId = "mvc";
+                    options.SaveTokens = true;
+                });
 
-            services.AddIdentityMongoDbProvider<ApplicationUser, ApplicationRole>(identityOptions =>
+            //var identityDatabase = Environment.GetEnvironmentVariable("IDENTITY_DATABASE");
+
+            /*services.AddIdentityMongoDbProvider<ApplicationUser, ApplicationRole>(identityOptions =>
             {
                 identityOptions.Password.RequireNonAlphanumeric = false;
                 /*if (!emailUsername.IsNullOrEmpty())
                 {
                     identityOptions.SignIn.RequireConfirmedEmail = true;
-                }*/
-            }, mongoIdentityOptions => { mongoIdentityOptions.ConnectionString = identityDatabase; });
+                }
+            }, mongoIdentityOptions => { mongoIdentityOptions.ConnectionString = identityDatabase; });*/
 
             services.ConfigureApplicationCookie(options =>
             {

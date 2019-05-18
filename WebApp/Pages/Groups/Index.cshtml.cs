@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using WebApp.Models;
 using WebApp.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -10,12 +11,10 @@ namespace WebApp.Pages.Groups
     [Authorize]
     public class GroupsModel : PageModel
     {
-        private readonly UserManager<ApplicationUser> _userManager;
         private readonly GroupService _groupsContext; 
         
-        public GroupsModel(UserManager<ApplicationUser> userManager, GroupService groupsContext)
+        public GroupsModel(GroupService groupsContext)
         {
-            _userManager = userManager;
             _groupsContext = groupsContext;
         }
 
@@ -27,7 +26,7 @@ namespace WebApp.Pages.Groups
 
             foreach (var group in _groupsContext.Get())
             {
-                if (group.OwnerId != _userManager.GetUserAsync(User).Result.Id) continue;
+                if (group.OwnerId != User.Claims.First(claim => claim.Type.Equals("sid")).Value) continue;
                 
                 Groups.Add(group);
             }

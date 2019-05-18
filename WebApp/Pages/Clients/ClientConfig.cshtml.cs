@@ -6,7 +6,6 @@ using IdentityServer4.Extensions;
 using WebApp.Models;
 using WebApp.Services;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -20,7 +19,7 @@ namespace WebApp.Pages.Clients
         private readonly ClientService _clientsContext;
         private readonly ClientConfigService _clientConfigsContext;
 
-        public ClientConfig(UserManager<ApplicationUser> userManager, ClientService clientsContext, ClientConfigService clientConfigsContext)
+        public ClientConfig(ClientService clientsContext, ClientConfigService clientConfigsContext)
         {
             _clientsContext = clientsContext;
             _clientConfigsContext = clientConfigsContext;

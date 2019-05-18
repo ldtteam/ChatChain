@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using IdentityServer.Store;
 using WebApp.Models;
@@ -15,13 +16,11 @@ namespace WebApp.Pages.Groups
     [Authorize]
     public class ClientsModel : PageModel
     {
-        private readonly UserManager<ApplicationUser> _userManager;
         private readonly GroupService _groupsContext;
         private readonly ClientService _clientsContext;
         
-        public ClientsModel(UserManager<ApplicationUser> userManager, GroupService groupsContext, ClientService clientsContext)
+        public ClientsModel(GroupService groupsContext, ClientService clientsContext)
         {
-            _userManager = userManager;
             _groupsContext = groupsContext;
             _clientsContext = clientsContext;
         }
@@ -35,7 +34,7 @@ namespace WebApp.Pages.Groups
         {
             Group = _groupsContext.Get(id);
 
-            if (Group == null || Group.OwnerId != _userManager.GetUserAsync(User).Result.Id)
+            if (Group == null || Group.OwnerId != User.Claims.First(claim => claim.Type.Equals("sid")).Value)
             {
                 return RedirectToPage("./Index");
             }
@@ -44,7 +43,7 @@ namespace WebApp.Pages.Groups
 
             foreach (var client in _groupsContext.GetClients(Group.Id.ToString()))
             {
-                if (client.OwnerId == _userManager.GetUserAsync(User).Result.Id)
+                if (client.OwnerId == User.Claims.First(claim => claim.Type.Equals("sid")).Value)
                 {
                     Clients.Add(client);
                 }
@@ -59,7 +58,7 @@ namespace WebApp.Pages.Groups
 
             var groupClient = _clientsContext.Get(ClientId);
             
-            if (Group.OwnerId != _userManager.GetUserAsync(User).Result.Id || groupClient.OwnerId != _userManager.GetUserAsync(User).Result.Id)
+            if (Group.OwnerId != User.Claims.First(claim => claim.Type.Equals("sid")).Value || groupClient.OwnerId != User.Claims.First(claim => claim.Type.Equals("sid")).Value)
             {
                 return RedirectToPage("./Index");
             }

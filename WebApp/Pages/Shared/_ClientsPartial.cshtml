@@ -1,8 +1,4 @@
-@using WebApp.Models
-
-@inject SignInManager<ApplicationUser> SignInManager
-
-@if (SignInManager.IsSignedIn(User))
+@if (User.Identity.IsAuthenticated)
 {
     <li><a asp-page="/Clients/Index">Clients</a></li>
     <li><a asp-page="/Groups/Index">Groups</a></li>

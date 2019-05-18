@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Threading.Tasks;
 using IdentityServer.Store;
 using WebApp.Models;
@@ -15,14 +16,12 @@ namespace WebApp.Pages.Groups
     [Authorize]
     public class AddClientModel : PageModel
     {
-        private readonly UserManager<ApplicationUser> _userManager;
         private readonly CustomClientStore _clientStore;
         private readonly GroupService _groupsContext;
         private readonly ClientService _clientsContext;
 
-        public AddClientModel(UserManager<ApplicationUser> userManager, CustomClientStore clientStore, GroupService groupsContext, ClientService clientsContext)
+        public AddClientModel(CustomClientStore clientStore, GroupService groupsContext, ClientService clientsContext)
         {
-            _userManager = userManager;
             _clientStore = clientStore;
             _groupsContext = groupsContext;
             _clientsContext = clientsContext;
@@ -49,7 +48,7 @@ namespace WebApp.Pages.Groups
 
             Group = _groupsContext.Get(id);
 
-            if (Group == null || Group.OwnerId != _userManager.GetUserAsync(User).Result.Id)
+            if (Group == null || Group.OwnerId != User.Claims.First(claim => claim.Type.Equals("sid")).Value)
             {
                 return RedirectToPage("./Clients");
             }
@@ -63,7 +62,7 @@ namespace WebApp.Pages.Groups
                 clientIds.Add(client.Id.ToString());
             }
 
-            foreach (var client in _clientsContext.GetFromOwnerId(_userManager.GetUserAsync(User).Result.Id))
+            foreach (var client in _clientsContext.GetFromOwnerId(User.Claims.First(claim => claim.Type.Equals("sid")).Value))
             {
 
                 if (!clientIds.Contains(client.Id.ToString()))

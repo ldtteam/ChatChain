@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using WebApp.Models;
 using WebApp.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -12,12 +13,10 @@ namespace WebApp.Pages.Groups
     [Authorize]
     public class EditModel : PageModel
     {
-        private readonly UserManager<ApplicationUser> _userManager;
         private readonly GroupService _groupsContext;
 
-        public EditModel(UserManager<ApplicationUser> userManager, GroupService groupContext)
+        public EditModel(GroupService groupContext)
         {
-            _userManager = userManager;
             _groupsContext = groupContext;
         }
         
@@ -46,7 +45,7 @@ namespace WebApp.Pages.Groups
 
             Group = _groupsContext.Get(id);
             
-            if (Group == null || Group.OwnerId != _userManager.GetUserAsync(User).Result.Id)
+            if (Group == null || Group.OwnerId != User.Claims.First(claim => claim.Type.Equals("sid")).Value)
             {
                 return RedirectToPage("./Index");
             }
@@ -69,7 +68,7 @@ namespace WebApp.Pages.Groups
             
             Group = _groupsContext.Get(id);
             
-            if (Group.OwnerId != _userManager.GetUserAsync(User).Result.Id)
+            if (Group.OwnerId != User.Claims.First(claim => claim.Type.Equals("sid")).Value)
             {
                 return RedirectToPage("./Index");
             }

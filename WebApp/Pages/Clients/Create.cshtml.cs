@@ -1,7 +1,9 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Threading.Tasks;
 using IdentityServer.Store;
+using IdentityServer4.Extensions;
 using IdentityServer4.Models;
 using WebApp.Models;
 using WebApp.Services;
@@ -17,13 +19,11 @@ namespace WebApp.Pages.Clients
     [Authorize]
     public class CreateModel : PageModel
     {
-        private readonly UserManager<ApplicationUser> _userManager;
         private readonly CustomClientStore _clientStore;
         private readonly ClientService _clientsContext;
 
-        public CreateModel(UserManager<ApplicationUser> userManager, CustomClientStore clientStore, ClientService clientsContext)
+        public CreateModel(CustomClientStore clientStore, ClientService clientsContext)
         {
-            _userManager = userManager;
             _clientStore = clientStore;
             _clientsContext = clientsContext;
         }
@@ -91,7 +91,8 @@ namespace WebApp.Pages.Clients
 
             var newClient = new Models.Client
             {
-                OwnerId = _userManager.GetUserAsync(User).Result.Id,
+                //OwnerId = _userManager.GetUserAsync(User).Result.Id,
+                OwnerId = User.Claims.First(claim => claim.Type.Equals("sid")).Value,
                 ClientId = is4Client.ClientId,
                 ClientGuid = is4Client.ClientId,
                 ClientName = is4Client.ClientName,

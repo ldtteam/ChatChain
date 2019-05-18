@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using IdentityServer.Store;
 using WebApp.Models;
@@ -14,13 +15,11 @@ namespace WebApp.Pages.Clients
     [Authorize]
     public class DeleteModel : PageModel
     {
-        private readonly UserManager<ApplicationUser> _userManager;
         private readonly CustomClientStore _is4ClientStore;
         private readonly ClientService _clientsContext;
 
-        public DeleteModel(UserManager<ApplicationUser> userManager, CustomClientStore is4ClientStore, ClientService clientsContext)
+        public DeleteModel(CustomClientStore is4ClientStore, ClientService clientsContext)
         {
-            _userManager = userManager;
             _is4ClientStore = is4ClientStore;
             _clientsContext = clientsContext;
         }
@@ -38,7 +37,7 @@ namespace WebApp.Pages.Clients
 
             Client = _clientsContext.Get(id);
             
-            if (Client == null || Client.OwnerId != _userManager.GetUserAsync(User).Result.Id)
+            if (Client == null || Client.OwnerId != User.Claims.First(claim => claim.Type.Equals("sid")).Value)
             {
                 return RedirectToPage("./Index");
             }
@@ -57,7 +56,7 @@ namespace WebApp.Pages.Clients
             
             var groupClient = _clientsContext.Get(id);
             
-            if (groupClient != null && groupClient.OwnerId != _userManager.GetUserAsync(User).Result.Id)
+            if (groupClient != null && groupClient.OwnerId != User.Claims.First(claim => claim.Type.Equals("sid")).Value)
             {
                 return RedirectToPage("./Index");
             }

@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using WebApp.Models;
 using WebApp.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -12,12 +13,10 @@ namespace WebApp.Pages.Groups
     [Authorize]
     public class CreateModel : PageModel
     {
-        private readonly UserManager<ApplicationUser> _userManager;
         private readonly GroupService _groupsContext;
 
-        public CreateModel(UserManager<ApplicationUser> userManager, GroupService groupsContext)
+        public CreateModel(GroupService groupsContext)
         {
-            _userManager = userManager;
             _groupsContext = groupsContext;
         }
         
@@ -51,7 +50,7 @@ namespace WebApp.Pages.Groups
                 GroupId = groupId,
                 GroupName = Input.GroupName,
                 GroupDescription = Input.GroupDescription,
-                OwnerId = _userManager.GetUserAsync(User).Result.Id
+                OwnerId = User.Claims.First(claim => claim.Type.Equals("sid")).Value
             };
             
             _groupsContext.Create(group);

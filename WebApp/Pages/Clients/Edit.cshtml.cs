@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 using IdentityServer.Store;
@@ -14,13 +15,11 @@ namespace WebApp.Pages.Clients
     [Authorize]
     public class EditModel : PageModel
     {
-        private readonly UserManager<ApplicationUser> _userManager;
         private readonly CustomClientStore _is4ClientStore;
         private readonly ClientService _clientsContext;
 
-        public EditModel(UserManager<ApplicationUser> userManager, CustomClientStore is4ClientStore, ClientService clientsContext)
+        public EditModel(CustomClientStore is4ClientStore, ClientService clientsContext)
         {
-            _userManager = userManager;
             _is4ClientStore = is4ClientStore;
             _clientsContext = clientsContext;
         }
@@ -51,7 +50,7 @@ namespace WebApp.Pages.Clients
 
             Client = _clientsContext.Get(id);
            
-            if (Client == null || Client.OwnerId != _userManager.GetUserAsync(User).Result.Id)
+            if (Client == null || Client.OwnerId != User.Claims.First(claim => claim.Type.Equals("sid")).Value)
             {
                 return RedirectToPage("./Index");
             }
@@ -79,7 +78,7 @@ namespace WebApp.Pages.Clients
             
             var groupsClient = _clientsContext.Get(id);
 
-            if (groupsClient.OwnerId != _userManager.GetUserAsync(User).Result.Id)
+            if (groupsClient.OwnerId != User.Claims.First(claim => claim.Type.Equals("sid")).Value)
             {
                 return RedirectToPage("./Index");
             }
