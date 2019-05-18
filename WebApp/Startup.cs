@@ -72,7 +72,7 @@ namespace WebApp
                     options.Authority = Environment.GetEnvironmentVariable("IDENTITY_SERVER_URL");;
                     options.RequireHttpsMetadata = false;
 
-                    options.ClientId = "mvc";
+                    options.ClientId = "auth";
                     options.SaveTokens = true;
                 });
 

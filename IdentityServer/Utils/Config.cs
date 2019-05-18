@@ -26,5 +26,24 @@ namespace IdentityServer.Utils
             };
         }
 
+        public static IEnumerable<Client> GetClients()
+        {
+            return new List<Client>
+            {
+                new Client
+                {
+                    ClientId = "auth",
+                    ClientName = "Auth Client",
+                    AllowedGrantTypes = GrantTypes.Implicit,
+
+                    AllowedScopes = new List<string>
+                    {
+                        IdentityServerConstants.StandardScopes.OpenId,
+                        IdentityServerConstants.StandardScopes.Profile
+                    }
+                }
+            };
+        }
+
     }
 }

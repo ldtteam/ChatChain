@@ -152,6 +152,16 @@ namespace IdentityServer
                 createdNewRepository = true;
             }
 
+            if (!repository.CollectionExists<Client>())
+            {
+                foreach (var client in Config.GetClients())
+                {
+                    repository.Add(client);
+                }
+
+                createdNewRepository = true;
+            }
+
             // If it's a new Repository (database), need to restart the website to configure Mongo to ignore Extra Elements.
             if (createdNewRepository)
             {
