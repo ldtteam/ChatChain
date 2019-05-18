@@ -35,6 +35,10 @@ namespace IdentityServer.Utils
                     ClientId = "auth",
                     ClientName = "Auth Client",
                     AllowedGrantTypes = GrantTypes.Implicit,
+                    
+                    RedirectUris = { "https://chatchain.co/signin-oidc" }, //TODO: REMOVE THIS
+                    
+                    PostLogoutRedirectUris = { "https://chatchain.co/signout-callback-oidc" }, //TODO: REMOVE THIS
 
                     AllowedScopes = new List<string>
                     {

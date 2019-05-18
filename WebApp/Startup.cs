@@ -78,8 +78,6 @@ namespace WebApp
                 {
                     options.Authority = Environment.GetEnvironmentVariable("IDENTITY_SERVER_URL");
                     options.RequireHttpsMetadata = false;
-                    
-                    options.SignedOutRedirectUri = Environment.GetEnvironmentVariable("WEBAPP_SERVER_URL")+"/signin-oidc";
 
                     options.ClientId = "auth";
                     options.SaveTokens = true;
