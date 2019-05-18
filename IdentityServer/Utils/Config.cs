@@ -36,6 +36,7 @@ namespace IdentityServer.Utils
                     ClientId = "auth",
                     ClientName = "Auth Client",
                     AllowedGrantTypes = GrantTypes.Implicit,
+                    RequireConsent = false, //TODO: REMOVE THIS
                     
                     RedirectUris = { Environment.GetEnvironmentVariable("WEBAPP_SERVER_URL") + "/signin-oidc" }, //TODO: REMOVE THIS
                     
