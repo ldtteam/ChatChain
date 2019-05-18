@@ -1,4 +1,5 @@
 @using IdentityServer4.Extensions
+@using Microsoft.AspNetCore.Http.Extensions
 @if (User.Identity.IsAuthenticated)
 {
     <form asp-page="/Account/Logout" asp-route-returnUrl="@Url.Page("/Index", new { area = "" })" method="post" id="logoutForm" class="navbar-right">
@@ -15,7 +16,7 @@
 else
 {
     <ul class="nav navbar-nav navbar-right">
-        <li><a href="@Environment.GetEnvironmentVariable("IDENTITY_SERVER_ORIGIN")/Account/Register">Register</a></li>
-        <li><a href="@Environment.GetEnvironmentVariable("IDENTITY_SERVER_ORIGIN")/Account/Login">Login</a></li>
+        <li><a href="@Environment.GetEnvironmentVariable("IDENTITY_SERVER_ORIGIN")/Account/Register?ReturnUrl=@Context.Request.GetDisplayUrl()">Register</a></li>
+        <li><a href="@Environment.GetEnvironmentVariable("IDENTITY_SERVER_ORIGIN")/Account/Login?ReturnUrl=@Context.Request.GetDisplayUrl()">Login</a></li>
     </ul>
 }

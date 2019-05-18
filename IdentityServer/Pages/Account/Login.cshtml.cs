@@ -67,7 +67,7 @@ namespace IdentityServer.Views.Account
                     var user = await _userManager.FindByNameAsync(Input.Username);
 
                     _logger.LogInformation("User logged in.");
-                    return LocalRedirect(returnUrl);
+                    return Redirect(returnUrl);
                 }
                 
                 ModelState.AddModelError(string.Empty, "Invalid login attempt.");
