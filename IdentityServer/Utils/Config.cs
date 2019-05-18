@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using IdentityServer4;
 using IdentityServer4.Models;
@@ -36,9 +37,9 @@ namespace IdentityServer.Utils
                     ClientName = "Auth Client",
                     AllowedGrantTypes = GrantTypes.Implicit,
                     
-                    RedirectUris = { "https://chatchain.co/signin-oidc" }, //TODO: REMOVE THIS
+                    RedirectUris = { Environment.GetEnvironmentVariable("WEBAPP_SERVER_URL") + "/signin-oidc" }, //TODO: REMOVE THIS
                     
-                    PostLogoutRedirectUris = { "https://chatchain.co/signout-callback-oidc" }, //TODO: REMOVE THIS
+                    PostLogoutRedirectUris = { Environment.GetEnvironmentVariable("WEBAPP_SERVER_URL") + "/signout-callback-oidc" }, //TODO: REMOVE THIS
 
                     AllowedScopes = new List<string>
                     {
