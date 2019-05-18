@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 using IdentityServer.Models;
+using IdentityServer4.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -15,12 +16,14 @@ namespace IdentityServer.Views.Account
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly ILogger<Login> _logger;
+        private readonly IIdentityServerInteractionService _interaction;
 
-        public Login(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, ILogger<Login> logger)
+        public Login(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, ILogger<Login> logger, IIdentityServerInteractionService interaction)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _logger = logger;
+            _interaction = interaction;
         }
         
         public string ReturnUrl { get; set; }
@@ -54,27 +57,28 @@ namespace IdentityServer.Views.Account
 
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)
         {
+            var context = await _interaction.GetAuthorizationContextAsync(returnUrl);
+            
             returnUrl = returnUrl ?? Url.Content("~/");
-            
-            if (ModelState.IsValid)
-            {
-                // This doesn't count login failures towards account lockout
-                // To enable password failures to trigger account lockout, set lockoutOnFailure: true
-                var result = await _signInManager.PasswordSignInAsync(Input.Username, Input.Password, Input.RememberMe, true);
-                if (result.Succeeded)
-                {
 
-                    var user = await _userManager.FindByNameAsync(Input.Username);
-
-                    _logger.LogInformation("User logged in.");
-                    return Redirect(returnUrl);
-                }
-                
-                ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+            if (!ModelState.IsValid) 
                 return Page();
-            }
             
+            // This doesn't count login failures towards account lockout
+            // To enable password failures to trigger account lockout, set lockoutOnFailure: true
+            var result = await _signInManager.PasswordSignInAsync(Input.Username, Input.Password, Input.RememberMe, true);
+            if (result.Succeeded)
+            {
+
+                var user = await _userManager.FindByNameAsync(Input.Username);
+
+                _logger.LogInformation("User logged in.");
+                return Redirect(returnUrl);
+            }
+                
+            ModelState.AddModelError(string.Empty, "Invalid login attempt.");
             return Page();
+
         }
     }
 }
