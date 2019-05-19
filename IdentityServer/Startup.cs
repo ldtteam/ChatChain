@@ -10,7 +10,6 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpOverrides;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Bson.Serialization;
@@ -29,7 +28,7 @@ namespace IdentityServer
         public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
-        public void ConfigureServices(IServiceCollection services)
+        public void ConfigureServices(IServiceCollection services, IHostingEnvironment env)
         {
             services.Configure<ForwardedHeadersOptions>(options =>
             {
@@ -56,7 +55,7 @@ namespace IdentityServer
                 identityOptions.Password.RequireNonAlphanumeric = false;
             }, mongoIdentityOptions => { mongoIdentityOptions.ConnectionString = identityDatabase; });
 
-            services.AddIdentityServer(options =>
+            var identityServerBuilder = services.AddIdentityServer(options =>
                 {
                     options.IssuerUri = Environment.GetEnvironmentVariable("IDENTITY_SERVER_URL");
                     options.PublicOrigin = Environment.GetEnvironmentVariable("IDENTITY_SERVER_ORIGIN");
@@ -67,6 +66,12 @@ namespace IdentityServer
                 .AddIdentityApiResources()
                 .AddPersistedGrants()
                 .AddAspNetIdentity<ApplicationUser>();
+
+            if (env.IsDevelopment())
+            {
+                identityServerBuilder.AddDeveloperSigningCredential();
+            }
+            //TODO: Add signingCredentials for production
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

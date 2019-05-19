@@ -83,17 +83,6 @@ namespace WebApp
                     options.SaveTokens = true;
                 });
 
-            //var identityDatabase = Environment.GetEnvironmentVariable("IDENTITY_DATABASE");
-
-            /*services.AddIdentityMongoDbProvider<ApplicationUser, ApplicationRole>(identityOptions =>
-            {
-                identityOptions.Password.RequireNonAlphanumeric = false;
-                /*if (!emailUsername.IsNullOrEmpty())
-                {
-                    identityOptions.SignIn.RequireConfirmedEmail = true;
-                }
-            }, mongoIdentityOptions => { mongoIdentityOptions.ConnectionString = identityDatabase; });*/
-
             services.ConfigureApplicationCookie(options =>
             {
                 options.Cookie.HttpOnly = true;
