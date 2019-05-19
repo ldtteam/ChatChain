@@ -9,7 +9,9 @@ using IdentityServer4.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Hosting.Internal;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Bson.Serialization;
@@ -28,7 +30,7 @@ namespace IdentityServer
         public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
-        public void ConfigureServices(IServiceCollection services, IHostingEnvironment env)
+        public void ConfigureServices(IServiceCollection services)
         {
             services.Configure<ForwardedHeadersOptions>(options =>
             {
@@ -67,7 +69,9 @@ namespace IdentityServer
                 .AddPersistedGrants()
                 .AddAspNetIdentity<ApplicationUser>();
 
-            if (env.IsDevelopment())
+            var isDevelopment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+            
+            if (isDevelopment != null && isDevelopment.Equals("Development"))
             {
                 identityServerBuilder.AddDeveloperSigningCredential();
             }
