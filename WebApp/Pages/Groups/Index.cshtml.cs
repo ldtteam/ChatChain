@@ -26,7 +26,7 @@ namespace WebApp.Pages.Groups
 
             foreach (var group in _groupsContext.Get())
             {
-                if (group.OwnerId != User.Claims.First(claim => claim.Type.Equals("sid")).Value) continue;
+                if (group.OwnerId != User.Claims.First(claim => claim.Type.Equals("sub")).Value) continue;
                 
                 Groups.Add(group);
             }

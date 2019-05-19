@@ -30,7 +30,7 @@ namespace WebApp.Pages.Clients
 
             foreach (var client in ClientsContext.Get())
             {
-                if (client != null && client.OwnerId == User.Claims.First(claim => claim.Type.Equals("sid")).Value)
+                if (client != null && client.OwnerId == User.Claims.First(claim => claim.Type.Equals("sub")).Value)
                 {
                     Clients.Add(client);
                 }

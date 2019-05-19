@@ -92,7 +92,7 @@ namespace WebApp.Pages.Clients
             var newClient = new Models.Client
             {
                 //OwnerId = _userManager.GetUserAsync(User).Result.Id,
-                OwnerId = User.Claims.First(claim => claim.Type.Equals("sid")).Value,
+                OwnerId = User.Claims.First(claim => claim.Type.Equals("sub")).Value,
                 ClientId = is4Client.ClientId,
                 ClientGuid = is4Client.ClientId,
                 ClientName = is4Client.ClientName,

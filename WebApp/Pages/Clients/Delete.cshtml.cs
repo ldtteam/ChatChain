@@ -37,7 +37,7 @@ namespace WebApp.Pages.Clients
 
             Client = _clientsContext.Get(id);
             
-            if (Client == null || Client.OwnerId != User.Claims.First(claim => claim.Type.Equals("sid")).Value)
+            if (Client == null || Client.OwnerId != User.Claims.First(claim => claim.Type.Equals("sub")).Value)
             {
                 return RedirectToPage("./Index");
             }
@@ -56,7 +56,7 @@ namespace WebApp.Pages.Clients
             
             var groupClient = _clientsContext.Get(id);
             
-            if (groupClient != null && groupClient.OwnerId != User.Claims.First(claim => claim.Type.Equals("sid")).Value)
+            if (groupClient != null && groupClient.OwnerId != User.Claims.First(claim => claim.Type.Equals("sub")).Value)
             {
                 return RedirectToPage("./Index");
             }

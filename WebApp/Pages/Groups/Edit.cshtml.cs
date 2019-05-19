@@ -45,7 +45,7 @@ namespace WebApp.Pages.Groups
 
             Group = _groupsContext.Get(id);
             
-            if (Group == null || Group.OwnerId != User.Claims.First(claim => claim.Type.Equals("sid")).Value)
+            if (Group == null || Group.OwnerId != User.Claims.First(claim => claim.Type.Equals("sub")).Value)
             {
                 return RedirectToPage("./Index");
             }
@@ -68,7 +68,7 @@ namespace WebApp.Pages.Groups
             
             Group = _groupsContext.Get(id);
             
-            if (Group.OwnerId != User.Claims.First(claim => claim.Type.Equals("sid")).Value)
+            if (Group.OwnerId != User.Claims.First(claim => claim.Type.Equals("sub")).Value)
             {
                 return RedirectToPage("./Index");
             }

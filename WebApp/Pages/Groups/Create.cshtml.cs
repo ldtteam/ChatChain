@@ -50,7 +50,7 @@ namespace WebApp.Pages.Groups
                 GroupId = groupId,
                 GroupName = Input.GroupName,
                 GroupDescription = Input.GroupDescription,
-                OwnerId = User.Claims.First(claim => claim.Type.Equals("sid")).Value
+                OwnerId = User.Claims.First(claim => claim.Type.Equals("sub")).Value
             };
             
             _groupsContext.Create(group);
