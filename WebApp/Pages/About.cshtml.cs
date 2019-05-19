@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace WebApp.Pages
@@ -8,6 +9,11 @@ namespace WebApp.Pages
     {
         public void OnGet()
         {
+        }
+
+        public IActionResult OnPost()
+        {
+            return SignOut("Cookies", "oidc");
         }
     }
 }
