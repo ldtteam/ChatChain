@@ -5,7 +5,7 @@
     <form asp-page="/Account/Logout" asp-route-returnUrl="@Url.Page("/Index", new { area = "" })" method="post" id="logoutForm" class="navbar-right">
         <ul class="nav navbar-nav navbar-right">
             <li>
-                <a title="Manage">Hello @User.Claims.First(claim => claim.Type.Equals("name"))!</a>
+                <a title="Manage">Hello @User.Claims.First(claim => claim.Type.Equals("name")).Value!</a>
             </li>
             <li>
                 <button type="submit" class="btn btn-link navbar-btn navbar-link">Logout</button>
