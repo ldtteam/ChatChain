@@ -25,6 +25,13 @@ namespace IdentityServer.Pages.Account
             _logger = logger;
             _interaction = interaction;
         }
+
+        public string LogoutId;
+        
+        public async void OnGetAsync(string logoutId)
+        {
+            LogoutId = logoutId;
+        }
         
         public async void OnPostAsync(string logoutId)
         {
