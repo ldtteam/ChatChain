@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using IdentityModel;
 using IdentityServer.Models;
 using IdentityServer4.Extensions;
@@ -33,12 +34,11 @@ namespace IdentityServer.Pages.Account
             LogoutId = logoutId;
         }
         
-        public async void OnPostAsync(string logoutId)
+        public async Task<IActionResult> OnPostAsync(string logoutId)
         {
-            
-            if (logoutId.IsNullOrEmpty()) return;
+            if (logoutId.IsNullOrEmpty()) return null;
 
-            if (User?.Identity.IsAuthenticated != true) return;
+            if (User?.Identity.IsAuthenticated != true) return null;
 
             var idp = User.FindFirst(JwtClaimTypes.IdentityProvider)?.Value;
 
@@ -57,8 +57,10 @@ namespace IdentityServer.Pages.Account
 
             if (externalAuthenticationScheme != null)
             {
-                SignOut(externalAuthenticationScheme);
+                return SignOut(externalAuthenticationScheme);
             }
+
+            return Page();
         }
     }
 }
