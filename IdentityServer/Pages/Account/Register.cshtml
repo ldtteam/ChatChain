@@ -7,6 +7,10 @@
 <div class="container">
     <div class="fullheight-with-navbar is-flex-centered">
         <h2>@ViewData["Title"]</h2>
+        @if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT").Equals("Development"))
+        {
+            <h3 class="text-danger">THIS ENVIRONMENT IS IN DEVELOPMENT, DO NOT USE A PASSWORD YOU WISH TO KEEP SECURE!</h3>
+        }
         <form asp-route-returnUrl="@Model.ReturnUrl" method="post">
             <h4>Create a ChatChain Auth account.</h4>
             <hr/>
