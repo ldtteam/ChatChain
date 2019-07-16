@@ -1,22 +1,19 @@
-@using IdentityServer4.Extensions
-@using Microsoft.AspNetCore.Http.Extensions
 @if (User.Identity.IsAuthenticated)
 {
-    <form asp-page="/Account/Logout" asp-route-returnUrl="@Url.Page("/Index", new { area = "" })" method="post" id="logoutForm" class="navbar-right">
-        <ul class="nav navbar-nav navbar-right">
-            <li>
-                <a title="Manage">Hello @User.Claims.First(claim => claim.Type.Equals("name")).Value!</a>
-            </li>
-            <li>
-                <button type="submit" class="btn btn-link navbar-btn navbar-link">Logout</button>
-            </li>
-        </ul>
-    </form>
+    <ul class="nav navbar-nav navbar-right">
+        <li>
+            <a title="Manage">Hello @User.Claims.First(claim => claim.Type.Equals("name")).Value!</a>
+        </li>
+        <li>
+            <a asp-page="/Account/Logout">Logout</a>
+        </li>
+    </ul>
 }
 else
 {
     <ul class="nav navbar-nav navbar-right">
-        <li><a href="@Environment.GetEnvironmentVariable("IDENTITY_SERVER_ORIGIN")/Account/Register?ReturnUrl=@Context.Request.GetDisplayUrl()">Register</a></li>
-        <li><a href="@Environment.GetEnvironmentVariable("IDENTITY_SERVER_ORIGIN")/Account/Login?ReturnUrl=@Context.Request.GetDisplayUrl()">Login</a></li>
+        <li>
+            <a asp-page="/Account/Login">Register Or Login</a>
+        </li>
     </ul>
 }

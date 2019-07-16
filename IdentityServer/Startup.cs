@@ -9,14 +9,11 @@ using IdentityServer4.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Hosting.Internal;
 using Microsoft.AspNetCore.HttpOverrides;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Bson.Serialization;
 using StackExchange.Redis;
-using WebApp.Models;
 
 namespace IdentityServer
 {
@@ -166,16 +163,6 @@ namespace IdentityServer
                 {
                     repository.Add(api);
                 }
-                createdNewRepository = true;
-            }
-
-            if (!repository.CollectionExists<Client>())
-            {
-                foreach (var client in Config.GetClients())
-                {
-                    repository.Add(client);
-                }
-
                 createdNewRepository = true;
             }
 

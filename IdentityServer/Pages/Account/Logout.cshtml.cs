@@ -1,9 +1,7 @@
 using System.Threading.Tasks;
-using IdentityModel;
 using IdentityServer.Models;
 using IdentityServer4.Extensions;
 using IdentityServer4.Services;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -38,29 +36,11 @@ namespace IdentityServer.Pages.Account
         {
             if (logoutId.IsNullOrEmpty()) return null;
 
-            if (User?.Identity.IsAuthenticated != true) return null;
-
-            var idp = User.FindFirst(JwtClaimTypes.IdentityProvider)?.Value;
-
-            string externalAuthenticationScheme = null;
-
-            if (idp != null && idp != IdentityServer4.IdentityServerConstants.LocalIdentityProvider)
-            {
-                var providerSupportsSignout = await HttpContext.GetSchemeSupportsSignOutAsync(idp);
-                if (providerSupportsSignout)
-                {
-                    externalAuthenticationScheme = idp;
-                }
-            }
-
             await _signInManager.SignOutAsync();
 
-            if (externalAuthenticationScheme != null)
-            {
-                return SignOut(externalAuthenticationScheme);
-            }
-
-            return Page();
+            var logout = await _interaction.GetLogoutContextAsync(logoutId);
+            
+            return Redirect(logout.PostLogoutRedirectUri);
         }
     }
 }

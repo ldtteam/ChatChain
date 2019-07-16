@@ -1,6 +1,4 @@
-using System;
 using System.Collections.Generic;
-using IdentityServer4;
 using IdentityServer4.Models;
 
 namespace IdentityServer.Utils
@@ -24,30 +22,6 @@ namespace IdentityServer.Utils
             {
                 new IdentityResources.OpenId(),
                 new IdentityResources.Profile()
-            };
-        }
-
-        public static IEnumerable<Client> GetClients()
-        {
-            return new List<Client>
-            {
-                new Client
-                {
-                    ClientId = "auth",
-                    ClientName = "Auth Client",
-                    AllowedGrantTypes = GrantTypes.Implicit,
-                    RequireConsent = false, //TODO: REMOVE THIS
-                    
-                    RedirectUris = { Environment.GetEnvironmentVariable("WEBAPP_SERVER_URL") + "/signin-oidc" }, //TODO: REMOVE THIS
-                    
-                    PostLogoutRedirectUris = { Environment.GetEnvironmentVariable("WEBAPP_SERVER_URL") + "/signout-callback-oidc" }, //TODO: REMOVE THIS
-
-                    AllowedScopes = new List<string>
-                    {
-                        IdentityServerConstants.StandardScopes.OpenId,
-                        IdentityServerConstants.StandardScopes.Profile
-                    }
-                }
             };
         }
 
