@@ -12,18 +12,13 @@ namespace IdentityServer.Pages.Account
 {
     public class Login : PageModel
     {
-
-        private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly ILogger<Login> _logger;
-        private readonly IIdentityServerInteractionService _interaction;
 
-        public Login(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, ILogger<Login> logger, IIdentityServerInteractionService interaction)
+        public Login(SignInManager<ApplicationUser> signInManager, ILogger<Login> logger)
         {
-            _userManager = userManager;
             _signInManager = signInManager;
             _logger = logger;
-            _interaction = interaction;
         }
         
         public string ReturnUrl { get; set; }
@@ -57,8 +52,6 @@ namespace IdentityServer.Pages.Account
 
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)
         {
-            var context = await _interaction.GetAuthorizationContextAsync(returnUrl);
-            
             returnUrl = returnUrl ?? Url.Content("~/");
 
             if (!ModelState.IsValid) 
@@ -69,9 +62,6 @@ namespace IdentityServer.Pages.Account
             var result = await _signInManager.PasswordSignInAsync(Input.Username, Input.Password, Input.RememberMe, true);
             if (result.Succeeded)
             {
-
-                var user = await _userManager.FindByNameAsync(Input.Username);
-
                 _logger.LogInformation("User logged in.");
                 return Redirect(returnUrl);
             }
