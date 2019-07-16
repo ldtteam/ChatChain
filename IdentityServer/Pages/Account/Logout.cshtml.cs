@@ -27,12 +27,7 @@ namespace IdentityServer.Pages.Account
 
         public string LogoutId;
         
-        public async void OnGetAsync(string logoutId)
-        {
-            LogoutId = logoutId;
-        }
-        
-        public async Task<IActionResult> OnPostAsync(string logoutId)
+        public async Task<IActionResult> OnGetAsync(string logoutId)
         {
             if (logoutId.IsNullOrEmpty()) return null;
 

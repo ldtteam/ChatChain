@@ -1,22 +1,18 @@
 @page
 @model IdentityServer.Pages.Account.Logout
 
-<div class="container">
-    <div class="fullheight-with-navbar is-flex-centered">
-        <h1>Logout</h1>
-        <section>
-            <p>Would you like to logout of IdentityServer?</p>
-        <form method="post">
-            <input type="hidden" name="logoutId" value="@Model.LogoutId"/>
-            <fieldset>
-                <div class="form-group">
-                    <button type="submit" class="btn btn-primary">Yes</button>
-                </div>
-            </fieldset>
-        </form>
-        </section>
-    </div>
+<!DOCTYPE html>
+
+<html>
+<head>
+    <title>Logout</title>
+</head>
+<body>
+<div>
+    <h2>You shouldn't be seeing this....</h2>
 </div>
+</body>
+</html>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
