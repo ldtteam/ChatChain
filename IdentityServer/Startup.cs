@@ -3,6 +3,7 @@ using AspNetCore.Identity.Mongo;
 using IdentityServer.Extension;
 using IdentityServer.Interface;
 using IdentityServer.Models;
+using IdentityServer.Services;
 using IdentityServer.Utils;
 using IdentityServer4.Extensions;
 using IdentityServer4.Models;
@@ -10,6 +11,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Bson.Serialization;
@@ -43,6 +45,18 @@ namespace IdentityServer
                 services.AddDataProtection()
                     .PersistKeysToStackExchangeRedis(redis, "DataProtection-Keys")
                     .SetApplicationName("IdentityServer");
+            }
+            
+            var emailUsername = Environment.GetEnvironmentVariable("EMAIL_USERNAME");
+            if (!emailUsername.IsNullOrEmpty())
+            {
+                var emailPassword = Environment.GetEnvironmentVariable("EMAIL_PASSWORD");
+                var emailHost = Environment.GetEnvironmentVariable("EMAIL_HOST");
+                var emailPort = int.Parse(Environment.GetEnvironmentVariable("EMAIL_PORT"));
+                var emailSsl = bool.Parse(Environment.GetEnvironmentVariable("EMAIL_ENABLE_SSL"));
+
+                services.AddTransient<EmailSender, EmailSender>(i =>
+                    new EmailSender(emailHost, emailPort, emailSsl, emailUsername, emailPassword));
             }
             
             services.AddMvc();

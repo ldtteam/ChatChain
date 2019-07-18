@@ -12,7 +12,6 @@ By @snaddyvitch-dispenser / Conor Howland
   flex-direction: column;
   justify-content: space-between;
 }
-
 .fullheight-with-navbar {
   height: calc(100vh - 60px);
 }

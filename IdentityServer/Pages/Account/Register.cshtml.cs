@@ -2,12 +2,13 @@ using System.ComponentModel.DataAnnotations;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using IdentityServer.Models;
+using IdentityServer.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
+using MimeKit;
 
 namespace IdentityServer.Pages.Account
 {
@@ -17,13 +18,13 @@ namespace IdentityServer.Pages.Account
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ILogger<Register> _logger;
-        private readonly IEmailSender _emailSender;
+        private readonly EmailSender _emailSender;
 
         public Register(
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
             ILogger<Register> logger,
-            IEmailSender emailSender = null)
+            EmailSender emailSender = null)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -85,8 +86,26 @@ namespace IdentityServer.Pages.Account
                         new { userId = user.Id, code },
                         Request.Scheme);
 
-                        await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
-                            $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+                        var message = new MimeMessage();
+                        message.To.Add(new MailboxAddress(user.Name, Input.Email));
+                        message.Subject = "Confirm ChatChain Auth Account";
+            
+                        var plainBody = new TextPart("plain")
+                        {
+                            Text = $"Please confirm your account at: {callbackUrl}"
+                        };
+                        var htmlBody = new TextPart("html")
+                        {
+                            Text = $"Please confirm your account at: <html><a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a></html>"
+                        };
+
+                        var alternative = new MultipartAlternative();
+                        alternative.Add(plainBody);
+                        alternative.Add(htmlBody);
+
+                        message.Body = alternative;
+
+                        await _emailSender.SendEmailAsync(message);
                     }
 
                     await _signInManager.SignInAsync(user, isPersistent: false);

@@ -22,7 +22,11 @@ namespace IdentityServer.Pages.Account
 
         public async Task<IActionResult> OnGetAsync(string logoutId)
         {
-            if (logoutId.IsNullOrEmpty()) return null;
+            if (logoutId.IsNullOrEmpty())
+            {
+                await _signInManager.SignOutAsync();
+                return LocalRedirect("/Index");
+            }
 
             await _signInManager.SignOutAsync();
 

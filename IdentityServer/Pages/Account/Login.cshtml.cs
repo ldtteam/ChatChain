@@ -1,7 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 using IdentityServer.Models;
-using IdentityServer4.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -64,6 +63,11 @@ namespace IdentityServer.Pages.Account
             {
                 _logger.LogInformation("User logged in.");
                 return Redirect(returnUrl);
+            }
+            
+            if (result.RequiresTwoFactor)
+            {
+                return RedirectToPage("./LoginWith2fa", new { ReturnUrl = returnUrl, Input.RememberMe });
             }
                 
             ModelState.AddModelError(string.Empty, "Invalid login attempt.");
