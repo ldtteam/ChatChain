@@ -10,13 +10,14 @@
 {
     <div id="cookieConsent" class="alert alert-info">
         Use this space to summarize your privacy and cookie use policy.
-        <button type="button" class="btn btn-primary" data-cookie-string="@cookieString">Accept</button>
+        <button type="button" id="cookieConsentButton" class="btn btn-primary" data-cookie-string="@cookieString">Accept</button>
     </div>
     <script>
         (function () {
-            document.querySelector("#cookieConsent button[data-cookie-string]").addEventListener("click", function (el) {
+            document.querySelector("#cookieConsentButton").addEventListener("click", function (el) {
+                console.log("#cookieConsentButton");
                 document.cookie = el.target.dataset.cookieString;
-                document.querySelector("#cookieConsent").classList.add("hidden");
+                document.querySelector("#cookieConsent").style.display = "none";
             }, false);
         })();
     </script>
