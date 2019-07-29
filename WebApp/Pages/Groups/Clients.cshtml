@@ -4,49 +4,51 @@
 @{
     ViewData["Title"] = Model.Group.GroupName + "'s Clients";
 }
+<div class="container">
+    <h2>@ViewData["Title"]</h2>
 
-<h2>@ViewData["Title"]</h2>
+    <p>
+        <a asp-page="./AddClient" asp-route-id="@Model.Group.Id">Add Client</a>
+    </p>
 
-<p>
-    <a asp-page="./AddClient" asp-route-id="@Model.Group.Id">Add Client</a>
-</p>
-
-<div class="row">
-    <table class="table">
-        <thead>
-        <tr>
-            <th>Client Id</th>
-            <th>Client Name</th>
-            <th>Client Description</th>
-        </tr>
-        </thead>
-        <tbody>
-        @foreach (var client in Model.Clients)
-        {
-            Model.ClientId = client.ClientId;
+    <div class="row">
+        <table class="table" style="color: white">
+            <thead>
             <tr>
-                <td>
-                    @Html.DisplayFor(m => client.ClientId)
-                </td>
-                <td>
-                    @Html.DisplayFor(m => client.ClientName)
-                </td>
-                <td>
-                    @Html.DisplayFor(m => client.ClientDescription)
-                </td>
-                <td>
-                    <form method="post">
-                        <input type="hidden" asp-for="@Model.Group.Id"/>
-                        <input type="hidden" asp-for="@Model.ClientId" value="@client.ClientId"/>
-                        <input type="submit" value="Remove" class="btn-link"/>
-                    </form>
-                </td>
+                <th>Client Id</th>
+                <th>Client Name</th>
+                <th>Client Description</th>
+                <th></th>
             </tr>
-        }
-        </tbody>
-    </table>
-</div>
+            </thead>
+            <tbody>
+            @foreach (var client in Model.Clients)
+            {
+                Model.ClientId = client.ClientId;
+                <tr>
+                    <td>
+                        @Html.DisplayFor(m => client.ClientId)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(m => client.ClientName)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(m => client.ClientDescription)
+                    </td>
+                    <td>
+                        <form method="post">
+                            <input type="hidden" asp-for="@Model.Group.Id"/>
+                            <input type="hidden" asp-for="@Model.ClientId" value="@client.ClientId"/>
+                            <input type="submit" value="Remove" class="btn btn-danger"/>
+                        </form>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
 
-<div>
-    <a asp-page="./Index">Back to Groups</a>
+    <div>
+        <a asp-page="./Index">Back to Groups</a>
+    </div>
 </div>

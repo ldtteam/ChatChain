@@ -4,36 +4,34 @@
     ViewData["Title"] = "Edit";
 }
 
-<h2>Edit</h2>
+<div class="container">
+    <h2>Edit Group</h2>
 
-<h4>Group</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form method="post">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="Group.Id"/>
-            <div class="form-group">
-                <label asp-for="Input.GroupName" class="control-label"></label>
-                <input asp-for="Input.GroupName" value="@Model.Group.GroupName"/>
-                <span asp-validation-for="Input.GroupName" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Input.GroupDescription" class="control-label"></label>
-                <input asp-for="Input.GroupDescription" value="@Model.Group.GroupDescription"/>
-                <span asp-validation-for="Input.GroupDescription" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-default" />
-            </div>
-        </form>
+    <hr/>
+    <div class="row">
+        <div class="col-md-4">
+            <form method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <input type="hidden" asp-for="Group.Id"/>
+                <div class="form-group">
+                    <label asp-for="Input.GroupName" class="control-label"></label>
+                    <input asp-for="Input.GroupName" value="@Model.Group.GroupName"/>
+                    <span asp-validation-for="Input.GroupName" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Input.GroupDescription" class="control-label"></label>
+                    <input asp-for="Input.GroupDescription" value="@Model.Group.GroupDescription"/>
+                    <span asp-validation-for="Input.GroupDescription" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <input type="submit" value="Save" class="btn btn-success"/>
+                    <a asp-page="./Index" class="btn btn-danger">Back to List</a>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 
-<div>
-    <a asp-page="./Index">Back to List</a>
-</div>
-
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
 }
