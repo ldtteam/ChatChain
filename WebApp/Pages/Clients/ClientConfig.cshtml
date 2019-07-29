@@ -3,33 +3,35 @@
 @{
     ViewData["Title"] = "Client Config";
 }
+<div class="container">
+    <h2>Client Config</h2>
+    <hr/>
 
-<h2>Client Config</h2>
-
-<div class="row">
-    <div class="col-md-4">
-        <form method="post">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="Client.ClientId"/>
-            <div class="form-group">
-                <label class="control-label">Which Groups to send Client Events to: </label>
-                <select asp-for="SelectedClientEventGroups" asp-items="Model.GroupOptions"></select>
-            </div>
-            <div class="form-group">
-                <label class="control-label">Which Groups to send User Events to: </label>
-                <select asp-for="SelectedUserEventGroups" asp-items="Model.GroupOptions"></select>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-default" />
-            </div>
-        </form>
+    <div class="row">
+        <div class="col-md-4">
+            <form method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <input type="hidden" asp-for="Client.ClientId"/>
+                <div class="form-group">
+                    <label class="control-label">Which Groups to send Client Events to: </label>
+                    <br/>
+                    <select asp-for="SelectedClientEventGroups" asp-items="Model.GroupOptions"></select>
+                </div>
+                <hr/>
+                <div class="form-group">
+                    <label class="control-label">Which Groups to send User Events to: </label>
+                    <br/>
+                    <select asp-for="SelectedUserEventGroups" asp-items="Model.GroupOptions"></select>
+                </div>
+                <div class="form-group">
+                    <input type="submit" value="Save" class="btn btn-success"/>
+                    <a asp-page="./Index" class="btn btn-danger">Back to List</a>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 
-<div>
-    <a asp-page="./Index">Back to List</a>
-</div>
-
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
 }

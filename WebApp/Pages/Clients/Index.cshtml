@@ -10,20 +10,11 @@
         <h2 class="d-inline-block">@ViewData["Title"]</h2>
         <a class="btn btn-primary ml-auto" asp-page="./Create">Create New</a>
     </div>
-    
 
-    @if (Model.Clients.Count == 0)
-    {
-        <p>0</p>
-    }
-    else
-    {
-        <p>1</p>
-    }
-</div>
+    <p>@Model.Clients.Count</p>
 
-<div class="row">
-        <table class="table">
+    <div class="row">
+        <table class="table" style="color: white">
             <thead>
             <tr>
                 <th>Id</th>
@@ -32,25 +23,26 @@
             </tr>
             </thead>
             <tbody>
-                @foreach (var client in Model.Clients)
-                {
-                        <tr>
-                            <td>
-                                @Html.DisplayFor(m => client.ClientId)
-                            </td>
-                            <td>
-                                @Html.DisplayFor(m => client.ClientName)
-                            </td>
-                            <td>
-                                @Html.DisplayFor(m => client.ClientDescription)
-                            </td>
-                            <td>
-                                <a asp-page="./ClientConfig" asp-route-clientId="@client.ClientId">Config</a>
-                                <a asp-page="./Edit" asp-route-id="@client.ClientId">Edit</a>
-                                <a asp-page="./Delete" asp-route-id="@client.ClientId">Delete</a>
-                            </td>
-                        </tr>
-                }
+            @foreach (var client in Model.Clients)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(m => client.ClientId)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(m => client.ClientName)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(m => client.ClientDescription)
+                    </td>
+                    <td>
+                        <a asp-page="./ClientConfig" asp-route-clientId="@client.ClientId">Config</a>
+                        <a asp-page="./Edit" asp-route-id="@client.ClientId">Edit</a>
+                        <a asp-page="./Delete" asp-route-id="@client.ClientId">Delete</a>
+                    </td>
+                </tr>
+            }
             </tbody>
         </table>
+    </div>
 </div>

@@ -3,39 +3,40 @@
 @{
     ViewData["Title"] = "Delete";
 }
+<div class="container">
+    <h2>Delete</h2>
 
-<h2>Delete</h2>
+    <p class="text-danger">@Model.ErrorMessage</p>
 
-<p class="text-danger">@Model.ErrorMessage</p>
+    <h3>Are you sure you want to delete this?</h3>
+    <div>
+        <h4>Client</h4>
+        <hr/>
+        <dl class="dl-horizontal">
+            <dt>
+                @Html.DisplayNameFor(m => m.Client.ClientId)
+            </dt>
+            <dd>
+                @Html.DisplayFor(m => m.Client.ClientId)
+            </dd>
+            <dt>
+                @Html.DisplayNameFor(m => m.Client.ClientName)
+            </dt>
+            <dd>
+                @Html.DisplayFor(m => m.Client.ClientName)
+            </dd>
+            <dt>
+                @Html.DisplayNameFor(m => m.Client.ClientDescription)
+            </dt>
+            <dd>
+                @Html.DisplayFor(m => m.Client.ClientDescription)
+            </dd>
+        </dl>
 
-<h3>Are you sure you want to delete this?</h3>
-<div>
-    <h4>Client</h4>
-    <hr />
-    <dl class="dl-horizontal">
-        <dt>
-            @Html.DisplayNameFor(m => m.Client.ClientId)
-        </dt>
-        <dd>
-            @Html.DisplayFor(m => m.Client.ClientId)
-        </dd>
-        <dt>
-            @Html.DisplayNameFor(m => m.Client.ClientName)
-        </dt>
-        <dd>
-            @Html.DisplayFor(m => m.Client.ClientName)
-        </dd>
-        <dt>
-            @Html.DisplayNameFor(m => m.Client.ClientDescription)
-        </dt>
-        <dd>
-            @Html.DisplayFor(m => m.Client.ClientDescription)
-        </dd>
-    </dl>
-    
-    <form method="post">
-        <input type="hidden" asp-for="Client.ClientId" />
-        <input type="submit" value="Delete" class="btn btn-default" /> |
-        <a asp-page="./Index">Back to List</a>
-    </form>
+        <form method="post">
+            <input type="hidden" asp-for="Client.ClientId"/>
+            <input type="submit" value="Delete" class="btn btn-danger"/>
+            <a asp-page="./Index" class="btn btn-success">Back to List</a>
+        </form>
+    </div>
 </div>
