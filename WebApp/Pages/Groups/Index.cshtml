@@ -8,12 +8,8 @@
 <div class="container">
     <h2>@ViewData["Title"]</h2>
 
-    <p>
-        <a asp-page="./Create">Create New</a>
-    </p>
-
     <div class="row">
-        <table class="table" style="color: white">
+        <table class="table">
             <thead>
             <tr>
                 <th>Database Id</th>
@@ -21,7 +17,7 @@
                 <th>Group Id</th>
                 <th>Group Description</th>
                 <th>Clients</th>
-                <th></th>
+                <th><a class="btn btn-success btn-sm" asp-page="./Create">Create New</a></th>
             </tr>
             </thead>
             <tbody>
@@ -41,11 +37,13 @@
                         @Html.DisplayFor(m => group.GroupDescription)
                     </td>
                     <td>
-                        <a asp-page="./Clients" asp-route-id="@group.Id.ToString()">View Clients</a>
+                        <a class="btn btn-primary btn-sm" asp-page="./Clients" asp-route-id="@group.Id.ToString()">View Clients</a>
                     </td>
                     <td>
-                        <a asp-page="./Edit" asp-route-id="@group.Id">Edit</a>
-                        <a asp-page="./Delete" asp-route-id="@group.Id">Delete</a>
+                        <div class="btn-group">
+                            <a class="btn btn-primary btn-sm" asp-page="./Edit" asp-route-id="@group.Id">Edit</a>
+                            <a class="btn btn-danger  btn-sm" asp-page="./Delete" asp-route-id="@group.Id">Delete</a>
+                        </div>
                     </td>
                 </tr>
             }

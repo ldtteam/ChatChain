@@ -6,21 +6,20 @@
 }
 
 <div class="container">
-    <div class="d-flex">
-        <h2 class="d-inline-block">@ViewData["Title"]</h2>
-        <a class="btn btn-primary ml-auto" asp-page="./Create">Create New</a>
-    </div>
 
-    <p>@Model.Clients.Count</p>
+    <h2>@ViewData["Title"]</h2>
 
+    <!-- <p >@Model.Clients.Count</p> -->
     <div class="row">
-        <table class="table" style="color: white">
+        <table class="table">
             <thead>
             <tr>
                 <th>Id</th>
                 <th>Client Name</th>
                 <th>Client Description</th>
-                <th></th>
+                <th>
+                    <a class="btn btn-success btn-sm" asp-page="./Create">Create New</a>
+                </th>
             </tr>
             </thead>
             <tbody>
@@ -37,9 +36,11 @@
                         @Html.DisplayFor(m => client.ClientDescription)
                     </td>
                     <td>
-                        <a asp-page="./ClientConfig" asp-route-clientId="@client.ClientId">Config</a>
-                        <a asp-page="./Edit" asp-route-id="@client.ClientId">Edit</a>
-                        <a asp-page="./Delete" asp-route-id="@client.ClientId">Delete</a>
+                        <div class="btn-group">
+                            <a class="btn btn-primary btn-sm" asp-page="./ClientConfig" asp-route-clientId="@client.ClientId">Config</a>
+                            <a class="btn btn-primary btn-sm" asp-page="./Edit" asp-route-id="@client.ClientId">Edit</a>
+                            <a class="btn btn-danger  btn-sm" asp-page="./Delete" asp-route-id="@client.ClientId">Delete</a>
+                        </div>
                     </td>
                 </tr>
             }

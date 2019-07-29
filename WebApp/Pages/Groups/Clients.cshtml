@@ -7,10 +7,6 @@
 <div class="container">
     <h2>@ViewData["Title"]</h2>
 
-    <p>
-        <a asp-page="./AddClient" asp-route-id="@Model.Group.Id">Add Client</a>
-    </p>
-
     <div class="row">
         <table class="table" style="color: white">
             <thead>
@@ -18,7 +14,7 @@
                 <th>Client Id</th>
                 <th>Client Name</th>
                 <th>Client Description</th>
-                <th></th>
+                <th><a class="btn btn-success btn-sm" asp-page="./AddClient" asp-route-id="@Model.Group.Id">Add Client</a></th>
             </tr>
             </thead>
             <tbody>

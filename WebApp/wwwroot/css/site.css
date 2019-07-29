@@ -35,6 +35,10 @@ body, .navbar {
     background-color: #23262D;
 }
 
+.table{
+    color: white !important;
+}
+
 .button.is-wider {
     padding: 0 25px; /* Button with more padding */
 }
