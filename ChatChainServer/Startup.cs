@@ -11,6 +11,10 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Logging;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+using BsonObjectIdConverter = MongoDB.Integrations.JsonDotNet.Converters.BsonObjectIdConverter;
+
 
 namespace ChatChainServer
 {
@@ -32,7 +36,12 @@ namespace ChatChainServer
                     ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
             });
             
-            services.AddMvc();
+            services.AddMvc().AddJsonOptions(options =>
+            {
+                options.SerializerSettings.Converters.Add(new StringEnumConverter());
+                //options.SerializerSettings.Converters.Add(new BsonObjectIdConverter());
+                options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
+            });
 
             IdentityModelEventSource.ShowPII = true;
 
@@ -67,6 +76,8 @@ namespace ChatChainServer
             services.AddScoped<ClientService>();
             services.AddScoped<GroupService>();
             services.AddScoped<ClientConfigService>();
+            services.AddScoped<CommandRegistryService>();
+            services.AddScoped<CommandExecutionService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

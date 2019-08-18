@@ -1,10 +1,13 @@
 using System.Collections.Generic;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace ChatChainServer.Models.MessageObjects
 {
     public class ClientEventMessage
     {
-        public string Event { get; set; }
+        [JsonConverter(typeof(StringEnumConverter))]
+        public ClientEventType Event { get; set; }
         public Group Group { get; set; }
         public Client SendingClient { get; set; }
         public bool SendToSelf { get; set; }
