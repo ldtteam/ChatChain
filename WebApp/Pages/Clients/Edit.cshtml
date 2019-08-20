@@ -3,37 +3,34 @@
 @{
     ViewData["Title"] = "Edit";
 }
+<div class="container">
+    <h2>Edit Client</h2>
+    <hr/>
+    <div class="row">
+        <div class="col-md-4">
+            <form method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <input type="hidden" asp-for="Client.ClientId"/>
+                <div class="form-group">
+                    <label asp-for="Input.ClientName" class="control-label"></label>
+                    <input asp-for="Input.ClientName" value="@Model.Client.ClientName"/>
+                    <span asp-validation-for="Input.ClientName" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Input.ClientDescription" class="control-label"></label>
+                    <input asp-for="Input.ClientDescription" value="@Model.Client.ClientDescription"/>
+                    <span asp-validation-for="Input.ClientDescription" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <input type="submit" value="Save" class="btn btn-success"/>
+                    <a asp-page="./Index" class="btn btn-danger">Back to List</a>
 
-<h2>Edit</h2>
-
-<h4>Client</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form method="post">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="Client.ClientId"/>
-            <div class="form-group">
-                <label asp-for="Input.ClientName" class="control-label"></label>
-                <input asp-for="Input.ClientName" value="@Model.Client.ClientName"/>
-                <span asp-validation-for="Input.ClientName" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Input.ClientDescription" class="control-label"></label>
-                <input asp-for="Input.ClientDescription" value="@Model.Client.ClientDescription"/>
-                <span asp-validation-for="Input.ClientDescription" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-default" />
-            </div>
-        </form>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 
-<div>
-    <a asp-page="./Index">Back to List</a>
-</div>
-
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
 }

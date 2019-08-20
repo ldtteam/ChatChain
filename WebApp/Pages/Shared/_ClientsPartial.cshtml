@@ -4,6 +4,8 @@
 
 @if (SignInManager.IsSignedIn(User))
 {
-    <li><a asp-page="/Clients/Index">Clients</a></li>
-    <li><a asp-page="/Groups/Index">Groups</a></li>
+    <ul class="navbar-nav mr-auto">
+        <li class="nav-item"><a class="nav-link" asp-page="/Clients/Index">Clients</a></li>
+        <li class="nav-item"><a class="nav-link" asp-page="/Groups/Index">Groups</a></li>
+    </ul>
 }

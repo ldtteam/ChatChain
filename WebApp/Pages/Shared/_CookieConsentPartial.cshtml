@@ -8,33 +8,17 @@
 
 @if (showBanner)
 {
-    <nav id="cookieConsent" class="navbar navbar-default navbar-fixed-top" role="alert">
-        <div class="container">
-            <div class="navbar-header">
-                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#cookieConsent .navbar-collapse">
-                    <span class="sr-only">Toggle cookie consent banner</span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                </button>
-                <span class="navbar-brand"><span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span></span>
-            </div>
-            <div class="collapse navbar-collapse">
-                <p class="navbar-text">
-                    Use this space to summarize your privacy and cookie use policy.
-                </p>
-                <div class="navbar-right">
-                    <a asp-page="/Privacy" class="btn btn-info navbar-btn">Learn More</a>
-                    <button type="button" class="btn btn-default navbar-btn" data-cookie-string="@cookieString">Accept</button>
-                </div>
-            </div>
-        </div>
-    </nav>
+    <div id="cookieConsent" class="alert alert-info">
+        <p>Yup, like every other site on the web, we use cookies. We use them for auth/security stuff, nothing else. 
+        The site won't function without them, click accept to accept this, or don't, I won't tell you how to live your life.</p>
+        <button type="button" id="cookieConsentButton" class="btn btn-primary" data-cookie-string="@cookieString">Accept</button>
+    </div>
     <script>
         (function () {
-            document.querySelector("#cookieConsent button[data-cookie-string]").addEventListener("click", function (el) {
+            document.querySelector("#cookieConsentButton").addEventListener("click", function (el) {
+                console.log("#cookieConsentButton");
                 document.cookie = el.target.dataset.cookieString;
-                document.querySelector("#cookieConsent").classList.add("hidden");
+                document.querySelector("#cookieConsent").style.display = "none";
             }, false);
         })();
     </script>
