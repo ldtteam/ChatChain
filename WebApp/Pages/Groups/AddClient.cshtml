@@ -4,27 +4,32 @@
     ViewData["Title"] = "Create";
 }
 <div class="container">
-    <h2>Add Client to group @Model.Group.GroupName</h2>
-
+    <script src="~/js/chosen.jquery.min.js" asp-append-version="true"></script>
+    <link rel="stylesheet" href="~/css/chosen.min.css">
+    
+    <h2>Edit Clients for @Model.Group.GroupName</h2>
     <hr/>
     <div class="row">
-        <div class="col-md-4">
-            <form method="post">
-                <div class="col-md-8">
-                    @Html.Hidden("id", Model.Group.Id)
-                    @Html.DropDownListFor(model => model.Input.ClientId, new SelectList(Model.Clients, "Value", "Text"), htmlAttributes: new {@class = "form-control", id = "Client"})
-                    @Html.ValidationMessageFor(model => model.Input.ClientId, "", new {@class = "text-danger"})
-                    <br/>
-                    <input type="submit" value="Add" class="btn btn-success"/>
-                    <a asp-page="./Clients" asp-route-id="@Model.Group.Id.ToString()" class="btn btn-danger">Back to List</a>
-                </div>
-            </form>
+            <div class="col-md-4">
+                <form method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <input type="hidden" asp-for="Group.Id"/>
+                    <div class="form-group">
+                        <br/>
+                        <select asp-for="SelectedClients" asp-items="Model.ClientOptions" 
+                                class="SelectedClients" style="width: 300px"></select>
+                    </div>
+                    <hr/>
+                    <div class="form-group">
+                        <input type="submit" value="Save" class="btn btn-success"/>
+                        <a asp-page="./Clients" asp-route-id="@Model.Group.Id.ToString()" class="btn btn-danger">Back to List</a>
+                    </div>
+                </form>
+            </div>
         </div>
-    </div>
-
-    <div>
-
-    </div>
+    <script>
+        $(".SelectedClients").chosen();
+    </script>
 </div>
 
 @section Scripts {

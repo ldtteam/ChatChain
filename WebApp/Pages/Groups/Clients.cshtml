@@ -14,7 +14,7 @@
                 <th>Client Id</th>
                 <th>Client Name</th>
                 <th>Client Description</th>
-                <th><a class="btn btn-success btn-sm" asp-page="./AddClient" asp-route-id="@Model.Group.Id">Add Client</a></th>
+                <th><a class="btn btn-success btn-sm" asp-page="./AddClient" asp-route-id="@Model.Group.Id">Edit Clients</a></th>
             </tr>
             </thead>
             <tbody>
@@ -35,7 +35,6 @@
                         <form method="post">
                             <input type="hidden" asp-for="@Model.Group.Id"/>
                             <input type="hidden" asp-for="@Model.ClientId" value="@client.ClientId"/>
-                            <input type="submit" value="Remove" class="btn btn-danger"/>
                         </form>
                     </td>
                 </tr>
@@ -45,6 +44,6 @@
     </div>
 
     <div>
-        <a asp-page="./Index">Back to Groups</a>
+        <a asp-page="./Index" class="btn btn-danger">Back to Groups</a>
     </div>
 </div>
