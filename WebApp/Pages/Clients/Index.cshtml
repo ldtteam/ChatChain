@@ -5,41 +5,46 @@
     ViewData["Title"] = "Clients";
 }
 
-<h2>@ViewData["Title"]</h2>
+<div class="container">
 
-<p>
-    <a asp-page="./Create">Create New</a>
-</p>
+    <h2>@ViewData["Title"]</h2>
 
-<div class="row">
+    <!-- <p >@Model.Clients.Count</p> -->
+    <div class="row">
         <table class="table">
             <thead>
             <tr>
                 <th>Id</th>
                 <th>Client Name</th>
                 <th>Client Description</th>
+                <th>
+                    <a class="btn btn-success btn-sm" asp-page="./Create">Create New</a>
+                </th>
             </tr>
             </thead>
             <tbody>
-                @foreach (var client in Model.Clients)
-                {
-                        <tr>
-                            <td>
-                                @Html.DisplayFor(m => client.ClientId)
-                            </td>
-                            <td>
-                                @Html.DisplayFor(m => client.ClientName)
-                            </td>
-                            <td>
-                                @Html.DisplayFor(m => client.ClientDescription)
-                            </td>
-                            <td>
-                                <a asp-page="./ClientConfig" asp-route-clientId="@client.ClientId">Config</a>
-                                <a asp-page="./Edit" asp-route-id="@client.ClientId">Edit</a>
-                                <a asp-page="./Delete" asp-route-id="@client.ClientId">Delete</a>
-                            </td>
-                        </tr>
-                }
+            @foreach (var client in Model.Clients)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(m => client.ClientId)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(m => client.ClientName)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(m => client.ClientDescription)
+                    </td>
+                    <td>
+                        <div class="btn-group">
+                            <a class="btn btn-primary btn-sm" asp-page="./ClientConfig" asp-route-clientId="@client.ClientId">Config</a>
+                            <a class="btn btn-primary btn-sm" asp-page="./Edit" asp-route-id="@client.ClientId">Edit</a>
+                            <a class="btn btn-danger  btn-sm" asp-page="./Delete" asp-route-id="@client.ClientId">Delete</a>
+                        </div>
+                    </td>
+                </tr>
+            }
             </tbody>
         </table>
+    </div>
 </div>
