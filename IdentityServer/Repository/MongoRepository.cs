@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using IdentityServer.Config;
 using IdentityServer.Interface;
 using MongoDB.Bson;
 using MongoDB.Driver;
@@ -14,10 +15,10 @@ namespace IdentityServer.Repository
         /// <summary>
         /// This Contructor leverages .NET Core built-in DI
         /// </summary>
-        public MongoRepository()
+        public MongoRepository(MongoConnections mongoConnections)
         {
-            IMongoClient client = new MongoClient(Environment.GetEnvironmentVariable("IDENTITY_SERVER_DATABASE_CONNECTION"));
-            _database = client.GetDatabase(Environment.GetEnvironmentVariable("IDENTITY_SERVER_DATABASE"));
+            IMongoClient client = new MongoClient(mongoConnections.IdentityServerConnection.ConnectionString);
+            _database = client.GetDatabase(mongoConnections.IdentityServerConnection.DatabaseName);
         }
 
         public IQueryable<T> All<T>() where T : class, new()

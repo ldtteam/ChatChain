@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using IdentityServer4.Models;
 
-namespace IdentityServer.Utils
+namespace IdentityServer.Config
 {
-    public class Config
+    public class IdentityConfig
     {
         
         //API that are allowed to access the Auth server

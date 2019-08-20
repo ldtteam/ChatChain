@@ -1,17 +1,15 @@
 ﻿using System;
-using AspNetCore.Identity.Mongo;
+using IdentityServer.Config;
 using IdentityServer.Extension;
 using IdentityServer.Interface;
 using IdentityServer.Models;
 using IdentityServer.Services;
-using IdentityServer.Utils;
 using IdentityServer4.Extensions;
 using IdentityServer4.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpOverrides;
-using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Bson.Serialization;
@@ -21,57 +19,81 @@ namespace IdentityServer
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        public Startup(IHostingEnvironment env)
         {
-            Configuration = configuration;
+            IConfigurationBuilder builder = new ConfigurationBuilder()
+                .SetBasePath(env.ContentRootPath)
+                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true);
+
+            builder.AddEnvironmentVariables();
+            _configuration = builder.Build();
+
         }
 
-        public IConfiguration Configuration { get; }
+        private IConfigurationRoot _configuration;
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            MongoConnections mongoConnections = new MongoConnections();
+            _configuration.GetSection("MongoConnections").Bind(mongoConnections);
+            services.AddSingleton(mongoConnections);
+            
+            EmailConnection emailConnection = new EmailConnection();
+            if (_configuration.GetSection("EmailConnection").Exists())
+            {
+                _configuration.GetSection("EmailConnection").Bind(emailConnection);
+                services.AddSingleton(emailConnection);
+            }
+            
+            IdentityServerOptions identityServerOptions = new IdentityServerOptions();
+            _configuration.GetSection("IdentityServerOptions").Bind(identityServerOptions);
+            services.AddSingleton(identityServerOptions);
+
             services.Configure<ForwardedHeadersOptions>(options =>
             {
                 options.ForwardedHeaders = 
                     ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
             });
             
-            var redisConnectionVariable = Environment.GetEnvironmentVariable("REDIS_STACK_EXCHANGE");
+            string redisConnectionVariable = _configuration.GetValue<string>("RedisConnection");
             
             if (redisConnectionVariable != null && !redisConnectionVariable.IsNullOrEmpty())
             {
-                var redis = ConnectionMultiplexer.Connect(redisConnectionVariable);
+                ConnectionMultiplexer redis = ConnectionMultiplexer.Connect(redisConnectionVariable);
                 services.AddDataProtection()
                     .PersistKeysToStackExchangeRedis(redis, "DataProtection-Keys")
                     .SetApplicationName("IdentityServer");
             }
             
-            var emailUsername = Environment.GetEnvironmentVariable("EMAIL_USERNAME");
-            if (!emailUsername.IsNullOrEmpty())
+            if (emailConnection.Host != null)
             {
-                var emailPassword = Environment.GetEnvironmentVariable("EMAIL_PASSWORD");
-                var emailHost = Environment.GetEnvironmentVariable("EMAIL_HOST");
-                var emailPort = int.Parse(Environment.GetEnvironmentVariable("EMAIL_PORT"));
-                var emailSsl = bool.Parse(Environment.GetEnvironmentVariable("EMAIL_ENABLE_SSL"));
+                string emailUsername = emailConnection.Username;
+                string emailPassword = emailConnection.Password;
+                string emailHost = emailConnection.Host;
+                int emailPort = emailConnection.Port;
+                bool emailSsl = emailConnection.Ssl;
 
                 services.AddTransient<EmailSender, EmailSender>(i =>
                     new EmailSender(emailHost, emailPort, emailSsl, emailUsername, emailPassword));
             }
             
             services.AddMvc();
-            
-            var identityDatabase = Environment.GetEnvironmentVariable("IDENTITY_DATABASE");
-            
+
             services.AddIdentityMongoDbProvider<ApplicationUser, ApplicationRole>(identityOptions =>
             {
                 identityOptions.Password.RequireNonAlphanumeric = false;
-            }, mongoIdentityOptions => { mongoIdentityOptions.ConnectionString = identityDatabase; });
+            }, mongoIdentityOptions =>
+            {
+                mongoIdentityOptions.ConnectionString = mongoConnections.IdentityConnection.ConnectionString;
+                mongoIdentityOptions.DatabaseName = mongoConnections.IdentityConnection.DatabaseName;
+            });
 
-            var identityServerBuilder = services.AddIdentityServer(options =>
+            IIdentityServerBuilder identityServerBuilder = services.AddIdentityServer(options =>
                 {
-                    options.IssuerUri = Environment.GetEnvironmentVariable("IDENTITY_SERVER_URL");
-                    options.PublicOrigin = Environment.GetEnvironmentVariable("IDENTITY_SERVER_ORIGIN");
+                    options.IssuerUri = identityServerOptions.ServerUrl;
+                    options.PublicOrigin = identityServerOptions.ServerOrigin;
                 })
                 //.AddDeveloperSigningCredential()
                 .AddMongoRepository()
@@ -80,7 +102,7 @@ namespace IdentityServer
                 .AddPersistedGrants()
                 .AddAspNetIdentity<ApplicationUser>();
 
-            var isDevelopment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+            string isDevelopment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
             
             if (isDevelopment != null && isDevelopment.Equals("Development"))
             {
@@ -103,11 +125,11 @@ namespace IdentityServer
                 app.UseExceptionHandler("/Error");
             }
             
-            var useHttps = Environment.GetEnvironmentVariable("USE_HTTPS");
+            string useHttps = Environment.GetEnvironmentVariable("USE_HTTPS");
 
             if (useHttps != null && !useHttps.IsNullOrEmpty())
             {
-                var boolUseHttps = bool.Parse(useHttps);
+                bool boolUseHttps = bool.Parse(useHttps);
 
                 if (boolUseHttps)
                 {
@@ -155,15 +177,15 @@ namespace IdentityServer
 
         }
         
-        private void InitializeDatabase(IApplicationBuilder app)
+        private static void InitializeDatabase(IApplicationBuilder app)
         {
             bool createdNewRepository = false;
-            var repository = app.ApplicationServices.GetService<IRepository>();
+            IRepository repository = app.ApplicationServices.GetService<IRepository>();
 
             //  --IdentityResource
             if (!repository.CollectionExists<IdentityResource>())
             {
-                foreach (var res in Config.GetIdentityResources())
+                foreach (IdentityResource res in IdentityConfig.GetIdentityResources())
                 {
                     repository.Add(res);
                 }
@@ -173,7 +195,7 @@ namespace IdentityServer
             //  --ApiResource
             if (!repository.CollectionExists<ApiResource>())
             {
-                foreach (var api in Config.GetApis())
+                foreach (ApiResource api in IdentityConfig.GetApis())
                 {
                     repository.Add(api);
                 }
@@ -181,11 +203,9 @@ namespace IdentityServer
             }
 
             // If it's a new Repository (database), need to restart the website to configure Mongo to ignore Extra Elements.
-            if (createdNewRepository)
-            {
-                var newRepositoryMsg = "Mongo Repository created/populated! Please restart you website, so Mongo driver will be configured  to ignore Extra Elements.";
-                throw new Exception(newRepositoryMsg);
-            }
+            if (!createdNewRepository) return;
+            const string newRepositoryMsg = "Mongo Repository created/populated! Please restart you website, so Mongo driver will be configured  to ignore Extra Elements.";
+            throw new Exception(newRepositoryMsg);
         }
     }
 }
