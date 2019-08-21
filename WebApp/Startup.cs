@@ -78,7 +78,8 @@ namespace WebApp
                     options.Authority = Environment.GetEnvironmentVariable("IDENTITY_SERVER_URL");
                     options.RequireHttpsMetadata = false;
 
-                    options.ClientId = "auth";
+                    options.ClientId = "webapp";
+                    options.ClientSecret = "Testing123!";
                     options.SaveTokens = true;
                 });
 

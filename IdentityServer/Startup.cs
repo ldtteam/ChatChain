@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using IdentityServer.Config;
 using IdentityServer.Extension;
 using IdentityServer.Interface;
@@ -14,6 +16,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Bson.Serialization;
 using StackExchange.Redis;
+using Secret = IdentityServer4.Models.Secret;
 
 namespace IdentityServer
 {
@@ -26,7 +29,7 @@ namespace IdentityServer
                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
                 .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true);
 
-            builder.AddEnvironmentVariables();
+            builder.AddEnvironmentVariables(options => { options.Prefix = "ChatChain_IdentityServer_"; });
             _configuration = builder.Build();
 
         }
@@ -101,6 +104,33 @@ namespace IdentityServer
                 .AddIdentityApiResources()
                 .AddPersistedGrants()
                 .AddAspNetIdentity<ApplicationUser>();
+            
+            if (_configuration.GetSection("ClientsConfig").Exists())
+            {
+                ClientsConfig clientsConfig = new ClientsConfig();
+
+                _configuration.GetSection("ClientsConfig").Bind(clientsConfig);
+
+                List<Client> clients = new List<Client>();
+
+                foreach (ClientConfig clientConfig in clientsConfig.ClientConfigs)
+                {
+                    clients.Add(new Client
+                    {
+                        ClientId = clientConfig.ClientId,
+                        ClientName = clientConfig.ClientName,
+                        RequireConsent = clientConfig.RequireConsent,
+                        RedirectUris = clientConfig.RedirectUris,
+                        PostLogoutRedirectUris = clientConfig.PostLogoutRedirectUris,
+                        AllowedCorsOrigins = clientConfig.AllowedCorsOrigins,
+                        AllowedGrantTypes = clientConfig.AllowedGrantTypes,
+                        ClientSecrets = clientConfig.Sha256Secrets.Select(sha256 => new Secret(sha256)).ToList(),
+                        AllowedScopes = clientConfig.AllowedScopes,
+                    });
+                }
+
+                identityServerBuilder.AddInMemoryClients(clients);
+            }
 
             string isDevelopment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
             
