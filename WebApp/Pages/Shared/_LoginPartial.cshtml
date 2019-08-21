@@ -1,13 +1,15 @@
 @if (User.Identity.IsAuthenticated)
 {
+    <form class="navbar-right">
     <ul class="navbar-nav ml-auto">
         <li class="nav-item">
-            <a title="Manage">Hello @User.Claims.First(claim => claim.Type.Equals("name")).Value!</a>
+            <a class="nav-link" title="Manage">Hello @User.Claims.First(claim => claim.Type.Equals("name")).Value!</a>
         </li>
         <li class="nav-item">
             <a class="btn btn-link nav-btn nav-link" asp-page="/Account/Logout">Logout</a>
         </li>
     </ul>
+    </form>
 }
 else
 {
