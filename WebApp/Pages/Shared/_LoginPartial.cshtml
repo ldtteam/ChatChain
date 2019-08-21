@@ -1,19 +1,19 @@
 @if (User.Identity.IsAuthenticated)
 {
-    <ul class="nav navbar-nav navbar-right">
-        <li>
+    <ul class="navbar-nav ml-auto">
+        <li class="nav-item">
             <a title="Manage">Hello @User.Claims.First(claim => claim.Type.Equals("name")).Value!</a>
         </li>
-        <li>
-            <a asp-page="/Account/Logout">Logout</a>
+        <li class="nav-item">
+            <a class="btn btn-link nav-btn nav-link" asp-page="/Account/Logout">Logout</a>
         </li>
     </ul>
 }
 else
 {
-    <ul class="nav navbar-nav navbar-right">
-        <li>
-            <a asp-page="/Account/Login">Register Or Login</a>
+    <ul class="navbar-nav ml-auto">
+        <li class="nav-item">
+            <a class="nav-link" asp-page="/Account/Login">Register Or Login</a>
         </li>
     </ul>
 }
