@@ -1,12 +1,8 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
-using IdentityServer.Store;
-using WebApp.Models;
-using WebApp.Services;
+using ChatChainCommon.DatabaseModels;
+using ChatChainCommon.DatabaseServices;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
@@ -25,8 +21,8 @@ namespace WebApp.Pages.Groups
             _clientsContext = clientsContext;
         }
 
-        public IList<Client> Clients { get; set; }
-        public Group Group { get; set; }
+        public IList<Client> Clients { get; private set; }
+        public Group Group { get; private set; }
         [BindProperty]
         public string ClientId { get; set; }
 
@@ -41,7 +37,7 @@ namespace WebApp.Pages.Groups
             
             Clients = new List<Client>();
 
-            foreach (var client in _groupsContext.GetClients(Group.Id.ToString()))
+            foreach (Client client in _groupsContext.GetClients(Group.Id.ToString()))
             {
                 if (client.OwnerId == User.Claims.First(claim => claim.Type.Equals("sub")).Value)
                 {
@@ -56,7 +52,7 @@ namespace WebApp.Pages.Groups
         {
             Group = _groupsContext.Get(id);
 
-            var groupClient = _clientsContext.Get(ClientId);
+            Client groupClient = _clientsContext.Get(ClientId);
             
             if (Group.OwnerId != User.Claims.First(claim => claim.Type.Equals("sub")).Value || groupClient.OwnerId != User.Claims.First(claim => claim.Type.Equals("sub")).Value)
             {

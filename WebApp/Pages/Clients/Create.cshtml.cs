@@ -2,13 +2,10 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
-using IdentityServer.Store;
-using IdentityServer4.Extensions;
+using ChatChainCommon.DatabaseServices;
+using ChatChainCommon.IdentityServerStore;
 using IdentityServer4.Models;
-using WebApp.Models;
-using WebApp.Services;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Client = IdentityServer4.Models.Client;
@@ -63,9 +60,9 @@ namespace WebApp.Pages.Clients
                 return Page();
             }
 
-            var clientId = Guid.NewGuid().ToString();
+            string clientId = Guid.NewGuid().ToString();
 
-            var client = new Client
+            Client client = new Client
             {
                 ClientId = clientId,
                 ClientName = Input.ClientName,
@@ -87,9 +84,9 @@ namespace WebApp.Pages.Clients
 
             _clientStore.AddClient(client);
             
-            var is4Client = await _clientStore.FindClientByIdAsync(clientId);
+            Client is4Client = await _clientStore.FindClientByIdAsync(clientId);
 
-            var newClient = new Models.Client
+            ChatChainCommon.DatabaseModels.Client newClient = new ChatChainCommon.DatabaseModels.Client
             {
                 //OwnerId = _userManager.GetUserAsync(User).Result.Id,
                 OwnerId = User.Claims.First(claim => claim.Type.Equals("sub")).Value,

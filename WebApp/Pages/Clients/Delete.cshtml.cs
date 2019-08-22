@@ -1,11 +1,9 @@
-using System;
 using System.Linq;
 using System.Threading.Tasks;
-using IdentityServer.Store;
-using WebApp.Models;
-using WebApp.Services;
+using ChatChainCommon.DatabaseModels;
+using ChatChainCommon.DatabaseServices;
+using ChatChainCommon.IdentityServerStore;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
@@ -52,9 +50,9 @@ namespace WebApp.Pages.Clients
                 return NotFound();
             }
 
-            var client = await _is4ClientStore.FindClientByIdAsync(id);
+            IdentityServer4.Models.Client client = await _is4ClientStore.FindClientByIdAsync(id);
             
-            var groupClient = _clientsContext.Get(id);
+            Client groupClient = _clientsContext.Get(id);
             
             if (groupClient != null && groupClient.OwnerId != User.Claims.First(claim => claim.Type.Equals("sub")).Value)
             {

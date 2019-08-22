@@ -1,10 +1,8 @@
-using System;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using WebApp.Models;
-using WebApp.Services;
+using ChatChainCommon.DatabaseModels;
+using ChatChainCommon.DatabaseServices;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
@@ -73,7 +71,7 @@ namespace WebApp.Pages.Groups
                 return RedirectToPage("./Index");
             }
 
-            var groupToUpdate = _groupsContext.Get(id);
+            Group groupToUpdate = _groupsContext.Get(id);
 
             groupToUpdate.GroupName = Input.GroupName;
             groupToUpdate.GroupDescription = Input.GroupDescription;

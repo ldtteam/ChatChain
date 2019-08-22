@@ -149,7 +149,7 @@ namespace IdentityServer.Pages.Account.Manage
         {
             return string.Format(
                 AuthenticatorUriFormat,
-                _urlEncoder.Encode("IdentityServer"),
+                _urlEncoder.Encode("ChatChain Auth"),
                 _urlEncoder.Encode(email),
                 unformattedKey);
         }

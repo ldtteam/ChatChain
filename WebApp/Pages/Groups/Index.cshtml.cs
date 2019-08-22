@@ -1,9 +1,8 @@
 using System.Collections.Generic;
 using System.Linq;
-using WebApp.Models;
-using WebApp.Services;
+using ChatChainCommon.DatabaseModels;
+using ChatChainCommon.DatabaseServices;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace WebApp.Pages.Groups
@@ -24,7 +23,7 @@ namespace WebApp.Pages.Groups
         {
             Groups = new List<Group>();
 
-            foreach (var group in _groupsContext.Get())
+            foreach (Group group in _groupsContext.Get())
             {
                 if (group.OwnerId != User.Claims.First(claim => claim.Type.Equals("sub")).Value) continue;
                 

@@ -1,11 +1,9 @@
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
-using IdentityServer.Store;
-using WebApp.Models;
-using WebApp.Services;
+using ChatChainCommon.DatabaseModels;
+using ChatChainCommon.DatabaseServices;
+using ChatChainCommon.IdentityServerStore;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace WebApp.Pages.Clients
@@ -14,12 +12,12 @@ namespace WebApp.Pages.Clients
     public class IndexModel : PageModel
     {
         private readonly CustomClientStore _is4ClientStore;
-        public readonly ClientService ClientsContext;
+        private readonly ClientService _clientsContext;
         
         public IndexModel(CustomClientStore is4ClientStore, ClientService clientsContext)
         {
             _is4ClientStore = is4ClientStore;
-            ClientsContext = clientsContext;
+            _clientsContext = clientsContext;
         }
 
         public IList<Client> Clients { get; set; }
@@ -28,7 +26,7 @@ namespace WebApp.Pages.Clients
         {
             Clients = new List<Client>();
 
-            foreach (var client in ClientsContext.Get())
+            foreach (Client client in _clientsContext.Get())
             {
                 if (client != null && client.OwnerId == User.Claims.First(claim => claim.Type.Equals("sub")).Value)
                 {

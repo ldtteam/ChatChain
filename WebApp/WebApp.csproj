@@ -40,4 +40,52 @@
       <_ContentIncludedByDefault Remove="Areas\Identity\Pages\_ViewStart.cshtml" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Compile Include="..\ChatChainCommon\Config\EmailConnection.cs">
+        <Link>Config\EmailConnection.cs</Link>
+      </Compile>
+      <Compile Include="..\ChatChainCommon\Config\IdentityServerConnection.cs">
+        <Link>Config\IdentityServerConnection.cs</Link>
+      </Compile>
+      <Compile Include="..\ChatChainCommon\Config\MongoConnections.cs">
+        <Link>Config\MongoConnections.cs</Link>
+      </Compile>
+      <Compile Include="..\ChatChainCommon\Config\MongoOptions.cs">
+        <Link>Config\MongoOptions.cs</Link>
+      </Compile>
+      <Compile Include="..\ChatChainCommon\DatabaseModels\Client.cs">
+        <Link>DatabaseModels\Client.cs</Link>
+      </Compile>
+      <Compile Include="..\ChatChainCommon\DatabaseModels\ClientConfig.cs">
+        <Link>DatabaseModels\ClientConfig.cs</Link>
+      </Compile>
+      <Compile Include="..\ChatChainCommon\DatabaseModels\Group.cs">
+        <Link>DatabaseModels\Group.cs</Link>
+      </Compile>
+      <Compile Include="..\ChatChainCommon\DatabaseServices\ClientConfigService.cs">
+        <Link>DatabaseServices\ClientConfigService.cs</Link>
+      </Compile>
+      <Compile Include="..\ChatChainCommon\DatabaseServices\ClientService.cs">
+        <Link>DatabaseServices\ClientService.cs</Link>
+      </Compile>
+      <Compile Include="..\ChatChainCommon\DatabaseServices\GroupService.cs">
+        <Link>DatabaseServices\GroupService.cs</Link>
+      </Compile>
+      <Compile Include="..\ChatChainCommon\IdentityServerRepository\IRepository.cs">
+        <Link>IdentityServerRepository\IRepository.cs</Link>
+      </Compile>
+      <Compile Include="..\ChatChainCommon\IdentityServerRepository\MongoRepository.cs">
+        <Link>IdentityServerRepository\MongoRepository.cs</Link>
+      </Compile>
+      <Compile Include="..\ChatChainCommon\IdentityServerStore\CustomClientStore.cs">
+        <Link>IdentityServerStore\CustomClientStore.cs</Link>
+      </Compile>
+      <Compile Include="..\ChatChainCommon\IdentityServerStore\CustomPersistedGrantStore.cs">
+        <Link>IdentityServerStore\CustomPersistedGrantStore.cs</Link>
+      </Compile>
+      <Compile Include="..\ChatChainCommon\IdentityServerStore\CustomResourceStore.cs">
+        <Link>IdentityServerStore\CustomResourceStore.cs</Link>
+      </Compile>
+    </ItemGroup>
+
 </Project>

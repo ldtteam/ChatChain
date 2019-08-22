@@ -11,6 +11,12 @@
 <div>
     <h2>Goodbye!</h2>
 </div>
+
+@if (Model.SignOutIframeUrl != null)
+{
+    <iframe width="0" height="0" class="signout" src="@Model.SignOutIframeUrl"></iframe>
+}
+
 </body>
 </html>
 

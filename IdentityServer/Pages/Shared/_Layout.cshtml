@@ -1,4 +1,7 @@
-﻿<!DOCTYPE HTML>
+﻿@using Microsoft.Extensions.Configuration
+@inject IConfigurationRoot Configuration
+
+<!DOCTYPE HTML>
 <html>
     <head>
         <meta charset="utf-8" />
@@ -12,7 +15,7 @@
     </head>
     <body>
         <nav class="navbar navbar-dark navbar-expand-lg">
-            <a class="navbar-brand" asp-page="/Index">
+            <a class="navbar-brand" href="@( Configuration.GetValue<string>("WebAppUrl") )">
             <img src="/images/ChatChainLogo.png" width="32" height="32" alt="ChatChain Logo" />
             <b>Chat</b>Chain
             </a>

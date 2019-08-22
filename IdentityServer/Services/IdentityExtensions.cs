@@ -2,7 +2,7 @@ using System;
 using AspNetCore.Identity.Mongo.Collections;
 using AspNetCore.Identity.Mongo.Model;
 using AspNetCore.Identity.Mongo.Stores;
-using IdentityServer.Config;
+using ChatChainCommon.Config;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 

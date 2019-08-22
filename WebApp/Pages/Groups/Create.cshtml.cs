@@ -1,10 +1,9 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using WebApp.Models;
-using WebApp.Services;
+using ChatChainCommon.DatabaseModels;
+using ChatChainCommon.DatabaseServices;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
@@ -43,9 +42,9 @@ namespace WebApp.Pages.Groups
                 return Page();
             }
 
-            var groupId = Guid.NewGuid().ToString();
+            string groupId = Guid.NewGuid().ToString();
 
-            var group = new Group
+            Group group = new Group
             {
                 GroupId = groupId,
                 GroupName = Input.GroupName,

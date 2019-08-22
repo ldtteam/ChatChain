@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using IdentityServer.Config;
+using ChatChainCommon.Config;
+using ChatChainCommon.Config.IdentityServer;
+using ChatChainCommon.IdentityServerRepository;
 using IdentityServer.Extension;
-using IdentityServer.Interface;
 using IdentityServer.Models;
 using IdentityServer.Services;
 using IdentityServer4.Extensions;
@@ -31,7 +32,6 @@ namespace IdentityServer
 
             builder.AddEnvironmentVariables(options => { options.Prefix = "ChatChain_IdentityServer_"; });
             _configuration = builder.Build();
-
         }
 
         private IConfigurationRoot _configuration;
@@ -39,6 +39,8 @@ namespace IdentityServer
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddSingleton(_configuration);
+            
             MongoConnections mongoConnections = new MongoConnections();
             _configuration.GetSection("MongoConnections").Bind(mongoConnections);
             services.AddSingleton(mongoConnections);
@@ -110,6 +112,7 @@ namespace IdentityServer
                 ClientsConfig clientsConfig = new ClientsConfig();
 
                 _configuration.GetSection("ClientsConfig").Bind(clientsConfig);
+                services.AddSingleton(clientsConfig);
 
                 List<Client> clients = new List<Client>();
 
@@ -124,8 +127,8 @@ namespace IdentityServer
                         PostLogoutRedirectUris = clientConfig.PostLogoutRedirectUris,
                         AllowedCorsOrigins = clientConfig.AllowedCorsOrigins,
                         AllowedGrantTypes = clientConfig.AllowedGrantTypes,
-                        ClientSecrets = clientConfig.Sha256Secrets.Select(sha256 => new Secret(sha256)).ToList(),
-                        AllowedScopes = clientConfig.AllowedScopes,
+                        ClientSecrets = clientConfig.Secrets.Select(secret => new Secret(secret.Sha256())).ToList(),
+                        AllowedScopes = clientConfig.AllowedScopes
                     });
                 }
 

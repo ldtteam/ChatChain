@@ -1,6 +1,5 @@
-using IdentityServer.Interface;
-using IdentityServer.Repository;
-using IdentityServer.Store;
+using ChatChainCommon.IdentityServerRepository;
+using ChatChainCommon.IdentityServerStore;
 using IdentityServer4.Services;
 using IdentityServer4.Stores;
 using Microsoft.Extensions.DependencyInjection;

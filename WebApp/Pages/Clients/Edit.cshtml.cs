@@ -1,12 +1,10 @@
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Xml.Serialization;
-using IdentityServer.Store;
-using WebApp.Models;
-using WebApp.Services;
+using ChatChainCommon.DatabaseModels;
+using ChatChainCommon.DatabaseServices;
+using ChatChainCommon.IdentityServerStore;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
@@ -76,14 +74,14 @@ namespace WebApp.Pages.Clients
                 return Page();
             }
             
-            var groupsClient = _clientsContext.Get(id);
+            Client groupsClient = _clientsContext.Get(id);
 
             if (groupsClient.OwnerId != User.Claims.First(claim => claim.Type.Equals("sub")).Value)
             {
                 return RedirectToPage("./Index");
             }
 
-            var clientToUpdate = await _is4ClientStore.FindClientByIdAsync(id);
+            IdentityServer4.Models.Client clientToUpdate = await _is4ClientStore.FindClientByIdAsync(id);
 
             clientToUpdate.ClientName = Input.ClientName;
             _is4ClientStore.UpdateClient(clientToUpdate);

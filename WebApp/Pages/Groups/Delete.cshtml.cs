@@ -1,14 +1,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using IdentityServer.Store;
-using WebApp.Models;
-using WebApp.Services;
+using ChatChainCommon.DatabaseModels;
+using ChatChainCommon.DatabaseServices;
+using ChatChainCommon.IdentityServerStore;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using Client = IdentityServer4.Models.Client;
 
 namespace WebApp.Pages.Groups
 {
@@ -26,7 +26,7 @@ namespace WebApp.Pages.Groups
         
         [BindProperty]
         public Group Group { get; set; }
-        public List<string> Clients { get; set; }
+        public List<string> Clients { get; private set; }
         public string ErrorMessage { get; private set; }
         
         public async Task<IActionResult> OnGetAsync(string id, bool? saveChangesError = false)
@@ -45,9 +45,9 @@ namespace WebApp.Pages.Groups
 
             Clients = new List<string>();
 
-            foreach (var client in _groupsContext.GetClients(Group.Id.ToString()))
+            foreach (ChatChainCommon.DatabaseModels.Client client in _groupsContext.GetClients(Group.Id.ToString()))
             {
-                var is4Client = await _clientStore.FindClientByIdAsync(client.ClientId);
+                Client is4Client = await _clientStore.FindClientByIdAsync(client.ClientId);
                 Clients.Add(is4Client.ClientName);
             }
 
