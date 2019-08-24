@@ -6,7 +6,7 @@
     <form class="navbar-right">
     <ul class="navbar-nav ml-auto">
         <li class="nav-item">
-            <a href="@( Configuration.GetValue<string>("AccountManagementPage") )" class="nav-link" title="Manage">Hello @User.Claims.First(claim => claim.Type.Equals("name")).Value!</a>
+            <a href="@( Configuration.GetValue<string>("AccountManagementPage") )" class="nav-link" title="Manage">Hello @User.Claims.First(claim => claim.Type.Equals("DisplayName")).Value!</a>
         </li>
         <li class="nav-item">
             <a class="btn btn-link nav-btn nav-link" asp-page="/Account/Logout">Logout</a>

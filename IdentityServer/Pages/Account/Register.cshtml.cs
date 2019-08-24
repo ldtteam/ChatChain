@@ -1,3 +1,4 @@
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
@@ -69,52 +70,49 @@ namespace IdentityServer.Pages.Account
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)
         {
             returnUrl = returnUrl ?? Url.Content("~/");
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid) return Page();
+            
+            ApplicationUser user = new ApplicationUser { UserName = Input.Email, Email = Input.Email, DisplayName = Input.Username};
+            IdentityResult result = await _userManager.CreateAsync(user, Input.Password);
+            if (result.Succeeded)
             {
-                var user = new ApplicationUser { UserName = Input.Username, Email = Input.Email };
-                var result = await _userManager.CreateAsync(user, Input.Password);
-                if (result.Succeeded)
-                {
-                    _logger.LogInformation($"User {Input.Username} created a new account.");
+                _logger.LogInformation($"User {Input.Username} created a new account.");
 
-                    if (_emailSender != null)
-                    {
-                        var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                        var callbackUrl = Url.Page(
+                if (_emailSender != null)
+                {
+                    string code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                    string callbackUrl = Url.Page(
                         "/Account/ConfirmEmail",
                         null,
                         new { userId = user.Id, code },
                         Request.Scheme);
 
-                        var message = new MimeMessage();
-                        message.To.Add(new MailboxAddress(user.Name, Input.Email));
-                        message.Subject = "Confirm ChatChain Auth Account";
+                    MimeMessage message = new MimeMessage();
+                    message.To.Add(new MailboxAddress(user.DisplayName, Input.Email));
+                    message.Subject = "Confirm ChatChain Auth Account";
             
-                        var plainBody = new TextPart("plain")
-                        {
-                            Text = $"Please confirm your account at: {callbackUrl}"
-                        };
-                        var htmlBody = new TextPart("html")
-                        {
-                            Text = $"Please confirm your account at: <html><a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a></html>"
-                        };
+                    TextPart plainBody = new TextPart("plain")
+                    {
+                        Text = $"Please confirm your account at: {callbackUrl}"
+                    };
+                    TextPart htmlBody = new TextPart("html")
+                    {
+                        Text = $"Please confirm your account at: <html><a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a></html>"
+                    };
 
-                        var alternative = new MultipartAlternative();
-                        alternative.Add(plainBody);
-                        alternative.Add(htmlBody);
+                    MultipartAlternative alternative = new MultipartAlternative {plainBody, htmlBody};
 
-                        message.Body = alternative;
+                    message.Body = alternative;
 
-                        await _emailSender.SendEmailAsync(message);
-                    }
-
-                    await _signInManager.SignInAsync(user, isPersistent: false);
-                    return LocalRedirect(returnUrl);
+                    await _emailSender.SendEmailAsync(message);
                 }
-                foreach (var error in result.Errors)
-                {
-                    ModelState.AddModelError(string.Empty, error.Description);
-                }
+
+                await _signInManager.SignInAsync(user, isPersistent: false);
+                return LocalRedirect(returnUrl);
+            }
+            foreach (IdentityError error in result.Errors)
+            {
+                ModelState.AddModelError(string.Empty, error.Description);
             }
 
             // If we got this far, something failed, redisplay form

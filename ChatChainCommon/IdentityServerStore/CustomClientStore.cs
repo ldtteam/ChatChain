@@ -24,7 +24,7 @@ namespace ChatChainCommon.IdentityServerStore
         
         public Task<List<Client>> AllClients()
         {
-            var clients = _dbRepository.All<Client>().ToList();
+            List<Client> clients = _dbRepository.All<Client>().ToList();
 
             return Task.FromResult(clients);
         }

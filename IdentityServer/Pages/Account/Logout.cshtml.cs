@@ -44,7 +44,12 @@ namespace IdentityServer.Pages.Account
             
             SignOutIframeUrl = logout?.SignOutIFrameUrl;
 
-            return logout?.PostLogoutRedirectUri == null ? null : Redirect(logout.PostLogoutRedirectUri);
+            if (logout?.PostLogoutRedirectUri != null)
+            {
+                return Redirect(logout.PostLogoutRedirectUri);
+            }
+
+            return Page();
         }
     }
 }

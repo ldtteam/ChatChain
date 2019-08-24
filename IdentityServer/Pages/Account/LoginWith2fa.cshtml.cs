@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
+using SignInResult = Microsoft.AspNetCore.Identity.SignInResult;
 
 namespace IdentityServer.Pages.Account
 {
@@ -13,11 +14,13 @@ namespace IdentityServer.Pages.Account
     {
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly ILogger<LoginWith2fa> _logger;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public LoginWith2fa(SignInManager<ApplicationUser> signInManager, ILogger<LoginWith2fa> logger)
+        public LoginWith2fa(SignInManager<ApplicationUser> signInManager, ILogger<LoginWith2fa> logger, UserManager<ApplicationUser> userManager)
         {
             _signInManager = signInManager;
             _logger = logger;
+            _userManager = userManager;
         }
 
         [BindProperty]
@@ -65,20 +68,21 @@ namespace IdentityServer.Pages.Account
 
             returnUrl = returnUrl ?? Url.Content("~/");
 
-            var user = await _signInManager.GetTwoFactorAuthenticationUserAsync();
+            ApplicationUser user = await _signInManager.GetTwoFactorAuthenticationUserAsync();
             if (user == null)
             {
                 return Redirect("./Login");
                 //throw new InvalidOperationException($"Unable to load two-factor authentication user.");
             }
 
-            var authenticatorCode = Input.TwoFactorCode.Replace(" ", string.Empty).Replace("-", string.Empty);
+            string authenticatorCode = Input.TwoFactorCode.Replace(" ", string.Empty).Replace("-", string.Empty);
 
-            var result = await _signInManager.TwoFactorAuthenticatorSignInAsync(authenticatorCode, rememberMe, Input.RememberMachine);
+            SignInResult result = await _signInManager.TwoFactorAuthenticatorSignInAsync(authenticatorCode, rememberMe, Input.RememberMachine);
 
             if (result.Succeeded)
             {
                 _logger.LogInformation("User with ID '{UserId}' logged in with 2fa.", user.Id);
+
                 return Redirect(returnUrl);
             }
             

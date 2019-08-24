@@ -1,13 +1,11 @@
 using AspNetCore.Identity.Mongo.Model;
+using Microsoft.AspNetCore.Identity;
 
 namespace IdentityServer.Models
 {
     public class ApplicationUser : MongoUser
     {
-        public string Name { get; set; }
-
-        public string LastName { get; set; }
-
-        public string City { get; set; }
+        [PersonalData]
+        public string DisplayName { get; set; }
     }
 }

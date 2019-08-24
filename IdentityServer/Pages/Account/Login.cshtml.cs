@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
+using SignInResult = Microsoft.AspNetCore.Identity.SignInResult;
 
 namespace IdentityServer.Pages.Account
 {
@@ -13,11 +14,13 @@ namespace IdentityServer.Pages.Account
     {
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly ILogger<Login> _logger;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public Login(SignInManager<ApplicationUser> signInManager, ILogger<Login> logger)
+        public Login(SignInManager<ApplicationUser> signInManager, ILogger<Login> logger, UserManager<ApplicationUser> userManager)
         {
             _signInManager = signInManager;
             _logger = logger;
+            _userManager = userManager;
         }
         
         public string ReturnUrl { get; set; }
@@ -29,7 +32,7 @@ namespace IdentityServer.Pages.Account
         {
             [Required]
             [DataType(DataType.Text)]
-            public string Username { get; set; }
+            public string Email { get; set; }
 
             [Required]
             [DataType(DataType.Password)]
@@ -53,15 +56,16 @@ namespace IdentityServer.Pages.Account
         {
             returnUrl = returnUrl ?? Url.Content("~/");
 
-            if (!ModelState.IsValid) 
+            if (!ModelState.IsValid)
                 return Page();
             
             // This doesn't count login failures towards account lockout
             // To enable password failures to trigger account lockout, set lockoutOnFailure: true
-            var result = await _signInManager.PasswordSignInAsync(Input.Username, Input.Password, Input.RememberMe, true);
+            SignInResult result = await _signInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, true);
             if (result.Succeeded)
             {
                 _logger.LogInformation("User logged in.");
+                
                 return Redirect(returnUrl);
             }
             
@@ -69,7 +73,7 @@ namespace IdentityServer.Pages.Account
             {
                 return RedirectToPage("./LoginWith2fa", new { ReturnUrl = returnUrl, Input.RememberMe });
             }
-                
+            
             ModelState.AddModelError(string.Empty, "Invalid login attempt.");
             return Page();
 

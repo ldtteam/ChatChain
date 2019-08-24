@@ -9,10 +9,12 @@ using IdentityServer.Models;
 using IdentityServer.Services;
 using IdentityServer4.Extensions;
 using IdentityServer4.Models;
+using IdentityServer4.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Bson.Serialization;
@@ -89,11 +91,17 @@ namespace IdentityServer
             services.AddIdentityMongoDbProvider<ApplicationUser, ApplicationRole>(identityOptions =>
             {
                 identityOptions.Password.RequireNonAlphanumeric = false;
+                identityOptions.Password.RequireLowercase = false;
+                identityOptions.Password.RequireUppercase = false;
+                identityOptions.Password.RequireDigit = false;
+                identityOptions.User.RequireUniqueEmail = true;
             }, mongoIdentityOptions =>
             {
                 mongoIdentityOptions.ConnectionString = mongoConnections.IdentityConnection.ConnectionString;
                 mongoIdentityOptions.DatabaseName = mongoConnections.IdentityConnection.DatabaseName;
             });
+
+            services.AddScoped<IUserClaimsPrincipalFactory<ApplicationUser>, UserClaimsPrincipleFactory>();
 
             IIdentityServerBuilder identityServerBuilder = services.AddIdentityServer(options =>
                 {
@@ -105,7 +113,8 @@ namespace IdentityServer
                 .AddClients()
                 .AddIdentityApiResources()
                 .AddPersistedGrants()
-                .AddAspNetIdentity<ApplicationUser>();
+                .AddAspNetIdentity<ApplicationUser>()
+                .AddProfileService<ProfileService>();
             
             if (_configuration.GetSection("ClientsConfig").Exists())
             {
@@ -128,7 +137,8 @@ namespace IdentityServer
                         AllowedCorsOrigins = clientConfig.AllowedCorsOrigins,
                         AllowedGrantTypes = clientConfig.AllowedGrantTypes,
                         ClientSecrets = clientConfig.Secrets.Select(secret => new Secret(secret.Sha256())).ToList(),
-                        AllowedScopes = clientConfig.AllowedScopes
+                        AllowedScopes = clientConfig.AllowedScopes,
+                        FrontChannelLogoutUri = clientConfig.FrontChannelLogoutUri
                     });
                 }
 

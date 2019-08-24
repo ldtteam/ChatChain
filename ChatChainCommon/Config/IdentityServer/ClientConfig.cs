@@ -11,6 +11,8 @@ namespace ChatChainCommon.Config.IdentityServer
         public string ClientName { get; set; }
 
         public bool RequireConsent { get; set; } = false;
+        
+        public string FrontChannelLogoutUri { get; set; }
  
         public ICollection<string> RedirectUris { get; set; }
         
