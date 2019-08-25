@@ -46,7 +46,10 @@ namespace IdentityServer
             _configuration.GetSection("MongoConnections").Bind(mongoConnections);
             services.AddSingleton(mongoConnections);
             
-            Console.WriteLine($"TESTING: {mongoConnections}");
+            Console.WriteLine($"TESTING: {mongoConnections.IdentityServerConnection.ConnectionString}");
+            Console.WriteLine($"TESTING: {mongoConnections.IdentityServerConnection.DatabaseName}");
+            Console.WriteLine($"TESTING: {mongoConnections.IdentityConnection.ConnectionString}");
+            Console.WriteLine($"TESTING: {mongoConnections.IdentityConnection.DatabaseName}");
             
             EmailConnection emailConnection = new EmailConnection();
             if (_configuration.GetSection("EmailConnection").Exists())
@@ -55,13 +58,18 @@ namespace IdentityServer
                 services.AddSingleton(emailConnection);
             }
             
-            Console.WriteLine($"TESTING: {emailConnection}");
+            Console.WriteLine($"TESTING: {emailConnection.Host}");
+            Console.WriteLine($"TESTING: {emailConnection.Port}");
+            Console.WriteLine($"TESTING: {emailConnection.Ssl}");
+            Console.WriteLine($"TESTING: {emailConnection.Username}");
             
             IdentityServerOptions identityServerOptions = new IdentityServerOptions();
             _configuration.GetSection("IdentityServerOptions").Bind(identityServerOptions);
             services.AddSingleton(identityServerOptions);
             
-            Console.WriteLine($"TESTING: {identityServerOptions}");
+            Console.WriteLine($"TESTING: {identityServerOptions.ServerOrigin}");
+            Console.WriteLine($"TESTING: {identityServerOptions.ServerUrl}");
+            Console.WriteLine($"TESTING: {identityServerOptions.SigningPath}");
 
             services.Configure<ForwardedHeadersOptions>(options =>
             {
@@ -134,6 +142,16 @@ namespace IdentityServer
 
                 foreach (ClientConfig clientConfig in clientsConfig.ClientConfigs)
                 {
+                    Console.WriteLine($"TESTING: {clientConfig.ClientId}");
+                    Console.WriteLine($"TESTING: {clientConfig.ClientName}");
+                    Console.WriteLine($"TESTING: {clientConfig.RequireConsent}");
+                    Console.WriteLine($"TESTING: {clientConfig.RedirectUris}");
+                    Console.WriteLine($"TESTING: {clientConfig.PostLogoutRedirectUris}");
+                    Console.WriteLine($"TESTING: {clientConfig.AllowedCorsOrigins}");
+                    Console.WriteLine($"TESTING: {clientConfig.AllowedGrantTypes}");
+                    Console.WriteLine($"TESTING: {clientConfig.Secrets}");
+                    Console.WriteLine($"TESTING: {clientConfig.AllowedScopes}");
+                    Console.WriteLine($"TESTING: {clientConfig.FrontChannelLogoutUri}");
                     clients.Add(new Client
                     {
                         ClientId = clientConfig.ClientId,
