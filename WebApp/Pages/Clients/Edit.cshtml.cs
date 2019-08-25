@@ -7,6 +7,7 @@ using ChatChainCommon.IdentityServerStore;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using MongoDB.Bson;
 
 namespace WebApp.Pages.Clients
 {
@@ -39,14 +40,14 @@ namespace WebApp.Pages.Clients
             public string ClientDescription { get; set; }
         }
         
-        public IActionResult OnGet(string id)
+        public async Task<IActionResult> OnGetAsync(string id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            Client = _clientsContext.Get(id);
+            Client = await _clientsContext.GetAsync(new ObjectId(id));
            
             if (Client == null || Client.OwnerId != User.Claims.First(claim => claim.Type.Equals("sub")).Value)
             {
@@ -74,21 +75,21 @@ namespace WebApp.Pages.Clients
                 return Page();
             }
             
-            Client groupsClient = _clientsContext.Get(id);
+            Client groupsClient = await _clientsContext.GetAsync(new ObjectId(id));
 
             if (groupsClient.OwnerId != User.Claims.First(claim => claim.Type.Equals("sub")).Value)
             {
                 return RedirectToPage("./Index");
             }
 
-            IdentityServer4.Models.Client clientToUpdate = await _is4ClientStore.FindClientByIdAsync(id);
+            IdentityServer4.Models.Client clientToUpdate = await _is4ClientStore.FindClientByIdAsync(groupsClient.ClientId);
 
             clientToUpdate.ClientName = Input.ClientName;
             _is4ClientStore.UpdateClient(clientToUpdate);
             
             groupsClient.ClientName = Input.ClientName;
             groupsClient.ClientDescription = Input.ClientDescription;
-            _clientsContext.Update(groupsClient.Id, groupsClient);
+            await _clientsContext.UpdateAsync(groupsClient.Id, groupsClient);
 
             return RedirectToPage("./Index");
         } 

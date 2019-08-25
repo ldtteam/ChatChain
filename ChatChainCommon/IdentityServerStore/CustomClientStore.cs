@@ -9,15 +9,22 @@ namespace ChatChainCommon.IdentityServerStore
     public class CustomClientStore : IdentityServer4.Stores.IClientStore
     {
         private readonly IRepository _dbRepository;
+        private readonly IEnumerable<Client> _clients;
 
-        public CustomClientStore(IRepository repository)
+        public CustomClientStore(IRepository repository, IEnumerable<Client> clients = null)
         {
             _dbRepository = repository;
+            _clients = clients;
         }
 
         public Task<Client> FindClientByIdAsync(string clientId)
         {
-            Client client = _dbRepository.Single<Client>(c => c.ClientId == clientId);
+            IEnumerable<Client> query =
+                from lClient in _clients
+                where lClient.ClientId == clientId
+                select lClient;
+            
+            Client client = query.SingleOrDefault() ?? _dbRepository.Single<Client>(c => c.ClientId == clientId);
 
             return Task.FromResult(client);
         }

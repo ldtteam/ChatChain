@@ -39,33 +39,33 @@ namespace WebApp.Pages.Clients
                 return RedirectToPage("./Index");
             }
 
-            Client = _clientsContext.Get(clientId); 
+            Client = await _clientsContext.GetAsync(new ObjectId(clientId)); 
             
-            if (_clientConfigsContext.Get(Client.ClientConfigId) == null)
+            if (await _clientConfigsContext.GetAsync(Client.ClientConfigId) == null)
             {
                 ClientConfig newConfig = new ClientConfig
                 {
                     ClientId = Client.Id
                 };
-                _clientConfigsContext.Create(newConfig);
+                await _clientConfigsContext.CreateAsync(newConfig);
             }
-            GroupOptions = new SelectList(_clientsContext.GetGroups(Client.Id), nameof(Group.Id), nameof(Group.GroupName));
+            GroupOptions = new SelectList(await _clientsContext.GetGroupsAsync(Client.Id), nameof(Group.Id), nameof(Group.GroupName));
             
             List<string> clientEventGroupIds = new List<string>();
 
-            foreach (ObjectId groupId in _clientsContext.GetClientConfig(Client.Id).ClientEventGroups)
+            foreach (ObjectId groupId in (await _clientsContext.GetClientConfigAsync(Client.Id)).ClientEventGroups)
             {
                 clientEventGroupIds.Add(groupId.ToString());
             }
 
             List<string> userEventGroupIds = new List<string>();
             
-            foreach (ObjectId groupId in _clientsContext.GetClientConfig(Client.Id).UserEventGroups)
+            foreach (ObjectId groupId in (await _clientsContext.GetClientConfigAsync(Client.Id)).UserEventGroups)
             {
                 userEventGroupIds.Add(groupId.ToString());
             }
 
-            if (_clientsContext.GetClientConfig(Client.Id) == null) return Page();
+            if (await _clientsContext.GetClientConfigAsync(Client.Id) == null) return Page();
             SelectedClientEventGroups = clientEventGroupIds.ToArray();
             SelectedUserEventGroups = userEventGroupIds.ToArray();
 
@@ -79,9 +79,9 @@ namespace WebApp.Pages.Clients
                 return RedirectToPage("./Index");
             }
 
-            Client = _clientsContext.Get(clientId);
+            Client = await _clientsContext.GetAsync(new ObjectId(clientId));
 
-            if (_clientConfigsContext.Get(Client.ClientConfigId) == null)
+            if (await _clientConfigsContext.GetAsync(Client.ClientConfigId) == null)
             {
                 Console.WriteLine("ClientConfig is null for client: " + clientId);
                 return RedirectToPage("./Index");
@@ -90,10 +90,10 @@ namespace WebApp.Pages.Clients
             List<ObjectId> clientEventGroupIds = SelectedClientEventGroups.Select(group => new ObjectId(group)).ToList();
             List<ObjectId> userEventGroupIds = SelectedUserEventGroups.Select(group => new ObjectId(group)).ToList();
 
-            ClientConfig clientConfig = _clientsContext.GetClientConfig(Client.Id);
+            ClientConfig clientConfig = await _clientsContext.GetClientConfigAsync(Client.Id);
             clientConfig.ClientEventGroups = clientEventGroupIds;
             clientConfig.UserEventGroups = userEventGroupIds;
-            _clientConfigsContext.Update(clientConfig.Id, clientConfig);
+            await _clientConfigsContext.UpdateAsync(clientConfig.Id, clientConfig);
             
             return RedirectToPage("./Index");
         }

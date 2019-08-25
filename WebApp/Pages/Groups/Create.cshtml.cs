@@ -1,6 +1,7 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Threading.Tasks;
 using ChatChainCommon.DatabaseModels;
 using ChatChainCommon.DatabaseServices;
 using Microsoft.AspNetCore.Authorization;
@@ -35,7 +36,7 @@ namespace WebApp.Pages.Groups
             public string GroupDescription { get; set; }
         }
         
-        public IActionResult OnPost()
+        public async Task<IActionResult> OnPostAsync()
         {
             if (!ModelState.IsValid)
             {
@@ -52,7 +53,7 @@ namespace WebApp.Pages.Groups
                 OwnerId = User.Claims.First(claim => claim.Type.Equals("sub")).Value
             };
             
-            _groupsContext.Create(group);
+            await _groupsContext.CreateAsync(group);
             
             return RedirectToPage("./Index");
         }

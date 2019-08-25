@@ -1,5 +1,6 @@
 
 using System.Collections.Generic;
+using ChatChainCommon.DatabaseModels;
 
 namespace ChatChainServer.Models.MessageObjects
 {
@@ -7,7 +8,7 @@ namespace ChatChainServer.Models.MessageObjects
     {
         public string Event { get; set; }
         public Group Group { get; set; }
-        public ClientUser User { get; set; }
+        public User User { get; set; }
         public Client SendingClient { get; set; }
         public bool SendToSelf { get; set; }
         public Dictionary<string, string> ExtraEventData { get; set; }

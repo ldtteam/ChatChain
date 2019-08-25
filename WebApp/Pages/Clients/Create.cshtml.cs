@@ -8,6 +8,7 @@ using IdentityServer4.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using WebApp.Util;
 using Client = IdentityServer4.Models.Client;
 using Secret = IdentityServer4.Models.Secret;
 
@@ -28,6 +29,10 @@ namespace WebApp.Pages.Clients
         [BindProperty]
         public InputModel Input { get; set; }
         
+        [TempData]
+        public string StatusMessage { get; set; }
+
+
         public class InputModel
         {
             
@@ -42,15 +47,20 @@ namespace WebApp.Pages.Clients
             public string ClientDescription { get; set; }
 
             [Required]
-            [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
-            [DataType(DataType.Password)]
+            [DataType(DataType.Text)]
             [Display(Name = "Password")]
             public string Password { get; set; }
 
             [DataType(DataType.Password)]
             [Display(Name = "Confirm password")]
-            [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
+            [Compare("Password", ErrorMessage = "\nThe password and confirmation password do not match.")]
             public string ConfirmPassword { get; set; }
+        }
+
+        public void OnGet()
+        {
+            Input = new InputModel {Password = PasswordGenerator.Generate()};
+            StatusMessage = $"Client password is: {Input.Password}\n You Will Not Receive This Again!";
         }
         
         public async Task<IActionResult> OnPostAsync()
@@ -96,7 +106,7 @@ namespace WebApp.Pages.Clients
                 ClientDescription = Input.ClientDescription
             };
 
-            _clientsContext.Create(newClient);
+            await _clientsContext.CreateAsync(newClient);
             
             return RedirectToPage("./Index");
         }

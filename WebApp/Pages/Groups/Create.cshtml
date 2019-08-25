@@ -3,12 +3,13 @@
 @{
     ViewData["Title"] = "Create";
 }
+<!--suppress ALL -->
 <div class="container">
     <h2>Create new group</h2>
     <hr/>
     <div class="row">
         <div class="col-md-4">
-            <form method="post">
+            <form method="post" id="edit">
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                 <div class="form-group">
                     <label asp-for="Input.GroupName" class="control-label"></label>
@@ -17,7 +18,7 @@
                 </div>
                 <div class="form-group">
                     <label asp-for="Input.GroupDescription" class="control-label"></label>
-                    <input asp-for="Input.GroupDescription" class="form-control"/>
+                    <textarea class="form-control" form="edit" id="Input_GroupDescription" name="Input.GroupDescription" cols="40" rows="5"></textarea>
                     <span asp-validation-for="Input.GroupDescription" class="text-danger"></span>
                 </div>
                 <div class="form-group">

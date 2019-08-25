@@ -9,7 +9,6 @@ using IdentityServer.Models;
 using IdentityServer.Services;
 using IdentityServer4.Extensions;
 using IdentityServer4.Models;
-using IdentityServer4.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
@@ -110,7 +109,7 @@ namespace IdentityServer
                 })
                 //.AddDeveloperSigningCredential()
                 .AddMongoRepository()
-                .AddClients()
+                //.AddClients()
                 .AddIdentityApiResources()
                 .AddPersistedGrants()
                 .AddAspNetIdentity<ApplicationUser>()
@@ -142,16 +141,17 @@ namespace IdentityServer
                     });
                 }
 
-                identityServerBuilder.AddInMemoryClients(clients);
+                identityServerBuilder.AddClientsWithInMemory(clients);
             }
 
-            string isDevelopment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
-            
-            if (isDevelopment != null && isDevelopment.Equals("Development"))
+            if (identityServerOptions.SigningPassword == null || identityServerOptions.SigningPath == null)
             {
                 identityServerBuilder.AddDeveloperSigningCredential();
             }
-            //TODO: Add signingCredentials for production
+            else
+            {
+                identityServerBuilder.AddCertificateFromFile(identityServerOptions);
+            }
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -168,16 +168,11 @@ namespace IdentityServer
                 app.UseExceptionHandler("/Error");
             }
             
-            string useHttps = Environment.GetEnvironmentVariable("USE_HTTPS");
+            bool useHttps = _configuration.GetValue<bool>("UseHttps");
 
-            if (useHttps != null && !useHttps.IsNullOrEmpty())
+            if (useHttps)
             {
-                bool boolUseHttps = bool.Parse(useHttps);
-
-                if (boolUseHttps)
-                {
-                    app.UseHttpsRedirection();
-                }
+                app.UseHttpsRedirection();
             }
 
             app.UseStaticFiles();

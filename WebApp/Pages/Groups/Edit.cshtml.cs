@@ -1,10 +1,12 @@
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Threading.Tasks;
 using ChatChainCommon.DatabaseModels;
 using ChatChainCommon.DatabaseServices;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using MongoDB.Bson;
 
 namespace WebApp.Pages.Groups
 {
@@ -34,14 +36,14 @@ namespace WebApp.Pages.Groups
             public string GroupDescription { get; set; }
         }
         
-        public IActionResult OnGet(string id)
+        public async Task<IActionResult> OnGetAsync(string id)
         {
             if (id == null)
             {
                 return RedirectToPage("./Index");
             }
 
-            Group = _groupsContext.Get(id);
+            Group = await _groupsContext.GetAsync(new ObjectId(id));
             
             if (Group == null || Group.OwnerId != User.Claims.First(claim => claim.Type.Equals("sub")).Value)
             {
@@ -57,26 +59,24 @@ namespace WebApp.Pages.Groups
             return Page();
         }
         
-        public IActionResult OnPost(string id)
+        public async Task<IActionResult> OnPostAsync(string id)
         {
             if (!ModelState.IsValid)
             {
                 return Page();
             }
             
-            Group = _groupsContext.Get(id);
+            Group = await _groupsContext.GetAsync(new ObjectId(id));
             
             if (Group.OwnerId != User.Claims.First(claim => claim.Type.Equals("sub")).Value)
             {
                 return RedirectToPage("./Index");
             }
 
-            Group groupToUpdate = _groupsContext.Get(id);
-
-            groupToUpdate.GroupName = Input.GroupName;
-            groupToUpdate.GroupDescription = Input.GroupDescription;
+            Group.GroupName = Input.GroupName;
+            Group.GroupDescription = Input.GroupDescription;
             
-            _groupsContext.Update(groupToUpdate.Id.ToString(), groupToUpdate);
+            await _groupsContext.UpdateAsync(Group.Id, Group);
             
             return RedirectToPage("./Index");
 

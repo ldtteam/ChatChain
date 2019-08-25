@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.Design;
 using System.Data;
 using System.Net.Http;
@@ -8,6 +9,7 @@ using System.Threading.Tasks;
 using IdentityModel.Client;
 using Microsoft.AspNetCore.SignalR.Client;
 using Newtonsoft.Json.Converters;
+using Newtonsoft.Json.Linq;
 
 namespace Client
 {
@@ -28,28 +30,29 @@ namespace Client
             //Console.WriteLine(tokenClient.ClientId);
             //var response = await tokenClient.RequestClientCredentialsAsync("api1");
            
-            var clientId = "55a8060a-c58e-41a9-9c46-1bceb9ca84de";
+            const string clientId = "5bd764d8-cad2-4468-a72c-5771f781fed8";
+            const string clientSecret = "U5FrQ1xYJ@pk6?KH$F_6aodS7W01-c6$?81!89w5a?LY@zeNA$1gk$S@4$Kq?X";
 
             HubConnection connection = new HubConnectionBuilder()
                 .WithUrl("http://localhost:5000/hubs/chatchain",
-                    options => { options.AccessTokenProvider = () => GetJwtToken(clientId, "test123!"); })
+                    options => { options.AccessTokenProvider = () => GetJwtToken(clientId, clientSecret); })
                 .Build();
             
             Console.WriteLine("test1234");
 
             await connection.StartAsync();
             
-            connection.On<string, string, string, string, string>("GenericMessageEvent",
-                (clientType, clientName, channel, user, message) =>
+            connection.On<JObject>("ReceiveGenericMessage",
+                message =>
                 {
                     Console.WriteLine(
-                        $"Client Name: {clientType} ---- Group Name: {clientName} ---- Group Id: {channel}");
+                        $"{message}");
                     Console.WriteLine("");
                 });
 
             Console.WriteLine("test123");
             
-            connection.Closed += async (error) =>
+            connection.Closed += async error =>
             {
                 await Task.Delay(new Random().Next(0,5) * 1000);
                 await connection.StartAsync();
@@ -59,22 +62,35 @@ namespace Client
             {
                 Thread.Sleep(1);
             }
-            //await connection.InvokeAsync("GenericMessageEvent", "1", "2", "3", "4", "5");
-            while (true)
+            await connection.InvokeAsync("SendGenericMessage", new GenericMessage
             {
+                Message = "TESTING",
+                Group = new Group
+                {
+                    GroupId = "f655f1d7-e54e-4ce9-882f-d65c09a5825d"
+                },
+                User = new User
+                {
+                    Name = "TestingUser",
+                    ClientRanks = new List<ClientRank>()
+                }
+            });
+            int i = 0;
+            while (i < 10)
+            {
+                i++;
                 Thread.Sleep(10000);
-                await connection.InvokeAsync("GenericMessageEvent", clientId, "2", "3", "4", "5");
             }
         }
 
-        private static async Task<String> GetJwtToken(string userid, string password)
+        private static async Task<string> GetJwtToken(string userid, string password)
         {
-            var client = new HttpClient();
+            HttpClient client = new HttpClient();
 
-            var disco = await client.GetDiscoveryDocumentAsync("http://localhost:5001");
+            DiscoveryDocumentResponse disco = await client.GetDiscoveryDocumentAsync("http://localhost:5001");
             if (disco.IsError) throw new Exception(disco.Error);
 
-            var response = await client.RequestTokenAsync(new TokenRequest
+            TokenResponse response = await client.RequestTokenAsync(new TokenRequest
             {
                 Address = disco.TokenEndpoint,
                 GrantType = "client_credentials",
@@ -84,7 +100,7 @@ namespace Client
 
                 Parameters =
                 {
-                    {"scope", "api1"}
+                    {"scope", "ChatChain"}
                 }
             });
             
@@ -95,5 +111,50 @@ namespace Client
             
             return response.Json.GetValue("access_token").ToString();
         }
+    }
+    
+    public class Group
+    {
+        public string GroupId { get; set; }
+        public string GroupName { get; set; }
+        public string OwnerId { get; set; }
+        public string GroupDescription { get; set; }
+    }
+    
+    public class ClientRank
+    {
+        public string Name { get; set; }
+        public string UniqueId { get; set; }
+        public int Priority { get; set; }
+        public string Display { get; set; }
+        public string Colour { get; set; }
+    }
+    
+    public class User
+    {
+        public string Name { get; set; }
+        public string UniqueId { get; set; }
+        public string NickName { get; set; }
+        public string Colour { get; set; }
+        public List<ClientRank> ClientRanks { get; set; }
+        
+    }
+    
+    public class Client
+    {
+        public string ClientId { get; set; }
+        public string OwnerId { get; set; }
+        public string ClientGuid { get; set; }
+        public string ClientName { get; set; }
+        public string ClientDescription { get; set; }
+    }
+    
+    public class GenericMessage
+    {
+        public Group Group { get; set; }
+        public User User { get; set; }
+        public string Message { get; set; }
+        public Client SendingClient { get; set; }
+        public bool SendToSelf { get; set; }
     }
 }

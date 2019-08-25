@@ -126,16 +126,11 @@ namespace WebApp
                 app.UseHsts();
             }
 
-            string useHttps = Environment.GetEnvironmentVariable("USE_HTTPS");
+            bool useHttps = _configuration.GetValue<bool>("UseHttps");
 
-            if (useHttps != null && !useHttps.IsNullOrEmpty())
+            if (useHttps)
             {
-                bool boolUseHttps = bool.Parse(useHttps);
-
-                if (boolUseHttps)
-                {
-                    app.UseHttpsRedirection();
-                }
+                app.UseHttpsRedirection();
             }
             
             app.UseStaticFiles();

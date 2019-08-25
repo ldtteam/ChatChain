@@ -1,4 +1,6 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
+using System.Threading.Tasks;
 using ChatChainCommon.Config;
 using ChatChainCommon.DatabaseModels;
 using Microsoft.Extensions.DependencyInjection;
@@ -7,6 +9,7 @@ using MongoDB.Driver;
 
 namespace ChatChainCommon.DatabaseServices
 {
+    [SuppressMessage("ReSharper", "MemberCanBePrivate.Global")]
     public class ClientConfigService
     {
         private readonly IMongoCollection<ClientConfig> _clientConfigs;
@@ -20,41 +23,45 @@ namespace ChatChainCommon.DatabaseServices
 
             _services = services;
         }
-        
-        public ClientConfig Get(ObjectId id)
+
+        public async Task<ClientConfig> GetAsync(ObjectId id)
         {
-            return _clientConfigs.Find(config => config.Id == id).FirstOrDefault();
+            IAsyncCursor<ClientConfig> cursor = await _clientConfigs.FindAsync(config => config.Id == id);
+            return await cursor.FirstOrDefaultAsync();
         }
 
-        public ClientConfig GetForClientId(ObjectId id)
+        public async Task<ClientConfig> GetForClientIdAsync(ObjectId id)
         {
-            return _clientConfigs.Find(config => config.ClientId == id).FirstOrDefault();
+            IAsyncCursor<ClientConfig> cursor = await _clientConfigs.FindAsync(config => config.ClientId == id);
+            return await cursor.FirstOrDefaultAsync();
         }
 
-        public void Create(ClientConfig clientConfig)
+        public async Task CreateAsync(ClientConfig clientConfig)
         {
-            _clientConfigs.InsertOne(clientConfig);
+            await _clientConfigs.InsertOneAsync(clientConfig);
             ObjectId clientId = clientConfig.ClientId;
+
+            ClientService clientService = _services.GetRequiredService<ClientService>();
             
-            Client clientToUpdate = _services.GetRequiredService<ClientService>().Get(clientConfig.ClientId);
-            clientToUpdate.ClientConfigId = GetForClientId(clientId).Id;
-            _services.GetRequiredService<ClientService>().Update(clientToUpdate.Id, clientToUpdate);
+            Client clientToUpdate = await clientService.GetAsync(clientConfig.ClientId);
+            clientToUpdate.ClientConfigId = (await GetForClientIdAsync(clientId)).Id;
+            await clientService.UpdateAsync(clientToUpdate.Id, clientToUpdate);
         }
 
-        public void Remove(ObjectId id)
+        public async Task RemoveAsync(ObjectId id)
         {
-            _clientConfigs.DeleteOne(config => config.Id == id);
+            await _clientConfigs.DeleteOneAsync(config => config.Id == id);
         }
         
-        public void Update(ObjectId id, ClientConfig clientConfig)
+        public async Task UpdateAsync(ObjectId id, ClientConfig clientConfig)
         {
-            _clientConfigs.ReplaceOne(config => config.Id == id, clientConfig);
+            await _clientConfigs.ReplaceOneAsync(config => config.Id == id, clientConfig);
         }
 
-        public Client GetClient(ObjectId id)
+        public async Task<Client> GetClientAsync(ObjectId id)
         {
-            ClientConfig config = Get(id);
-            return _services.GetRequiredService<ClientService>().Get(config.ClientId);
+            ClientConfig config = await GetAsync(id);
+            return await _services.GetRequiredService<ClientService>().GetAsync(config.ClientId);
         }
     }
 }

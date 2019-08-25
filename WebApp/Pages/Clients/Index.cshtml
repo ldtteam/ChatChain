@@ -1,4 +1,5 @@
 @page
+@using ChatChainCommon.DatabaseModels
 @model IndexModel
 
 @{
@@ -23,7 +24,7 @@
             </tr>
             </thead>
             <tbody>
-            @foreach (var client in Model.Clients)
+            @foreach (Client client in Model.Clients)
             {
                 <tr>
                     <td>
@@ -37,9 +38,9 @@
                     </td>
                     <td>
                         <div class="btn-group">
-                            <a class="btn btn-primary btn-sm" asp-page="./EditClientConfig" asp-route-clientId="@client.ClientId">Config</a>
-                            <a class="btn btn-primary btn-sm" asp-page="./Edit" asp-route-id="@client.ClientId">Edit</a>
-                            <a class="btn btn-danger  btn-sm" asp-page="./Delete" asp-route-id="@client.ClientId">Delete</a>
+                            <a class="btn btn-primary btn-sm" asp-page="./EditClientConfig" asp-route-clientId="@client.Id">Config</a>
+                            <a class="btn btn-primary btn-sm" asp-page="./Edit" asp-route-id="@client.Id">Edit</a>
+                            <a class="btn btn-danger  btn-sm" asp-page="./Delete" asp-route-id="@client.Id">Delete</a>
                         </div>
                     </td>
                 </tr>

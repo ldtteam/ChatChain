@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Threading.Tasks;
 using ChatChainCommon.Config;
 using ChatChainCommon.DatabaseModels;
 using Microsoft.Extensions.DependencyInjection;
@@ -8,6 +10,7 @@ using MongoDB.Driver;
 
 namespace ChatChainCommon.DatabaseServices
 {
+    [SuppressMessage("ReSharper", "MemberCanBePrivate.Global")]
     public class GroupService
     {
         private readonly IMongoCollection<Client> _clients;
@@ -24,80 +27,77 @@ namespace ChatChainCommon.DatabaseServices
             _services = services;
         }
 
-        public List<Group> Get()
+        public async Task<IEnumerable<Group>> GetAsync()
         {
-            return _groups.Find(group => true).ToList();
+            IAsyncCursor<Group> cursor = await _groups.FindAsync(group => true);
+            return await cursor.ToListAsync();
+        }
+        
+        public async Task<Group> GetAsync(ObjectId groupId)
+        {
+            IAsyncCursor<Group> cursor = await _groups.FindAsync(group => group.Id == groupId);
+            return await cursor.FirstOrDefaultAsync();
         }
 
-        public Group Get(string id)
+        public async Task<Group> GetFromGuidAsync(string guid)
         {
-            ObjectId docId = new ObjectId(id);
-
-            return _groups.Find(group => group.Id == docId).FirstOrDefault();
+            IAsyncCursor<Group> cursor = await _groups.FindAsync(group => group.GroupId == guid);
+            return await cursor.FirstOrDefaultAsync();
         }
 
-        public void Create(Group group)
+        public async Task UpdateAsync(ObjectId groupId, Group groupIn)
         {
-            _groups.InsertOne(group);
+            await _groups.ReplaceOneAsync(group => group.Id == groupId, groupIn);
         }
 
-        public void Update(string id, Group groupIn)
+        public async Task RemoveAsync(ObjectId groupId)
         {
-            ObjectId docId = new ObjectId(id);
-
-            _groups.ReplaceOne(group => group.Id == docId, groupIn);
-
-            //_groups.ReplaceOne(group => group.Id == docId, groupIn);
+            await _groups.DeleteOneAsync(group => group.Id == groupId);
+        }
+        
+        public async Task CreateAsync(Group group)
+        {
+            await _groups.InsertOneAsync(group);
         }
 
-        public void Remove(Group groupIn)
+        public async Task<IEnumerable<Client>> GetClientsAsync(ObjectId groupId)
         {
-            _groups.DeleteOne(group => group.Id == groupIn.Id);
+            IAsyncCursor<Client> cursor = await _clients.FindAsync(client => client.GroupIds.Contains(groupId));
+            return await cursor.ToListAsync();
         }
 
-        public void Remove(string id)
+        public async Task AddClientAsync(ObjectId groupId, ObjectId clientId, bool addGroupToClient = true)
         {
-            ObjectId docId = new ObjectId(id);
+            ClientService clientService = _services.GetRequiredService<ClientService>();
             
-            _groups.DeleteOne(group => group.Id == docId);
-        }
-
-        public List<Client> GetClients(string groupId)
-        {
-            ObjectId docId = new ObjectId(groupId);
-
-            return _clients.Find(client => client.GroupIds.Contains(docId)).ToList();
-        }
-
-        public void AddClient(ObjectId groupId, ObjectId clientId, bool addGroupToClient = true)
-        {
-            Group group = _groups.Find(lgroup => lgroup.Id == groupId).FirstOrDefault();
-            Client client = _clients.Find(lclient => lclient.Id == clientId).FirstOrDefault();
+            Group group = await GetAsync(groupId);
+            Client client = await clientService.GetAsync(clientId);
             
             if (group == null || client == null) return;
 
-            List<ObjectId> clientIds = new List<ObjectId>(group.ClientIds) {client.Id};
-            group.ClientIds = clientIds;
-            Update(group.Id.ToString(), group);
+            group.ClientIds.Add(client.Id);
+            await UpdateAsync(group.Id, group);
             
             if (!addGroupToClient) return;
 
-            _services.GetRequiredService<ClientService>().AddGroup(client.Id, group.Id, false);
+            await clientService.AddGroupAsync(client.Id, group.Id, false);
         }
         
-        public void RemoveClient(ObjectId groupId, ObjectId clientId, bool removeGroupFromClient = true)
+        public async Task RemoveClientAsync(ObjectId groupId, ObjectId clientId, bool removeGroupFromClient = true)
         {
-            Group group = _groups.Find(lgroup => lgroup.Id == groupId).FirstOrDefault();
-            Client client = _clients.Find(lclient => lclient.Id == clientId).FirstOrDefault();
+            ClientService clientService = _services.GetRequiredService<ClientService>();
+            
+            Group group = await GetAsync(groupId);
+            Client client = await clientService.GetAsync(clientId);
             
             if (group == null || client == null) return;
             
             group.ClientIds.Remove(client.Id);
-            Update(group.Id.ToString(), group);
+            await UpdateAsync(group.Id, group);
             
             if (!removeGroupFromClient) return;
 
-            _services.GetRequiredService<ClientService>().RemoveGroup(client.Id, group.Id, false);
+            await clientService.RemoveGroupAsync(client.Id, group.Id, false);
         }
     }
 }

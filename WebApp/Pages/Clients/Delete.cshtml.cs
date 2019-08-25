@@ -6,7 +6,7 @@ using ChatChainCommon.IdentityServerStore;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.EntityFrameworkCore;
+using MongoDB.Bson;
 
 namespace WebApp.Pages.Clients
 {
@@ -24,6 +24,7 @@ namespace WebApp.Pages.Clients
         
         [BindProperty]
         public Client Client { get; set; }
+        // ReSharper disable once UnusedAutoPropertyAccessor.Global
         public string ErrorMessage { get; set; }
         
         public async Task<IActionResult> OnGetAsync(string id)
@@ -33,7 +34,7 @@ namespace WebApp.Pages.Clients
                 return RedirectToPage("./Index");
             }
 
-            Client = _clientsContext.Get(id);
+            Client = await _clientsContext.GetAsync(new ObjectId(id));
             
             if (Client == null || Client.OwnerId != User.Claims.First(claim => claim.Type.Equals("sub")).Value)
             {
@@ -50,36 +51,28 @@ namespace WebApp.Pages.Clients
                 return NotFound();
             }
 
-            IdentityServer4.Models.Client client = await _is4ClientStore.FindClientByIdAsync(id);
+            Client groupClient = await _clientsContext.GetAsync(new ObjectId(id));
+
+            if (groupClient == null)
+            {
+                return NotFound();
+            }
             
-            Client groupClient = _clientsContext.Get(id);
-            
-            if (groupClient != null && groupClient.OwnerId != User.Claims.First(claim => claim.Type.Equals("sub")).Value)
+            if (groupClient.OwnerId != User.Claims.First(claim => claim.Type.Equals("sub")).Value)
             {
                 return RedirectToPage("./Index");
             }
+
+            IdentityServer4.Models.Client client = await _is4ClientStore.FindClientByIdAsync(groupClient.ClientId);
             
             if (client == null)
             {
                 return NotFound();
             }
 
-            try
-            {
-                _is4ClientStore.RemoveClient(client);
-
-                if (groupClient != null)
-                {
-                    _clientsContext.Remove(groupClient);
-                }
-                return RedirectToPage("./Index");
-            }
-            catch (DbUpdateException)
-            {
-                //Log the error (uncomment ex variable name and write a log.)
-                return RedirectToAction("./Delete",
-                    new {id, saveChangesError = true });
-            }
+            _is4ClientStore.RemoveClient(client);
+            await _clientsContext.RemoveAsync(groupClient.Id);
+            return RedirectToPage("./Index");
         }
     }
 }

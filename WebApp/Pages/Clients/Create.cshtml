@@ -3,12 +3,13 @@
 @{
     ViewData["Title"] = "Create";
 }
+<!--suppress HtmlFormInputWithoutLabel -->
 <div class="container">
     <h2>Create new Client</h2>
     <hr/>
     <div class="row">
-        <div class="col-md-4">
-            <form method="post">
+        <div class="col-md-6">
+            <form method="post" id="edit">
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                 <div class="form-group">
                     <label asp-for="Input.ClientName" class="control-label"></label>
@@ -17,12 +18,12 @@
                 </div>
                 <div class="form-group">
                     <label asp-for="Input.ClientDescription" class="control-label"></label>
-                    <input asp-for="Input.ClientDescription" class="form-control"/>
+                    <textarea class="form-control" form="edit" id="Input_ClientDescription" name="Input.ClientDescription" cols="40" rows="5"></textarea>
                     <span asp-validation-for="Input.ClientDescription" class="text-danger"></span>
                 </div>
                 <div class="form-group">
                     <label asp-for="Input.Password"></label>
-                    <input asp-for="Input.Password" class="form-control"/>
+                    <input asp-for="Input.Password" value="@Model.Input.Password" class="form-control" readonly/>
                     <span asp-validation-for="Input.Password" class="text-danger"></span>
                 </div>
                 <div class="form-group">

@@ -4,5 +4,7 @@ namespace ChatChainCommon.Config.IdentityServer
     {
         public string ServerUrl { get; set; }
         public string ServerOrigin { get; set; }
+        public string SigningPath { get; set; }
+        public string SigningPassword { get; set; }
     }
 }

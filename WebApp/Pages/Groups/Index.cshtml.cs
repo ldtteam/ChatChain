@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using ChatChainCommon.DatabaseModels;
 using ChatChainCommon.DatabaseServices;
 using Microsoft.AspNetCore.Authorization;
@@ -17,13 +18,13 @@ namespace WebApp.Pages.Groups
             _groupsContext = groupsContext;
         }
 
-        public IList<Group> Groups { get; set; }
+        public IList<Group> Groups { get; private set; }
 
-        public void OnGet()
+        public async Task OnGetAsync()
         {
             Groups = new List<Group>();
 
-            foreach (Group group in _groupsContext.Get())
+            foreach (Group group in await _groupsContext.GetAsync())
             {
                 if (group.OwnerId != User.Claims.First(claim => claim.Type.Equals("sub")).Value) continue;
                 

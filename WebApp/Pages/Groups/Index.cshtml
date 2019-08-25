@@ -1,4 +1,5 @@
 ﻿@page
+@using ChatChainCommon.DatabaseModels
 @model GroupsModel
 
 @{
@@ -16,12 +17,11 @@
                 <th>Group Name</th>
                 <th>Group Id</th>
                 <th>Group Description</th>
-                <th>Clients</th>
                 <th><a class="btn btn-success btn-sm" asp-page="./Create">Create New</a></th>
             </tr>
             </thead>
             <tbody>
-            @foreach (var group in Model.Groups)
+            @foreach (Group group in Model.Groups)
             {
                 <tr>
                     <td>
@@ -37,10 +37,8 @@
                         @Html.DisplayFor(m => group.GroupDescription)
                     </td>
                     <td>
-                        <a class="btn btn-primary btn-sm" asp-page="./Clients" asp-route-id="@group.Id.ToString()">View Clients</a>
-                    </td>
-                    <td>
                         <div class="btn-group">
+                            <a class="btn btn-primary btn-sm" asp-page="./Clients" asp-route-id="@group.Id">View Clients</a>
                             <a class="btn btn-primary btn-sm" asp-page="./Edit" asp-route-id="@group.Id">Edit</a>
                             <a class="btn btn-danger  btn-sm" asp-page="./Delete" asp-route-id="@group.Id">Delete</a>
                         </div>

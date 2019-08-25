@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using MongoDB.Bson;
 using Client = IdentityServer4.Models.Client;
 
 namespace WebApp.Pages.Groups
@@ -36,7 +37,7 @@ namespace WebApp.Pages.Groups
                 return RedirectToPage("./Index");
             }
 
-            Group = _groupsContext.Get(id);
+            Group = await _groupsContext.GetAsync(new ObjectId(id));
             
             if (Group == null || Group.OwnerId != User.Claims.First(claim => claim.Type.Equals("sub")).Value)
             {
@@ -45,7 +46,7 @@ namespace WebApp.Pages.Groups
 
             Clients = new List<string>();
 
-            foreach (ChatChainCommon.DatabaseModels.Client client in _groupsContext.GetClients(Group.Id.ToString()))
+            foreach (ChatChainCommon.DatabaseModels.Client client in await _groupsContext.GetClientsAsync(Group.Id))
             {
                 Client is4Client = await _clientStore.FindClientByIdAsync(client.ClientId);
                 Clients.Add(is4Client.ClientName);
@@ -59,14 +60,14 @@ namespace WebApp.Pages.Groups
             return Page();
         }
         
-        public IActionResult OnPost(string id)
+        public async Task<IActionResult> OnPost(string id)
         {
             if (id == null)
             {
                 return RedirectToPage("./Index");
             }
 
-            Group = _groupsContext.Get(id);
+            Group = await _groupsContext.GetAsync(new ObjectId(id));
             
             if (Group.OwnerId != User.Claims.First(claim => claim.Type.Equals("sub")).Value)
             {
@@ -80,7 +81,7 @@ namespace WebApp.Pages.Groups
 
             try
             {
-                _groupsContext.Remove(Group);
+                await _groupsContext.RemoveAsync(Group.Id);
 
                 return RedirectToPage("./Index");
             }

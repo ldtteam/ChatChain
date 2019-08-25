@@ -35,40 +35,28 @@ namespace WebApp.Pages.Groups
                 return RedirectToPage("./Clients");
             }
 
-            Group = _groupsContext.Get(id);
+            Group = await _groupsContext.GetAsync(new ObjectId(id));
 
             if (Group == null || Group.OwnerId != User.Claims.First(claim => claim.Type.Equals("sub")).Value)
             {
                 return RedirectToPage("./Clients");
             }
 
-            List<string> clientIds = new List<string>();
+            ClientOptions = new SelectList(await _clientsContext.GetFromOwnerIdAsync(Group.OwnerId), nameof(Client.Id), nameof(Client.ClientName));
 
-            foreach (Client client in _groupsContext.GetClients(Group.Id.ToString()))
-            {
-                clientIds.Add(client.Id.ToString());
-            }
-            
-            ClientOptions = new SelectList(_clientsContext.GetFromOwnerId(Group.OwnerId), nameof(Client.Id), nameof(Client.ClientName));
-
-            List<string> selectedClients = new List<string>();
-            foreach (Client client in _groupsContext.GetClients(Group.Id.ToString()))
-            {
-                selectedClients.Add(client.Id.ToString());
-            }
-            SelectedClients = selectedClients.ToArray();
+            SelectedClients = (from client in await _groupsContext.GetClientsAsync(Group.Id) select client.Id.ToString()).ToArray();
 
             return Page();
         }
         
-        public IActionResult OnPost(string id)
+        public async Task<IActionResult> OnPostAsync(string id)
         {
             if (!ModelState.IsValid)
             {
                 return Page();
             }
 
-            Group = _groupsContext.Get(id);
+            Group = await _groupsContext.GetAsync(new ObjectId(id));
 
             if (Group == null) return RedirectToPage("./Index");
             
@@ -80,7 +68,7 @@ namespace WebApp.Pages.Groups
             {
                 if (!selectedClientsIds.Contains(clientId))
                 {
-                    _groupsContext.RemoveClient(Group.Id, clientId);
+                    await _groupsContext.RemoveClientAsync(Group.Id, clientId);
                 }
             }
 
@@ -89,7 +77,7 @@ namespace WebApp.Pages.Groups
                 if (!currentClients.Contains(selectedClientId))
                 {
 
-                    _groupsContext.AddClient(Group.Id, selectedClientId);
+                    await _groupsContext.AddClientAsync(Group.Id, selectedClientId);
                 }
             }
             
