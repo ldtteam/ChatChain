@@ -46,6 +46,8 @@ namespace IdentityServer
             _configuration.GetSection("MongoConnections").Bind(mongoConnections);
             services.AddSingleton(mongoConnections);
             
+            Console.WriteLine($"TESTING: {mongoConnections}");
+            
             EmailConnection emailConnection = new EmailConnection();
             if (_configuration.GetSection("EmailConnection").Exists())
             {
@@ -53,9 +55,13 @@ namespace IdentityServer
                 services.AddSingleton(emailConnection);
             }
             
+            Console.WriteLine($"TESTING: {emailConnection}");
+            
             IdentityServerOptions identityServerOptions = new IdentityServerOptions();
             _configuration.GetSection("IdentityServerOptions").Bind(identityServerOptions);
             services.AddSingleton(identityServerOptions);
+            
+            Console.WriteLine($"TESTING: {identityServerOptions}");
 
             services.Configure<ForwardedHeadersOptions>(options =>
             {
@@ -64,6 +70,8 @@ namespace IdentityServer
             });
             
             string redisConnectionVariable = _configuration.GetValue<string>("RedisConnection");
+            
+            Console.WriteLine($"TESTING: {redisConnectionVariable}");
             
             if (redisConnectionVariable != null && !redisConnectionVariable.IsNullOrEmpty())
             {
