@@ -1,5 +1,6 @@
 
 using System.Collections.Generic;
+using ChatChainCommon.DatabaseModels;
 
 namespace ChatChainServer.Models.MessageObjects
 {

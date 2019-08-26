@@ -1,10 +1,9 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
-using IdentityServer.Store;
-using WebApp.Models;
-using WebApp.Services;
+using ChatChainCommon.DatabaseModels;
+using ChatChainCommon.DatabaseServices;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace WebApp.Pages.Clients
@@ -12,26 +11,22 @@ namespace WebApp.Pages.Clients
     [Authorize]
     public class IndexModel : PageModel
     {
-        private readonly UserManager<ApplicationUser> _userManager;
-        private readonly CustomClientStore _is4ClientStore;
-        public readonly ClientService ClientsContext;
+        private readonly ClientService _clientsContext;
         
-        public IndexModel(UserManager<ApplicationUser> userManager, CustomClientStore is4ClientStore, ClientService clientsContext)
+        public IndexModel(ClientService clientsContext)
         {
-            _userManager = userManager;
-            _is4ClientStore = is4ClientStore;
-            ClientsContext = clientsContext;
+            _clientsContext = clientsContext;
         }
 
-        public IList<Client> Clients { get; set; }
+        public IList<Client> Clients { get; private set; }
 
-        public void OnGet()
+        public async Task OnGetAsync()
         {
             Clients = new List<Client>();
 
-            foreach (var client in ClientsContext.Get())
+            foreach (Client client in await _clientsContext.GetAsync())
             {
-                if (client != null && client.OwnerId == _userManager.GetUserAsync(User).Result.Id)
+                if (client != null && client.OwnerId == User.Claims.First(claim => claim.Type.Equals("sub")).Value)
                 {
                     Clients.Add(client);
                 }

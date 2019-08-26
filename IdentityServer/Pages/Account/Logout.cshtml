@@ -1,0 +1,26 @@
+@page
+@model IdentityServer.Pages.Account.Logout
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <title>Logout</title>
+</head>
+<body>
+<div>
+    <h2>Goodbye!</h2>
+</div>
+
+@if (Model.SignOutIframeUrl != null)
+{
+    <iframe width="0" height="0" border="0" class="signout" src="@Model.SignOutIframeUrl"></iframe>
+}
+
+</body>
+</html>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+

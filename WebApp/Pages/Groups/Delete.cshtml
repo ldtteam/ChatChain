@@ -25,7 +25,7 @@
             <dt>
                 <p>Clients:</p>
             </dt>
-            @foreach (var client in Model.Clients)
+            @foreach (string client in Model.Clients)
             {
                 <dd>
                     @Html.DisplayFor(m => client)

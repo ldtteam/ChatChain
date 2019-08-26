@@ -1,81 +1,48 @@
-using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
-using IdentityServer.Store;
-using WebApp.Models;
-using WebApp.Services;
+using ChatChainCommon.DatabaseModels;
+using ChatChainCommon.DatabaseServices;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.EntityFrameworkCore;
+using MongoDB.Bson;
 
 namespace WebApp.Pages.Groups
 {
     [Authorize]
     public class ClientsModel : PageModel
     {
-        private readonly UserManager<ApplicationUser> _userManager;
         private readonly GroupService _groupsContext;
-        private readonly ClientService _clientsContext;
         
-        public ClientsModel(UserManager<ApplicationUser> userManager, GroupService groupsContext, ClientService clientsContext)
+        public ClientsModel(GroupService groupsContext)
         {
-            _userManager = userManager;
             _groupsContext = groupsContext;
-            _clientsContext = clientsContext;
         }
 
-        public IList<Client> Clients { get; set; }
-        public Group Group { get; set; }
-        [BindProperty]
-        public string ClientId { get; set; }
+        public IList<Client> Clients { get; private set; }
+        public Group Group { get; private set; }
 
-        public IActionResult OnGet(string id)
+        public async Task<IActionResult> OnGetAsync(string id)
         {
-            Group = _groupsContext.Get(id);
+            Group = await _groupsContext.GetAsync(new ObjectId(id));
 
-            if (Group == null || Group.OwnerId != _userManager.GetUserAsync(User).Result.Id)
+            if (Group == null || Group.OwnerId != User.Claims.First(claim => claim.Type.Equals("sub")).Value)
             {
                 return RedirectToPage("./Index");
             }
             
             Clients = new List<Client>();
 
-            foreach (var client in _groupsContext.GetClients(Group.Id.ToString()))
+            foreach (Client client in await _groupsContext.GetClientsAsync(Group.Id))
             {
-                if (client.OwnerId == _userManager.GetUserAsync(User).Result.Id)
+                if (client.OwnerId == User.Claims.First(claim => claim.Type.Equals("sub")).Value)
                 {
                     Clients.Add(client);
                 }
             }
 
             return Page();
-        }
-        
-        public IActionResult OnPost(string id)
-        {
-            Group = _groupsContext.Get(id);
-
-            var groupClient = _clientsContext.Get(ClientId);
-            
-            if (Group.OwnerId != _userManager.GetUserAsync(User).Result.Id || groupClient.OwnerId != _userManager.GetUserAsync(User).Result.Id)
-            {
-                return RedirectToPage("./Index");
-            }
-            
-            try
-            {
-                _groupsContext.RemoveClient(Group.Id, groupClient.Id);
-                
-                return RedirectToPage("./Clients", new { id = Group.Id});
-            }
-            catch (DbUpdateException /* ex */)
-            {
-                //Log the error (uncomment ex variable name and write a log.)
-                return RedirectToAction("./Clients",
-                    new { id = Group.Id , saveChangesError = true });
-            }
         }
     }
 }

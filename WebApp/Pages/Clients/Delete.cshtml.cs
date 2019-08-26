@@ -1,32 +1,30 @@
-using System;
+using System.Linq;
 using System.Threading.Tasks;
-using IdentityServer.Store;
-using WebApp.Models;
-using WebApp.Services;
+using ChatChainCommon.DatabaseModels;
+using ChatChainCommon.DatabaseServices;
+using ChatChainCommon.IdentityServerStore;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.EntityFrameworkCore;
+using MongoDB.Bson;
 
 namespace WebApp.Pages.Clients
 {
     [Authorize]
     public class DeleteModel : PageModel
     {
-        private readonly UserManager<ApplicationUser> _userManager;
         private readonly CustomClientStore _is4ClientStore;
         private readonly ClientService _clientsContext;
 
-        public DeleteModel(UserManager<ApplicationUser> userManager, CustomClientStore is4ClientStore, ClientService clientsContext)
+        public DeleteModel(CustomClientStore is4ClientStore, ClientService clientsContext)
         {
-            _userManager = userManager;
             _is4ClientStore = is4ClientStore;
             _clientsContext = clientsContext;
         }
         
         [BindProperty]
         public Client Client { get; set; }
+        // ReSharper disable once UnusedAutoPropertyAccessor.Global
         public string ErrorMessage { get; set; }
         
         public async Task<IActionResult> OnGetAsync(string id)
@@ -36,9 +34,9 @@ namespace WebApp.Pages.Clients
                 return RedirectToPage("./Index");
             }
 
-            Client = _clientsContext.Get(id);
+            Client = await _clientsContext.GetAsync(new ObjectId(id));
             
-            if (Client == null || Client.OwnerId != _userManager.GetUserAsync(User).Result.Id)
+            if (Client == null || Client.OwnerId != User.Claims.First(claim => claim.Type.Equals("sub")).Value)
             {
                 return RedirectToPage("./Index");
             }
@@ -53,36 +51,28 @@ namespace WebApp.Pages.Clients
                 return NotFound();
             }
 
-            var client = await _is4ClientStore.FindClientByIdAsync(id);
+            Client groupClient = await _clientsContext.GetAsync(new ObjectId(id));
+
+            if (groupClient == null)
+            {
+                return NotFound();
+            }
             
-            var groupClient = _clientsContext.Get(id);
-            
-            if (groupClient != null && groupClient.OwnerId != _userManager.GetUserAsync(User).Result.Id)
+            if (groupClient.OwnerId != User.Claims.First(claim => claim.Type.Equals("sub")).Value)
             {
                 return RedirectToPage("./Index");
             }
+
+            IdentityServer4.Models.Client client = await _is4ClientStore.FindClientByIdAsync(groupClient.ClientId);
             
             if (client == null)
             {
                 return NotFound();
             }
 
-            try
-            {
-                _is4ClientStore.RemoveClient(client);
-
-                if (groupClient != null)
-                {
-                    _clientsContext.Remove(groupClient);
-                }
-                return RedirectToPage("./Index");
-            }
-            catch (DbUpdateException)
-            {
-                //Log the error (uncomment ex variable name and write a log.)
-                return RedirectToAction("./Delete",
-                    new {id, saveChangesError = true });
-            }
+            _is4ClientStore.RemoveClient(client);
+            await _clientsContext.RemoveAsync(groupClient.Id);
+            return RedirectToPage("./Index");
         }
     }
 }

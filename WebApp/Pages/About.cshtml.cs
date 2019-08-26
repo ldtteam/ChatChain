@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace WebApp.Pages
@@ -6,11 +7,13 @@ namespace WebApp.Pages
     [Authorize]
     public class AboutModel : PageModel
     {
-        public string Message { get; set; }
-
         public void OnGet()
         {
-            Message = "Your application description page.";
+        }
+
+        public void OnPost()
+        { 
+            HttpContext.SignOutAsync();
         }
     }
 }

@@ -1,0 +1,45 @@
+@using IdentityServer.Models
+@using Microsoft.AspNetCore.Http.Extensions
+
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+
+@if (SignInManager.IsSignedIn(User))
+{
+    <ul class="nav navbar-nav navbar-right">
+        <li class="nav-item">
+            <a class="nav-link" asp-page="/Account/Manage/Index" title="Manage">Hello @User.Claims.First(claim => claim.Type.Equals("DisplayName")).Value!</a>
+        </li>
+        @if (!Context.Request.GetDisplayUrl().Contains("Logout"))
+        {
+            <li class="nav-item">
+                <a class="nav-link" asp-page="/Account/Logout">Logout</a>
+            </li>
+        }
+    </ul>
+}
+else
+{
+    <ul class="nav navbar-nav navbar-right">
+        <li class="nav-item">
+            @if (Model.GetType().GetProperty("ReturnUrl") != null)
+            {
+                <a class="nav-link btn btn-primary" asp-page="/Account/Register" asp-route-returnUrl="@Model.ReturnUrl">Register</a>
+            }
+            else
+            {
+                <a class="nav-link btn btn-primary" asp-page="/Account/Register">Register</a>
+            }
+        </li>
+        <li class="nav-item">
+            @if (Model.GetType().GetProperty("ReturnUrl") != null)
+            {
+                <a class="nav-link" asp-page="/Account/Login" sp-route-returnUrl="@Model.ReturnUrl">Login</a>
+            }
+            else
+            {
+                <a class="nav-link" asp-page="/Account/Login">Login</a>
+            }
+        </li>
+    </ul>
+}

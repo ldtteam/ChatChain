@@ -1,8 +1,4 @@
-@using WebApp.Models
-
-@inject SignInManager<ApplicationUser> SignInManager
-
-@if (SignInManager.IsSignedIn(User))
+@if (User.Identity.IsAuthenticated)
 {
     <ul class="navbar-nav mr-auto">
         <li class="nav-item"><a class="nav-link" asp-page="/Clients/Index">Clients</a></li>

@@ -1,16 +1,16 @@
 using System;
-using AspNetCore.Identity.Mongo;
-using IdentityServer.Store;
+using System.IdentityModel.Tokens.Jwt;
+using ChatChainCommon.Config;
+using ChatChainCommon.DatabaseServices;
+using ChatChainCommon.IdentityServerRepository;
+using ChatChainCommon.IdentityServerStore;
 using IdentityServer4.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using WebApp.Models;
-using WebApp.Repository;
-using WebApp.Services;
 using Microsoft.AspNetCore.DataProtection;
-using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Bson.Serialization;
@@ -21,21 +21,34 @@ namespace WebApp
     public class Startup
     {
         //quick test for CI -- 5
-        public Startup(IConfiguration configuration)
+        public Startup(IHostingEnvironment env)
         {
-            Configuration = configuration;
+            IConfigurationBuilder builder = new ConfigurationBuilder()
+                .SetBasePath(env.ContentRootPath)
+                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true);
+
+            builder.AddEnvironmentVariables(options => { options.Prefix = "ChatChain_WebApp_"; });
+            _configuration = builder.Build();
         }
 
-        public IConfiguration Configuration { get; }
+        private readonly IConfigurationRoot _configuration;
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            var redisConnectionVariable = Environment.GetEnvironmentVariable("REDIS_STACK_EXCHANGE");
+            services.AddSingleton(_configuration);
+            
+            services.Configure<ForwardedHeadersOptions>(options =>
+            {
+                options.ForwardedHeaders = ForwardedHeaders.XForwardedProto;
+            });
+            
+            string redisConnectionVariable = _configuration.GetValue<string>("RedisConnection");
 
             if (redisConnectionVariable != null && !redisConnectionVariable.IsNullOrEmpty())
             {
-                var redis = ConnectionMultiplexer.Connect(redisConnectionVariable);
+                ConnectionMultiplexer redis = ConnectionMultiplexer.Connect(redisConnectionVariable);
                 services.AddDataProtection()
                     .PersistKeysToStackExchangeRedis(redis, "DataProtection-Keys")
                     .SetApplicationName("WebApp");
@@ -48,40 +61,42 @@ namespace WebApp
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
 
-            var emailUsername = Environment.GetEnvironmentVariable("EMAIL_USERNAME");
-            if (!emailUsername.IsNullOrEmpty())
-            {
-                var emailPassword = Environment.GetEnvironmentVariable("EMAIL_PASSWORD");
-                var emailHost = Environment.GetEnvironmentVariable("EMAIL_HOST");
-                var emailPort = int.Parse(Environment.GetEnvironmentVariable("EMAIL_PORT"));
-                var emailSsl = bool.Parse(Environment.GetEnvironmentVariable("EMAIL_ENABLE_SSL"));
+            JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
+            
+            IdentityServerConnection identityServerConnection = new IdentityServerConnection();
+            _configuration.GetSection("IdentityServerConnection").Bind(identityServerConnection);
 
-                services.AddTransient<IEmailSender, EmailSender>(i =>
-                    new EmailSender(emailHost, emailPort, emailSsl, emailUsername, emailPassword));
-            }
-
-            var identityDatabase = Environment.GetEnvironmentVariable("IDENTITY_DATABASE");
-
-            services.AddIdentityMongoDbProvider<ApplicationUser, ApplicationRole>(identityOptions =>
-            {
-                identityOptions.Password.RequireNonAlphanumeric = false;
-                /*if (!emailUsername.IsNullOrEmpty())
+            services.AddAuthentication(options =>
                 {
-                    identityOptions.SignIn.RequireConfirmedEmail = true;
-                }*/
-            }, mongoIdentityOptions => { mongoIdentityOptions.ConnectionString = identityDatabase; });
+                    options.DefaultScheme = "Cookies";
+                    options.DefaultChallengeScheme = "oidc";
+                })
+                .AddCookie("Cookies")
+                .AddOpenIdConnect("oidc", options =>
+                {
+                    options.Authority = identityServerConnection.ServerUrl;
+                    options.RequireHttpsMetadata = false;
+
+                    options.ClientId = identityServerConnection.ClientId;
+                    options.ClientSecret = identityServerConnection.ClientSecret;
+                    options.SaveTokens = true;
+                });
 
             services.ConfigureApplicationCookie(options =>
             {
                 options.Cookie.HttpOnly = true;
                 options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
-
-                options.LoginPath = "/Identity/Account/Login";
-                options.AccessDeniedPath = "/Identity/Account/AccessDenied";
+                
+                options.LoginPath = "/Account/Login";
+                //options.AccessDeniedPath = "/Identity/Account/AccessDenied";
             });
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
+            MongoConnections mongoConnections = new MongoConnections();
+            _configuration.GetSection("MongoConnections").Bind(mongoConnections);
+            services.AddSingleton(mongoConnections);
+            
             services.AddScoped<ClientService>();
             services.AddScoped<GroupService>();
             services.AddScoped<ClientConfigService>();
@@ -93,6 +108,11 @@ namespace WebApp
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
+            app.UseForwardedHeaders(
+                new ForwardedHeadersOptions
+                {
+                    ForwardedHeaders = ForwardedHeaders.XForwardedProto
+                });
             //UpdateDatabase(app);
             
             if (env.IsDevelopment())
@@ -106,16 +126,11 @@ namespace WebApp
                 app.UseHsts();
             }
 
-            var useHttps = Environment.GetEnvironmentVariable("USE_HTTPS");
+            bool useHttps = _configuration.GetValue<bool>("UseHttps");
 
-            if (useHttps != null && !useHttps.IsNullOrEmpty())
+            if (useHttps)
             {
-                var boolUseHttps = bool.Parse(useHttps);
-
-                if (boolUseHttps)
-                {
-                    app.UseHttpsRedirection();
-                }
+                app.UseHttpsRedirection();
             }
             
             app.UseStaticFiles();

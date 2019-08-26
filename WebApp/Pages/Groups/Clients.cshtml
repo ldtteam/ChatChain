@@ -1,4 +1,5 @@
 @page
+@using ChatChainCommon.DatabaseModels
 @model ClientsModel
 
 @{
@@ -18,9 +19,8 @@
             </tr>
             </thead>
             <tbody>
-            @foreach (var client in Model.Clients)
+            @foreach (Client client in Model.Clients)
             {
-                Model.ClientId = client.ClientId;
                 <tr>
                     <td>
                         @Html.DisplayFor(m => client.ClientId)
@@ -31,12 +31,7 @@
                     <td>
                         @Html.DisplayFor(m => client.ClientDescription)
                     </td>
-                    <td>
-                        <form method="post">
-                            <input type="hidden" asp-for="@Model.Group.Id"/>
-                            <input type="hidden" asp-for="@Model.ClientId" value="@client.ClientId"/>
-                        </form>
-                    </td>
+                    <td></td>
                 </tr>
             }
             </tbody>

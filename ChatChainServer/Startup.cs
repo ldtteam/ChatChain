@@ -1,11 +1,12 @@
-using System;
+using ChatChainCommon.Config;
+using ChatChainCommon.DatabaseServices;
 using ChatChainServer.Hubs;
-using ChatChainServer.Services;
 using ChatChainServer.Utils;
 using IdentityServer4.Extensions;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,19 +16,34 @@ namespace ChatChainServer
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        public Startup(IHostingEnvironment env)
         {
-            Configuration = configuration;
+            IConfigurationBuilder builder = new ConfigurationBuilder()
+                .SetBasePath(env.ContentRootPath)
+                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true);
+
+            builder.AddEnvironmentVariables(options => { options.Prefix = "ChatChain_Server_"; });
+            _configuration = builder.Build();
         }
-        
-        private IConfiguration Configuration { get; }
+
+        private readonly IConfigurationRoot _configuration;
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.Configure<ForwardedHeadersOptions>(options =>
+            {
+                options.ForwardedHeaders = 
+                    ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+            });
+            
             services.AddMvc();
 
             IdentityModelEventSource.ShowPII = true;
+            
+            IdentityServerConnection identityServerConnection = new IdentityServerConnection();
+            _configuration.GetSection("IdentityServerConnection").Bind(identityServerConnection);
 
             services.AddAuthentication(options =>
             {
@@ -35,17 +51,17 @@ namespace ChatChainServer
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
             }).AddIdentityServerAuthentication(JwtBearerDefaults.AuthenticationScheme, options =>
             {
-                options.Authority = Environment.GetEnvironmentVariable("IDENTITY_SERVER_URL"); //"http://host.docker.internal:5081";
+                options.Authority = identityServerConnection.ServerUrl;
                 options.TokenRetriever = CustomTokenRetriever.FromHeaderAndQueryString;
                 options.RequireHttpsMetadata = false;
                 options.ApiName = "ChatChain";
             });
 
-            var environmentConnectionString = Environment.GetEnvironmentVariable("REDIS_BACKPLANE");
+            string redisConnectionVariable = _configuration.GetValue<string>("RedisConnection");
 
-            if (environmentConnectionString != null && !environmentConnectionString.IsNullOrEmpty())
+            if (redisConnectionVariable != null && !redisConnectionVariable.IsNullOrEmpty())
             {
-                services.AddSignalR().AddStackExchangeRedis(environmentConnectionString, options =>
+                services.AddSignalR().AddStackExchangeRedis(redisConnectionVariable, options =>
                     {
                         options.Configuration.ChannelPrefix = "ChatChain";
                     });
@@ -57,6 +73,10 @@ namespace ChatChainServer
 
             services.AddSingleton<IUserIdProvider, ChatChainUserProvider>();
             
+            MongoConnections mongoConnections = new MongoConnections();
+            _configuration.GetSection("MongoConnections").Bind(mongoConnections);
+            services.AddSingleton(mongoConnections);
+            
             services.AddScoped<ClientService>();
             services.AddScoped<GroupService>();
             services.AddScoped<ClientConfigService>();
@@ -65,6 +85,8 @@ namespace ChatChainServer
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
+            app.UseForwardedHeaders();
+            
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -79,16 +101,11 @@ namespace ChatChainServer
             app.UseStaticFiles();
             app.UseCookiePolicy();
 
-            var useHttps = Environment.GetEnvironmentVariable("USE_HTTPS");
+            bool useHttps = _configuration.GetValue<bool>("UseHttps");
 
-            if (useHttps != null && !useHttps.IsNullOrEmpty())
+            if (useHttps)
             {
-                var boolUseHttps = bool.Parse(useHttps);
-
-                if (boolUseHttps)
-                {
                     app.UseHttpsRedirection();
-                }
             }
 
             app.UseMvc();
