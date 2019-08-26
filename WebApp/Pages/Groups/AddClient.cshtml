@@ -16,8 +16,10 @@
                     <input type="hidden" asp-for="Group.Id"/>
                     <div class="form-group">
                         <br/>
-                        <select asp-for="SelectedClients" asp-items="Model.ClientOptions" 
-                                class="SelectedClients" style="width: 300px"></select>
+                        <label>
+                            <select asp-for="SelectedClients" asp-items="Model.ClientOptions" 
+                                    class="SelectedClients" style="width: 300px"></select>
+                        </label>
                     </div>
                     <hr/>
                     <div class="form-group">

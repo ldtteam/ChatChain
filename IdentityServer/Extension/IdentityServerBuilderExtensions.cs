@@ -1,6 +1,7 @@
-using IdentityServer.Interface;
-using IdentityServer.Repository;
-using IdentityServer.Store;
+using System.Collections.Generic;
+using ChatChainCommon.IdentityServerRepository;
+using ChatChainCommon.IdentityServerStore;
+using IdentityServer4.Models;
 using IdentityServer4.Services;
 using IdentityServer4.Stores;
 using Microsoft.Extensions.DependencyInjection;
@@ -25,6 +26,22 @@ namespace IdentityServer.Extension
         /// <returns></returns>
         public static IIdentityServerBuilder AddClients(this IIdentityServerBuilder builder)
         {
+            builder.Services.AddTransient<IClientStore, CustomClientStore>();
+            builder.Services.AddTransient<ICorsPolicyService, InMemoryCorsPolicyService>();
+
+            return builder;
+        }
+        
+        /// <summary>
+        /// Configure ClientId / Secrets
+        /// </summary>
+        /// <param name="builder"></param>
+        /// <param name="configurationOption"></param>
+        /// <returns></returns>
+        public static IIdentityServerBuilder AddClientsWithInMemory(this IIdentityServerBuilder builder, IEnumerable<Client> clients)
+        {
+            builder.Services.AddSingleton(clients);
+            
             builder.Services.AddTransient<IClientStore, CustomClientStore>();
             builder.Services.AddTransient<ICorsPolicyService, InMemoryCorsPolicyService>();
 

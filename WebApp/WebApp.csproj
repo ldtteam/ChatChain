@@ -10,14 +10,13 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="AspNetCore.Identity.Mongo" Version="5.0.0.12" />
         <PackageReference Include="EntityFramework" Version="6.2.0" />
         <PackageReference Include="IdentityServer4" Version="2.3.2" />
-        <PackageReference Include="IdentityServer4.EntityFramework" Version="2.3.2" />
         <PackageReference Include="Microsoft.AspNetCore.App" />
         <PackageReference Include="Microsoft.AspNetCore.Cryptography.Internal" Version="2.2.0" />
         <PackageReference Include="Microsoft.AspNetCore.DataProtection.Abstractions" Version="2.2.0" />
         <PackageReference Include="Microsoft.AspNetCore.DataProtection.StackExchangeRedis" Version="2.2.0" />
+        <PackageReference Include="Microsoft.AspNetCore.HttpOverrides" Version="2.2.0" />
         <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.2.0" />
         <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.2.0" PrivateAssets="All" />
         <PackageReference Include="MongoDB.Driver" Version="2.7.3" />
@@ -29,6 +28,64 @@
 
     <ItemGroup>
       <_ContentIncludedByDefault Remove="Areas\Clients\Pages\Index.cshtml" />
+      <_ContentIncludedByDefault Remove="Areas\Identity\Pages\Account\ConfirmEmail.cshtml" />
+      <_ContentIncludedByDefault Remove="Areas\Identity\Pages\Account\Login.cshtml" />
+      <_ContentIncludedByDefault Remove="Areas\Identity\Pages\Account\Logout.cshtml" />
+      <_ContentIncludedByDefault Remove="Areas\Identity\Pages\Account\Manage\Index.cshtml" />
+      <_ContentIncludedByDefault Remove="Areas\Identity\Pages\Account\Manage\_ViewImports.cshtml" />
+      <_ContentIncludedByDefault Remove="Areas\Identity\Pages\Account\Register.cshtml" />
+      <_ContentIncludedByDefault Remove="Areas\Identity\Pages\Account\_ViewImports.cshtml" />
+      <_ContentIncludedByDefault Remove="Areas\Identity\Pages\_ValidationScriptsPartial.cshtml" />
+      <_ContentIncludedByDefault Remove="Areas\Identity\Pages\_ViewImports.cshtml" />
+      <_ContentIncludedByDefault Remove="Areas\Identity\Pages\_ViewStart.cshtml" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Include="..\ChatChainCommon\Config\EmailConnection.cs">
+        <Link>Config\EmailConnection.cs</Link>
+      </Compile>
+      <Compile Include="..\ChatChainCommon\Config\IdentityServerConnection.cs">
+        <Link>Config\IdentityServerConnection.cs</Link>
+      </Compile>
+      <Compile Include="..\ChatChainCommon\Config\MongoConnections.cs">
+        <Link>Config\MongoConnections.cs</Link>
+      </Compile>
+      <Compile Include="..\ChatChainCommon\Config\MongoOptions.cs">
+        <Link>Config\MongoOptions.cs</Link>
+      </Compile>
+      <Compile Include="..\ChatChainCommon\DatabaseModels\Client.cs">
+        <Link>DatabaseModels\Client.cs</Link>
+      </Compile>
+      <Compile Include="..\ChatChainCommon\DatabaseModels\ClientConfig.cs">
+        <Link>DatabaseModels\ClientConfig.cs</Link>
+      </Compile>
+      <Compile Include="..\ChatChainCommon\DatabaseModels\Group.cs">
+        <Link>DatabaseModels\Group.cs</Link>
+      </Compile>
+      <Compile Include="..\ChatChainCommon\DatabaseServices\ClientConfigService.cs">
+        <Link>DatabaseServices\ClientConfigService.cs</Link>
+      </Compile>
+      <Compile Include="..\ChatChainCommon\DatabaseServices\ClientService.cs">
+        <Link>DatabaseServices\ClientService.cs</Link>
+      </Compile>
+      <Compile Include="..\ChatChainCommon\DatabaseServices\GroupService.cs">
+        <Link>DatabaseServices\GroupService.cs</Link>
+      </Compile>
+      <Compile Include="..\ChatChainCommon\IdentityServerRepository\IRepository.cs">
+        <Link>IdentityServerRepository\IRepository.cs</Link>
+      </Compile>
+      <Compile Include="..\ChatChainCommon\IdentityServerRepository\MongoRepository.cs">
+        <Link>IdentityServerRepository\MongoRepository.cs</Link>
+      </Compile>
+      <Compile Include="..\ChatChainCommon\IdentityServerStore\CustomClientStore.cs">
+        <Link>IdentityServerStore\CustomClientStore.cs</Link>
+      </Compile>
+      <Compile Include="..\ChatChainCommon\IdentityServerStore\CustomPersistedGrantStore.cs">
+        <Link>IdentityServerStore\CustomPersistedGrantStore.cs</Link>
+      </Compile>
+      <Compile Include="..\ChatChainCommon\IdentityServerStore\CustomResourceStore.cs">
+        <Link>IdentityServerStore\CustomResourceStore.cs</Link>
+      </Compile>
     </ItemGroup>
 
 </Project>

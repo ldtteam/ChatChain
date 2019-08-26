@@ -1,26 +1,24 @@
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Threading.Tasks;
-using System.Xml.Serialization;
-using IdentityServer.Store;
-using WebApp.Models;
-using WebApp.Services;
+using ChatChainCommon.DatabaseModels;
+using ChatChainCommon.DatabaseServices;
+using ChatChainCommon.IdentityServerStore;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using MongoDB.Bson;
 
 namespace WebApp.Pages.Clients
 {
     [Authorize]
     public class EditModel : PageModel
     {
-        private readonly UserManager<ApplicationUser> _userManager;
         private readonly CustomClientStore _is4ClientStore;
         private readonly ClientService _clientsContext;
 
-        public EditModel(UserManager<ApplicationUser> userManager, CustomClientStore is4ClientStore, ClientService clientsContext)
+        public EditModel(CustomClientStore is4ClientStore, ClientService clientsContext)
         {
-            _userManager = userManager;
             _is4ClientStore = is4ClientStore;
             _clientsContext = clientsContext;
         }
@@ -42,16 +40,16 @@ namespace WebApp.Pages.Clients
             public string ClientDescription { get; set; }
         }
         
-        public IActionResult OnGet(string id)
+        public async Task<IActionResult> OnGetAsync(string id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            Client = _clientsContext.Get(id);
+            Client = await _clientsContext.GetAsync(new ObjectId(id));
            
-            if (Client == null || Client.OwnerId != _userManager.GetUserAsync(User).Result.Id)
+            if (Client == null || Client.OwnerId != User.Claims.First(claim => claim.Type.Equals("sub")).Value)
             {
                 return RedirectToPage("./Index");
             }
@@ -77,21 +75,21 @@ namespace WebApp.Pages.Clients
                 return Page();
             }
             
-            var groupsClient = _clientsContext.Get(id);
+            Client groupsClient = await _clientsContext.GetAsync(new ObjectId(id));
 
-            if (groupsClient.OwnerId != _userManager.GetUserAsync(User).Result.Id)
+            if (groupsClient.OwnerId != User.Claims.First(claim => claim.Type.Equals("sub")).Value)
             {
                 return RedirectToPage("./Index");
             }
 
-            var clientToUpdate = await _is4ClientStore.FindClientByIdAsync(id);
+            IdentityServer4.Models.Client clientToUpdate = await _is4ClientStore.FindClientByIdAsync(groupsClient.ClientId);
 
             clientToUpdate.ClientName = Input.ClientName;
             _is4ClientStore.UpdateClient(clientToUpdate);
             
             groupsClient.ClientName = Input.ClientName;
             groupsClient.ClientDescription = Input.ClientDescription;
-            _clientsContext.Update(groupsClient.Id, groupsClient);
+            await _clientsContext.UpdateAsync(groupsClient.Id, groupsClient);
 
             return RedirectToPage("./Index");
         } 

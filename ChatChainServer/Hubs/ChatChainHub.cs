@@ -1,11 +1,13 @@
 using System;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using ChatChainCommon.DatabaseModels;
+using ChatChainCommon.DatabaseServices;
 using ChatChainServer.Models.MessageObjects;
-using ChatChainServer.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
+using MongoDB.Bson;
 
 namespace ChatChainServer.Hubs
 {
@@ -35,7 +37,7 @@ namespace ChatChainServer.Hubs
                 _logger.LogInformation($"Claim: {claim.Properties}, {claim.Issuer}, {claim.Value}");
             }
 
-            foreach (var identity in Context.User.Identities )
+            foreach (ClaimsIdentity identity in Context.User.Identities )
             {
                 _logger.LogInformation($"identity: {identity.Name}");
             }
@@ -48,7 +50,7 @@ namespace ChatChainServer.Hubs
         {
             if (!_hasSentLeaveMessage)
             {
-                var message = new ClientEventMessage {Event = "STOP", SendToSelf = false};
+                ClientEventMessage message = new ClientEventMessage {Event = "STOP", SendToSelf = false};
                 await SendClientEventMessage(message);
                 _logger.LogInformation("Sent Client Event STOP message");
             }
@@ -60,14 +62,14 @@ namespace ChatChainServer.Hubs
         {
             _logger.LogInformation($"Client {Context.UserIdentifier} had author: {message.User.Name} send \"{message.Message}\" in channel: {message.Group.GroupId}");
 
-            var group = _groupsContext.GetFromGuid(message.Group.GroupId);
-            var client = _clientsContext.GetFromClientGuid(Context.UserIdentifier);
+            Group group = await _groupsContext.GetFromGuidAsync(message.Group.GroupId);
+            Client client = await _clientsContext.GetFromGuidAsync(Context.UserIdentifier);
             
             if (group != null && client != null && group.ClientIds.Contains(client.Id))
             {
                 message.SendingClient = client;
                 message.Group = group;
-                foreach (var fClient in _groupsContext.GetClients(group.Id))
+                foreach (Client fClient in await _groupsContext.GetClientsAsync(group.Id))
                 {
                     if (!fClient.ClientId.Equals(client.ClientId) || message.SendToSelf)
                     {
@@ -81,7 +83,7 @@ namespace ChatChainServer.Hubs
         {
             _logger.LogInformation($"Client {Context.UserIdentifier} sent event: {message.Event} with extra data: {message.ExtraEventData}");
 
-            var client = _clientsContext.GetFromClientGuid(Context.UserIdentifier);
+            Client client = await _clientsContext.GetFromGuidAsync(Context.UserIdentifier);
 
             if (client != null)
             {
@@ -91,15 +93,15 @@ namespace ChatChainServer.Hubs
                 }
 
                 message.SendingClient = client;
-                if (_clientsContext.GetClientConfig(client.Id) != null)
+                if (await _clientsContext.GetClientConfigAsync(client.Id) != null)
                 {
-                    foreach (var fGroupId in _clientsContext.GetClientConfig(client.Id).ClientEventGroups)
+                    foreach (ObjectId fGroupId in (await _clientsContext.GetClientConfigAsync(client.Id)).ClientEventGroups)
                     {
-                        var group = _groupsContext.Get(fGroupId);
+                        Group group = await _groupsContext.GetAsync(fGroupId);
                         
                         if (group == null) continue;
                         message.Group = group;
-                        foreach (var fClient in _groupsContext.GetClients(group.Id))
+                        foreach (Client fClient in await _groupsContext.GetClientsAsync(group.Id))
                         {
                             if (!fClient.ClientId.Equals(client.ClientId) || message.SendToSelf)
                             {
@@ -116,21 +118,21 @@ namespace ChatChainServer.Hubs
         {
             _logger.LogInformation($"Client {Context.UserIdentifier} with user: {message.User.Name} sent event: {message.Event} with extra data: {message.ExtraEventData}");
 
-            var client = _clientsContext.GetFromClientGuid(Context.UserIdentifier);
+            Client client = await _clientsContext.GetFromGuidAsync(Context.UserIdentifier);
 
             if (client != null)
             {
                 message.SendingClient = client;
 
-                if (_clientsContext.GetClientConfig(client.Id) != null)
+                if (await _clientsContext.GetClientConfigAsync(client.Id) != null)
                 {
-                    foreach (var fGroupId in _clientsContext.GetClientConfig(client.Id).UserEventGroups)
+                    foreach (ObjectId fGroupId in (await _clientsContext.GetClientConfigAsync(client.Id)).UserEventGroups)
                     {
-                        var group = _groupsContext.Get(fGroupId);
+                        Group group = await _groupsContext.GetAsync(fGroupId);
                         
                         if (group == null) continue;
                         message.Group = group;
-                        foreach (var fClient in _groupsContext.GetClients(group.Id))
+                        foreach (Client fClient in await _groupsContext.GetClientsAsync(group.Id))
                         {
                             if (!fClient.ClientId.Equals(client.ClientId) || message.SendToSelf)
                             {
@@ -147,13 +149,13 @@ namespace ChatChainServer.Hubs
         {
             _logger.LogInformation($"Client {Context.UserIdentifier} requested their groups");
             
-            var response = new GetGroupsResponse();
+            GetGroupsResponse response = new GetGroupsResponse();
 
-            var client = _clientsContext.GetFromClientGuid(Context.UserIdentifier);
+            Client client = await _clientsContext.GetFromGuidAsync(Context.UserIdentifier);
 
             if (client != null)
             {
-                response.Groups = _clientsContext.GetGroups(client.Id);
+                response.Groups = await _clientsContext.GetGroupsAsync(client.Id);
             }
 
             await Clients.Caller.SendAsync("ReceiveGroups", response);
@@ -163,9 +165,9 @@ namespace ChatChainServer.Hubs
         {
             _logger.LogInformation($"Client {Context.UserIdentifier} requested their Client");
             
-            var response = new GetClientResponse();
+            GetClientResponse response = new GetClientResponse();
 
-            var client = _clientsContext.GetFromClientGuid(Context.UserIdentifier);
+            Client client = await _clientsContext.GetFromGuidAsync(Context.UserIdentifier);
 
             if (client != null)
             {

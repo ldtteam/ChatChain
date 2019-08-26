@@ -1,12 +1,9 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using IdentityServer.Store;
-using WebApp.Models;
-using WebApp.Services;
+using ChatChainCommon.DatabaseModels;
+using ChatChainCommon.DatabaseServices;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -17,22 +14,18 @@ namespace WebApp.Pages.Groups
     [Authorize]
     public class AddClientModel : PageModel
     {
-        private readonly UserManager<ApplicationUser> _userManager;
-        private readonly CustomClientStore _clientStore;
         private readonly GroupService _groupsContext;
         private readonly ClientService _clientsContext;
 
-        public AddClientModel(UserManager<ApplicationUser> userManager, CustomClientStore clientStore, GroupService groupsContext, ClientService clientsContext)
+        public AddClientModel(GroupService groupsContext, ClientService clientsContext)
         {
-            _userManager = userManager;
-            _clientStore = clientStore;
             _groupsContext = groupsContext;
             _clientsContext = clientsContext;
         }
 
         public Group Group { get; set; }
         [BindProperty]
-        public String[] SelectedClients { get; set; }
+        public string[] SelectedClients { get; set; }
         public SelectList ClientOptions { get; set; }
 
         public async Task<IActionResult> OnGetAsync(string id)
@@ -42,52 +35,52 @@ namespace WebApp.Pages.Groups
                 return RedirectToPage("./Clients");
             }
 
-            Group = _groupsContext.Get(id);
+            Group = await _groupsContext.GetAsync(new ObjectId(id));
 
-            if (Group == null || Group.OwnerId != _userManager.GetUserAsync(User).Result.Id)
+            if (Group == null || Group.OwnerId != User.Claims.First(claim => claim.Type.Equals("sub")).Value)
             {
                 return RedirectToPage("./Clients");
             }
-            
-            var clients = new List<SelectListItem>();
 
-            var clientIds = new List<string>();
+            ClientOptions = new SelectList(await _clientsContext.GetFromOwnerIdAsync(Group.OwnerId), nameof(Client.Id), nameof(Client.ClientName));
 
-            foreach (var client in _groupsContext.GetClients(Group.Id.ToString()))
-            {
-                clientIds.Add(client.Id.ToString());
-            }
-            
-            ClientOptions = new SelectList(_clientsContext.GetFromOwnerId(Group.OwnerId), nameof(Client.Id), nameof(Client.ClientName));
-
-            var selectedClients = new List<string>();
-            foreach (var client in _groupsContext.GetClients(Group.Id.ToString()))
-            {
-                selectedClients.Add(client.Id.ToString());
-            }
-            SelectedClients = selectedClients.ToArray();
+            SelectedClients = (from client in await _groupsContext.GetClientsAsync(Group.Id) select client.Id.ToString()).ToArray();
 
             return Page();
         }
         
-        public IActionResult OnPost(string id)
+        public async Task<IActionResult> OnPostAsync(string id)
         {
             if (!ModelState.IsValid)
             {
                 return Page();
             }
 
-            Group = _groupsContext.Get(id);
+            Group = await _groupsContext.GetAsync(new ObjectId(id));
 
             if (Group == null) return RedirectToPage("./Index");
             
-            var selectedClientsIds = SelectedClients.Select(client => new ObjectId(client)).ToList();
-            
-            foreach (var selectedClientId in selectedClientsIds)
+            List<ObjectId> selectedClientsIds = SelectedClients.Select(client => new ObjectId(client)).ToList();
+
+            List<ObjectId> currentClients = Group.ClientIds;
+
+            foreach (ObjectId clientId in currentClients)
             {
-                _groupsContext.AddClient(Group.Id, selectedClientId);
+                if (!selectedClientsIds.Contains(clientId))
+                {
+                    await _groupsContext.RemoveClientAsync(Group.Id, clientId);
+                }
             }
 
+            foreach (ObjectId selectedClientId in selectedClientsIds)
+            {
+                if (!currentClients.Contains(selectedClientId))
+                {
+
+                    await _groupsContext.AddClientAsync(Group.Id, selectedClientId);
+                }
+            }
+            
             return RedirectToPage("./Clients", new { id = Group.Id} );
 
         }

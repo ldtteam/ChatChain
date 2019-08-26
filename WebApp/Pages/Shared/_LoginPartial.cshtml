@@ -1,22 +1,24 @@
-@using WebApp.Models
-@using Microsoft.AspNetCore.Identity
+@using Microsoft.Extensions.Configuration
+@inject IConfigurationRoot Configuration
 
-@inject SignInManager<ApplicationUser> SignInManager
-@inject UserManager<ApplicationUser> UserManager
-
-@if (SignInManager.IsSignedIn(User))
+@if (User.Identity.IsAuthenticated)
 {
-    <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Page("/Index", new { area = "" })" method="post" id="logoutForm" class="navbar-right">
-        <ul class="navbar-nav ml-auto">
-            <li class="nav-item"><a class="nav-link" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">Hello @UserManager.GetUserName(User)!</a></li>
-            <li class="nav-item"><button type="submit" class="btn btn-link nav-btn nav-link">Logout</button></li>
-        </ul>
+    <form class="navbar-right">
+    <ul class="navbar-nav ml-auto">
+        <li class="nav-item">
+            <a href="@( Configuration.GetValue<string>("AccountManagementPage") )" class="nav-link" title="Manage">Hello @User.Claims.First(claim => claim.Type.Equals("DisplayName")).Value!</a>
+        </li>
+        <li class="nav-item">
+            <a class="btn btn-link nav-btn nav-link" asp-page="/Account/Logout">Logout</a>
+        </li>
+    </ul>
     </form>
 }
 else
 {
     <ul class="navbar-nav ml-auto">
-        <li class="nav-item"><a class="nav-link" asp-area="Identity" asp-page="/Account/Login">Login</a></li>
-        <li class="nav-item"><a class="nav-link btn btn-primary" asp-area="Identity" asp-page="/Account/Register">Register</a></li>
+        <li class="nav-item">
+            <a class="nav-link" asp-page="/Account/Login">Register Or Login</a>
+        </li>
     </ul>
 }

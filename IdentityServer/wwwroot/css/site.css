@@ -1,0 +1,210 @@
+﻿/*
+Main Site CSS
+By @snaddyvitch-dispenser / Conor Howland
+*/
+
+:root {
+  --primary: #D68C00;
+}
+
+.hero {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.fullheight-with-navbar {
+  height: calc(100vh - 60px);
+}
+
+.fullheight {
+  height: 100vh;
+}
+
+.next-section-spacer {
+  height: 70px;
+  border-top-left-radius: 100%;
+  border-top-right-radius: 100%;
+}
+
+body {
+  color: white;
+}
+
+body, .navbar {
+  background-color: #23262D;
+}
+
+.button.is-wider {
+  padding: 0 25px; /* Button with more padding */
+}
+
+/* Center Flex Items */
+.is-flex-centered {
+  align-content: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* Alternate Grey */
+.is-primary-alt {
+  background-color: #2A2E37;
+  color: #FFF;
+}
+
+/* Curved Header for next page*/
+.next-page-header {
+  height: 30px;
+  border-top-right-radius: 50601%;
+  border-top-left-radius: 50601%;
+}
+
+.compatible-logos {
+  background-color: #2E353D;
+  border-radius: 10px;
+  width: 100%;
+  display: flex;
+  align-content: center;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+}
+
+.compatible-logos img {
+  max-width: 50%;
+  max-height: 50%;
+  height: auto;
+  width: auto;
+}
+
+.compatible-logos h3 {
+  font-size: 50px;
+  line-height: 50px;
+}
+
+.large-title {
+  font-size: 55px;
+  font-weight: bold;
+}
+
+/* Half page image */
+.half-image {
+  align-self: center;
+  justify-content: center;
+  max-width: 100%;
+  width: auto;
+  height: auto;
+}
+
+.has-text-margin {
+  margin-bottom: 20px;
+}
+
+.circuit-background {
+  background-image: url("/images/background_pattern.png");
+  background-size: cover;
+}
+
+/* Small Logo */
+.small-logo {
+  max-height: 1.75em;
+  width: auto;
+  height: auto;
+  margin-right: 10px;
+}
+
+/* Form over page */
+.floating-form {
+  max-width: 100%;
+  width: 800px;
+  box-shadow: rgba(255,255,255,0.3) 2px 4px 20px 2px;
+  padding: 2.5% 5%;
+  border-radius: 20px;
+  background-color: #2E353D;
+}
+
+/* Full Page with Central Form */
+.full-page-form-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.3);
+  display: flex;
+  align-content: center;
+  justify-content: center;
+  align-items: center;
+  align-content: center;
+  z-index: 1000;
+}
+
+/* Fix checkbox hover color */
+.checkbox:hover.has-text-white {
+  color: white;
+}
+
+/* Add spacing */
+.has-bottom-margin {
+  margin-bottom: 20px;
+}
+
+/* Set the Cookie Consent to show at the bottom of the device viewport */
+#cookieConsent {
+  position: fixed;
+  bottom: 10px;
+  left: 50%;
+  transform: translate(-50%, 0);
+}
+
+/* For Non-Mobile Devices */
+@media screen and (min-width: 768px) {
+  .is-limited-width-desktop {
+    max-width: 70%;
+  }
+
+  .half-image {
+    max-width: 60%;
+  }
+
+  /* Make Thinner */
+  .is-thinner {
+    padding-left: 5%;
+    padding-right: 5%;
+  }
+
+  /* Add Padding */
+  .is-padded {
+    padding-left: 10%;
+    padding-right: 10%;
+  }
+
+  /* Limit Height */
+  .max-height {
+    max-height: 70%;
+    align-self: center;
+  }
+
+  /* Pull Upwards*/
+  .next-page-header {
+    height: 70px;
+    margin-top: -50px;
+  }
+}
+
+@media (max-width: 768px) {
+  #cookieConsent {
+    position: fixed;
+    bottom: 0;
+    width: 100vw;
+    margin: 0;
+  }
+}
+
+@media (min-width: 1500px) {
+  .container {
+    max-width: 1450px;
+  }
+}

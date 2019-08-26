@@ -1,8 +1,9 @@
 using System.Collections.Generic;
-using WebApp.Models;
-using WebApp.Services;
+using System.Linq;
+using System.Threading.Tasks;
+using ChatChainCommon.DatabaseModels;
+using ChatChainCommon.DatabaseServices;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace WebApp.Pages.Groups
@@ -10,24 +11,22 @@ namespace WebApp.Pages.Groups
     [Authorize]
     public class GroupsModel : PageModel
     {
-        private readonly UserManager<ApplicationUser> _userManager;
         private readonly GroupService _groupsContext; 
         
-        public GroupsModel(UserManager<ApplicationUser> userManager, GroupService groupsContext)
+        public GroupsModel(GroupService groupsContext)
         {
-            _userManager = userManager;
             _groupsContext = groupsContext;
         }
 
-        public IList<Group> Groups { get; set; }
+        public IList<Group> Groups { get; private set; }
 
-        public void OnGet()
+        public async Task OnGetAsync()
         {
             Groups = new List<Group>();
 
-            foreach (var group in _groupsContext.Get())
+            foreach (Group group in await _groupsContext.GetAsync())
             {
-                if (group.OwnerId != _userManager.GetUserAsync(User).Result.Id) continue;
+                if (group.OwnerId != User.Claims.First(claim => claim.Type.Equals("sub")).Value) continue;
                 
                 Groups.Add(group);
             }

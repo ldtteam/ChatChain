@@ -1,9 +1,10 @@
 using System;
 using System.ComponentModel.DataAnnotations;
-using WebApp.Models;
-using WebApp.Services;
+using System.Linq;
+using System.Threading.Tasks;
+using ChatChainCommon.DatabaseModels;
+using ChatChainCommon.DatabaseServices;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
@@ -12,12 +13,10 @@ namespace WebApp.Pages.Groups
     [Authorize]
     public class CreateModel : PageModel
     {
-        private readonly UserManager<ApplicationUser> _userManager;
         private readonly GroupService _groupsContext;
 
-        public CreateModel(UserManager<ApplicationUser> userManager, GroupService groupsContext)
+        public CreateModel(GroupService groupsContext)
         {
-            _userManager = userManager;
             _groupsContext = groupsContext;
         }
         
@@ -37,24 +36,24 @@ namespace WebApp.Pages.Groups
             public string GroupDescription { get; set; }
         }
         
-        public IActionResult OnPost()
+        public async Task<IActionResult> OnPostAsync()
         {
             if (!ModelState.IsValid)
             {
                 return Page();
             }
 
-            var groupId = Guid.NewGuid().ToString();
+            string groupId = Guid.NewGuid().ToString();
 
-            var group = new Group
+            Group group = new Group
             {
                 GroupId = groupId,
                 GroupName = Input.GroupName,
                 GroupDescription = Input.GroupDescription,
-                OwnerId = _userManager.GetUserAsync(User).Result.Id
+                OwnerId = User.Claims.First(claim => claim.Type.Equals("sub")).Value
             };
             
-            _groupsContext.Create(group);
+            await _groupsContext.CreateAsync(group);
             
             return RedirectToPage("./Index");
         }
