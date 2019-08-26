@@ -14,13 +14,11 @@ namespace IdentityServer.Pages.Account
     {
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly ILogger<Login> _logger;
-        private readonly UserManager<ApplicationUser> _userManager;
 
-        public Login(SignInManager<ApplicationUser> signInManager, ILogger<Login> logger, UserManager<ApplicationUser> userManager)
+        public Login(SignInManager<ApplicationUser> signInManager, ILogger<Login> logger)
         {
             _signInManager = signInManager;
             _logger = logger;
-            _userManager = userManager;
         }
         
         public string ReturnUrl { get; set; }

@@ -130,7 +130,7 @@ namespace IdentityServer
                     {
                         ClientId = clientConfig.ClientId,
                         ClientName = clientConfig.ClientName,
-                        RequireConsent = clientConfig.RequireConsent,
+                        RequireConsent = false, // Not Supported Currently TODO: support Consent with Razor view.
                         RedirectUris = clientConfig.RedirectUris,
                         PostLogoutRedirectUris = clientConfig.PostLogoutRedirectUris,
                         AllowedCorsOrigins = clientConfig.AllowedCorsOrigins,
