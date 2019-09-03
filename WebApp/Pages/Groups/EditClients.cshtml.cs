@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -8,38 +9,47 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using MongoDB.Bson;
+using WebApp.Utilities;
 
 namespace WebApp.Pages.Groups
 {
     [Authorize]
-    public class AddClientModel : PageModel
+    public class EditClientsModel : PageModel
     {
         private readonly GroupService _groupsContext;
         private readonly ClientService _clientsContext;
+        private readonly OrganisationService _organisationsContext;
 
-        public AddClientModel(GroupService groupsContext, ClientService clientsContext)
+        public EditClientsModel(GroupService groupsContext, ClientService clientsContext, OrganisationService organisationsContext)
         {
             _groupsContext = groupsContext;
             _clientsContext = clientsContext;
+            _organisationsContext = organisationsContext;
         }
 
         public Group Group { get; set; }
         [BindProperty]
         public string[] SelectedClients { get; set; }
         public SelectList ClientOptions { get; set; }
+        
+        public Organisation Organisation { get; set; }
 
-        public async Task<IActionResult> OnGetAsync(string id)
+        public async Task<IActionResult> OnGetAsync(string organisation, string group)
         {
-            if (id == null)
+            if (group == null)
             {
-                return RedirectToPage("./Clients");
+                return RedirectToPage("./Index", new { organisation = Organisation.Id });
             }
+            
+            (bool result, Organisation org) = await this.VerifyUserPermissions(organisation, _organisationsContext, OrganisationPermissions.EditGroups);
+            Organisation = org;
+            if (!result) return NotFound();
 
-            Group = await _groupsContext.GetAsync(new ObjectId(id));
+            Group = await _groupsContext.GetAsync(new ObjectId(group));
 
-            if (Group == null || Group.OwnerId != User.Claims.First(claim => claim.Type.Equals("sub")).Value)
+            if (Group == null || Group.OwnerId != Organisation.Id.ToString())
             {
-                return RedirectToPage("./Clients");
+                return RedirectToPage("./Index", new { organisation = Organisation.Id });
             }
 
             ClientOptions = new SelectList(await _clientsContext.GetFromOwnerIdAsync(Group.OwnerId), nameof(Client.Id), nameof(Client.ClientName));
@@ -49,16 +59,23 @@ namespace WebApp.Pages.Groups
             return Page();
         }
         
-        public async Task<IActionResult> OnPostAsync(string id)
+        public async Task<IActionResult> OnPostAsync(string organisation, string group)
         {
+            (bool result, Organisation org) = await this.VerifyUserPermissions(organisation, _organisationsContext, OrganisationPermissions.EditGroups);
+            Organisation = org;
+            if (!result) return NotFound();
+
             if (!ModelState.IsValid)
             {
                 return Page();
             }
 
-            Group = await _groupsContext.GetAsync(new ObjectId(id));
+            Group = await _groupsContext.GetAsync(new ObjectId(group));
 
-            if (Group == null) return RedirectToPage("./Index");
+            if (Group == null || Group.OwnerId != Organisation.Id.ToString())
+            {
+                return RedirectToPage("./Index", new { organisation = Organisation.Id });
+            }
             
             List<ObjectId> selectedClientsIds = SelectedClients.Select(client => new ObjectId(client)).ToList();
 
@@ -81,7 +98,7 @@ namespace WebApp.Pages.Groups
                 }
             }
             
-            return RedirectToPage("./Clients", new { id = Group.Id} );
+            return RedirectToPage("./Clients", new { organisation = Organisation.Id, group = Group.Id} );
 
         }
     }

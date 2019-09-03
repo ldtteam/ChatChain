@@ -1,11 +1,10 @@
-@page
+@page "/{organisation}/Clients"
 @using ChatChainCommon.DatabaseModels
 @model IndexModel
-
 @{
     ViewData["Title"] = "Clients";
+    Layout = "Shared/_ClientGroupsLayout";
 }
-
 <div class="container">
 
     <h2>@ViewData["Title"]</h2>
@@ -19,7 +18,11 @@
                 <th>Client Name</th>
                 <th>Client Description</th>
                 <th>
-                    <a class="btn btn-success btn-sm" asp-page="./Create">Create New</a>
+                    @if (Model.Organisation.Users[User.Claims.First(claim => claim.Type.Equals("sub")).Value].Permissions.Contains(OrganisationPermissions.CreateClients)
+                         || Model.Organisation.Users[User.Claims.First(claim => claim.Type.Equals("sub")).Value].Permissions.Contains(OrganisationPermissions.All))
+                    {
+                        <a class="btn btn-success btn-sm" asp-page="./Create" asp-route-organisation="@Model.Organisation.Id">Create New</a>
+                    }
                 </th>
             </tr>
             </thead>
@@ -38,9 +41,17 @@
                     </td>
                     <td>
                         <div class="btn-group">
-                            <a class="btn btn-primary btn-sm" asp-page="./EditClientConfig" asp-route-clientId="@client.Id">Config</a>
-                            <a class="btn btn-primary btn-sm" asp-page="./Edit" asp-route-id="@client.Id">Edit</a>
-                            <a class="btn btn-danger  btn-sm" asp-page="./Delete" asp-route-id="@client.Id">Delete</a>
+                            @if (Model.Organisation.Users[User.Claims.First(claim => claim.Type.Equals("sub")).Value].Permissions.Contains(OrganisationPermissions.EditClients)
+                                 || Model.Organisation.Users[User.Claims.First(claim => claim.Type.Equals("sub")).Value].Permissions.Contains(OrganisationPermissions.All))
+                            {
+                                <a class="btn btn-primary btn-sm" asp-page="./EditClientConfig" asp-route-organisation="@Model.Organisation.Id" asp-route-client="@client.Id">Config</a>
+                                <a class="btn btn-primary btn-sm" asp-page="./Edit" asp-route-organisation="@Model.Organisation.Id" asp-route-client="@client.Id">Edit</a>
+                            }
+                            @if (Model.Organisation.Users[User.Claims.First(claim => claim.Type.Equals("sub")).Value].Permissions.Contains(OrganisationPermissions.DeleteClients)
+                                 || Model.Organisation.Users[User.Claims.First(claim => claim.Type.Equals("sub")).Value].Permissions.Contains(OrganisationPermissions.All))
+                            {
+                                <a class="btn btn-danger  btn-sm" asp-page="./Delete" asp-route-organisation="@Model.Organisation.Id" asp-route-client="@client.Id">Delete</a>
+                            }
                         </div>
                     </td>
                 </tr>

@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace WebApp.Util
+namespace ChatChainCommon.RandomGenerator
 {
     public class PasswordGenerator
     {

@@ -1,3 +1,4 @@
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
@@ -7,6 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using MongoDB.Bson;
+using WebApp.Utilities;
 
 namespace WebApp.Pages.Groups
 {
@@ -14,15 +16,19 @@ namespace WebApp.Pages.Groups
     public class EditModel : PageModel
     {
         private readonly GroupService _groupsContext;
+        private readonly OrganisationService _organisationsContext; 
 
-        public EditModel(GroupService groupContext)
+        public EditModel(GroupService groupContext, OrganisationService organisationsContext)
         {
             _groupsContext = groupContext;
+            _organisationsContext = organisationsContext;
         }
         
         public Group Group { get; set; }
         [BindProperty]
         public InputModel Input { get; set; }
+        
+        public Organisation Organisation { get; set; }
         
         public class InputModel
         {
@@ -36,16 +42,20 @@ namespace WebApp.Pages.Groups
             public string GroupDescription { get; set; }
         }
         
-        public async Task<IActionResult> OnGetAsync(string id)
+        public async Task<IActionResult> OnGetAsync(string organisation, string group)
         {
-            if (id == null)
+            if (group == null)
             {
                 return RedirectToPage("./Index");
             }
 
-            Group = await _groupsContext.GetAsync(new ObjectId(id));
+            (bool result, Organisation org) = await this.VerifyUserPermissions(organisation, _organisationsContext, OrganisationPermissions.EditGroups);
+            Organisation = org;
+            if (!result) return NotFound();
+
+            Group = await _groupsContext.GetAsync(new ObjectId(group));
             
-            if (Group == null || Group.OwnerId != User.Claims.First(claim => claim.Type.Equals("sub")).Value)
+            if (Group == null || Group.OwnerId != Organisation.Id.ToString())
             {
                 return RedirectToPage("./Index");
             }
@@ -59,16 +69,20 @@ namespace WebApp.Pages.Groups
             return Page();
         }
         
-        public async Task<IActionResult> OnPostAsync(string id)
+        public async Task<IActionResult> OnPostAsync(string organisation, string group)
         {
+            (bool result, Organisation org) = await this.VerifyUserPermissions(organisation, _organisationsContext, OrganisationPermissions.EditGroups);
+            Organisation = org;
+            if (!result) return NotFound();
+            
             if (!ModelState.IsValid)
             {
                 return Page();
             }
+
+            Group = await _groupsContext.GetAsync(new ObjectId(group));
             
-            Group = await _groupsContext.GetAsync(new ObjectId(id));
-            
-            if (Group.OwnerId != User.Claims.First(claim => claim.Type.Equals("sub")).Value)
+            if (Group.OwnerId != Organisation.Id.ToString())
             {
                 return RedirectToPage("./Index");
             }

@@ -1,7 +1,8 @@
-﻿@page
+﻿@page "/{organisation}/Clients/{client}/Delete/"
 @model DeleteModel
 @{
     ViewData["Title"] = "Delete";
+    Layout = "Shared/_ClientGroupsLayout";
 }
 <div class="container">
     <h2>Delete</h2>
@@ -36,7 +37,7 @@
         <form method="post">
             <input type="hidden" asp-for="Client.ClientId"/>
             <input type="submit" value="Delete" class="btn btn-danger"/>
-            <a asp-page="./Index" class="btn btn-success">Back to List</a>
+            <a asp-page="./Index" asp-route-organisation="@Model.Organisation.Id" class="btn btn-success">Back to List</a>
         </form>
     </div>
 </div>

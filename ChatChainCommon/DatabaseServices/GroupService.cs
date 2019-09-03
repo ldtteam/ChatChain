@@ -32,6 +32,12 @@ namespace ChatChainCommon.DatabaseServices
             IAsyncCursor<Group> cursor = await _groups.FindAsync(group => true);
             return await cursor.ToListAsync();
         }
+
+        public async Task<IEnumerable<Group>> GetFromOwnerAsync(string ownerId)
+        {
+            IAsyncCursor<Group> cursor = await _groups.FindAsync(group => group.OwnerId == ownerId);
+            return await cursor.ToListAsync();
+        }
         
         public async Task<Group> GetAsync(ObjectId groupId)
         {

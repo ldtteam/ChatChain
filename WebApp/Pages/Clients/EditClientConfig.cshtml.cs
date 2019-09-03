@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using MongoDB.Bson;
+using WebApp.Utilities;
 
 namespace WebApp.Pages.Clients
 {
@@ -18,11 +19,13 @@ namespace WebApp.Pages.Clients
     {
         private readonly ClientService _clientsContext;
         private readonly ClientConfigService _clientConfigsContext;
+        private readonly OrganisationService _organisationsContext;
 
-        public EditClientConfig(ClientService clientsContext, ClientConfigService clientConfigsContext)
+        public EditClientConfig(ClientService clientsContext, ClientConfigService clientConfigsContext, OrganisationService organisationsContext)
         {
             _clientsContext = clientsContext;
             _clientConfigsContext = clientConfigsContext;
+            _organisationsContext = organisationsContext;
         }
 
         public Client Client { get; set; }
@@ -31,15 +34,26 @@ namespace WebApp.Pages.Clients
         [BindProperty]
         public string[] SelectedUserEventGroups { get; set; }
         public SelectList GroupOptions { get; set; }
+        
+        public Organisation Organisation { get; set; }
 
-        public async Task<IActionResult> OnGetAsync(string clientId)
+        public async Task<IActionResult> OnGetAsync(string organisation, string client)
         {
-            if (clientId.IsNullOrEmpty())
+            if (client.IsNullOrEmpty())
             {
-                return RedirectToPage("./Index");
+                return RedirectToPage("./Index", new { organisation = Organisation.Id });
             }
+            
+            (bool result, Organisation org) = await this.VerifyUserPermissions(organisation, _organisationsContext, OrganisationPermissions.EditClients);
+            Organisation = org;
+            if (!result) return NotFound();
 
-            Client = await _clientsContext.GetAsync(new ObjectId(clientId)); 
+            Client = await _clientsContext.GetAsync(new ObjectId(client)); 
+            
+            if (Client == null || Client.OwnerId != Organisation.Id.ToString())
+            {
+                return RedirectToPage("./Index", new { organisation = Organisation.Id });
+            }
             
             if (await _clientConfigsContext.GetAsync(Client.ClientConfigId) == null)
             {
@@ -72,19 +86,28 @@ namespace WebApp.Pages.Clients
             return Page();
         }
         
-        public async Task<IActionResult> OnPostAsync(string clientId)
+        public async Task<IActionResult> OnPostAsync(string organisation, string client)
         {
-            if (clientId.IsNullOrEmpty())
+            if (client.IsNullOrEmpty())
             {
-                return RedirectToPage("./Index");
+                return RedirectToPage("./Index", new { organisation = Organisation.Id });
             }
+            
+            (bool result, Organisation org) = await this.VerifyUserPermissions(organisation, _organisationsContext, OrganisationPermissions.EditClients);
+            Organisation = org;
+            if (!result) return NotFound();
 
-            Client = await _clientsContext.GetAsync(new ObjectId(clientId));
+            Client = await _clientsContext.GetAsync(new ObjectId(client));
 
+            if (Client == null || Client.OwnerId != Organisation.Id.ToString())
+            {
+                return RedirectToPage("./Index", new { organisation = Organisation.Id });
+            }
+            
             if (await _clientConfigsContext.GetAsync(Client.ClientConfigId) == null)
             {
-                Console.WriteLine("ClientConfig is null for client: " + clientId);
-                return RedirectToPage("./Index");
+                Console.WriteLine("ClientConfig is null for client: " + client);
+                return RedirectToPage("./Index", new { organisation = Organisation.Id });
             }
 
             List<ObjectId> clientEventGroupIds = SelectedClientEventGroups.Select(group => new ObjectId(group)).ToList();
@@ -95,7 +118,7 @@ namespace WebApp.Pages.Clients
             clientConfig.UserEventGroups = userEventGroupIds;
             await _clientConfigsContext.UpdateAsync(clientConfig.Id, clientConfig);
             
-            return RedirectToPage("./Index");
+            return RedirectToPage("./Index", new { organisation = Organisation.Id });
         }
     }
 }
