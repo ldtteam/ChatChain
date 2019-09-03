@@ -14,6 +14,12 @@
             <dd>
                 @Html.DisplayFor(m => m.RemoveUser.DisplayName)
             </dd>
+            <dt>
+                <p>Email:</p>
+            </dt>
+            <dd>
+                @Html.DisplayFor(m => m.RemoveUser.EmailAddress)
+            </dd>
         </dl>
         <form method="post">
             <input type="hidden" asp-for="RemoveUser.Id"/>

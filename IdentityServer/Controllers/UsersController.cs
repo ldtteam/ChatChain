@@ -26,6 +26,7 @@ namespace IdentityServer.Controllers
                 returnList.Add(new ResponseUser
                 {
                     DisplayName = (await _userManager.FindByIdAsync(userId))?.DisplayName,
+                    EmailAddress = (await _userManager.FindByIdAsync(userId))?.Email,
                     Id = userId
                 });
             }
@@ -35,6 +36,7 @@ namespace IdentityServer.Controllers
         public class ResponseUser
         {
             public string DisplayName { get; set; }
+            public string EmailAddress { get; set; }
             public string Id { get; set; }
         }
         

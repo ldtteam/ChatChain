@@ -32,6 +32,7 @@ namespace WebApp.Pages.Organisations.Users
         public class ResponseUser
         {
             public string DisplayName { get; set; }
+            public string EmailAddress { get; set; }
             public string Id { get; set; }
         }
 
