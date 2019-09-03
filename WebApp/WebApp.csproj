@@ -38,6 +38,12 @@
       <_ContentIncludedByDefault Remove="Areas\Identity\Pages\_ValidationScriptsPartial.cshtml" />
       <_ContentIncludedByDefault Remove="Areas\Identity\Pages\_ViewImports.cshtml" />
       <_ContentIncludedByDefault Remove="Areas\Identity\Pages\_ViewStart.cshtml" />
+      <_ContentIncludedByDefault Remove="Pages\Organisations\Clients\Create.cshtml" />
+      <_ContentIncludedByDefault Remove="Pages\Organisations\Clients\Delete.cshtml" />
+      <_ContentIncludedByDefault Remove="Pages\Organisations\Clients\Edit.cshtml" />
+      <_ContentIncludedByDefault Remove="Pages\Organisations\Clients\EditClientConfig.cshtml" />
+      <_ContentIncludedByDefault Remove="Pages\Organisations\Clients\Index.cshtml" />
+      <_ContentIncludedByDefault Remove="Pages\Organisations\Clients\_StatusMessage.cshtml" />
     </ItemGroup>
 
     <ItemGroup>
@@ -62,6 +68,18 @@
       <Compile Include="..\ChatChainCommon\DatabaseModels\Group.cs">
         <Link>DatabaseModels\Group.cs</Link>
       </Compile>
+      <Compile Include="..\ChatChainCommon\DatabaseModels\Organisation.cs">
+        <Link>DatabaseModels\Organisation.cs</Link>
+      </Compile>
+      <Compile Include="..\ChatChainCommon\DatabaseModels\OrganisationInvite.cs">
+        <Link>DatabaseModels\OrganisationInvite.cs</Link>
+      </Compile>
+      <Compile Include="..\ChatChainCommon\DatabaseModels\OrganisationPermissions.cs">
+        <Link>DatabaseModels\OrganisationPermissions.cs</Link>
+      </Compile>
+      <Compile Include="..\ChatChainCommon\DatabaseModels\OrganisationUser.cs">
+        <Link>DatabaseModels\OrganisationUser.cs</Link>
+      </Compile>
       <Compile Include="..\ChatChainCommon\DatabaseServices\ClientConfigService.cs">
         <Link>DatabaseServices\ClientConfigService.cs</Link>
       </Compile>
@@ -70,6 +88,9 @@
       </Compile>
       <Compile Include="..\ChatChainCommon\DatabaseServices\GroupService.cs">
         <Link>DatabaseServices\GroupService.cs</Link>
+      </Compile>
+      <Compile Include="..\ChatChainCommon\DatabaseServices\OrganisationService.cs">
+        <Link>DatabaseServices\OrganisationService.cs</Link>
       </Compile>
       <Compile Include="..\ChatChainCommon\IdentityServerRepository\IRepository.cs">
         <Link>IdentityServerRepository\IRepository.cs</Link>
@@ -85,6 +106,9 @@
       </Compile>
       <Compile Include="..\ChatChainCommon\IdentityServerStore\CustomResourceStore.cs">
         <Link>IdentityServerStore\CustomResourceStore.cs</Link>
+      </Compile>
+      <Compile Include="..\ChatChainCommon\RandomGenerator\PasswordGenerator.cs">
+        <Link>RandomGenerator\PasswordGenerator.cs</Link>
       </Compile>
     </ItemGroup>
 

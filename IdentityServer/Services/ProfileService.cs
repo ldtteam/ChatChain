@@ -23,7 +23,8 @@ namespace IdentityServer.Services
             
             List<Claim> claims = new List<Claim>
             {
-                new Claim("DisplayName", user.DisplayName ?? " ")
+                new Claim("DisplayName", user.DisplayName ?? " "),
+                new Claim("EmailAddress", user.Email ?? " ")
             };
 
             context.IssuedClaims.AddRange(claims);

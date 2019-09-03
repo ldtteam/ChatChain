@@ -1,7 +1,8 @@
-﻿@page
+﻿@page "/{organisation}/Clients/Create"
 @model CreateModel
 @{
     ViewData["Title"] = "Create";
+    Layout = "Shared/_ClientGroupsLayout";
 }
 <!--suppress HtmlFormInputWithoutLabel -->
 <div class="container">
@@ -33,7 +34,7 @@
                 </div>
                 <div class="form-group">
                     <input type="submit" value="Create" class="btn btn-success"/>
-                    <a asp-page="./Index" class="btn btn-danger">Back to List</a>
+                    <a asp-page="./Index" asp-route-organisation="@Model.Organisation.Id" class="btn btn-danger">Back to List</a>
                 </div>
             </form>
         </div>

@@ -1,7 +1,8 @@
-﻿@page
+﻿@page "/{organisation}/Groups/{group}/Delete"
 @model DeleteModel
 @{
     ViewData["Title"] = "Delete";
+    Layout = "Shared/_ClientGroupsLayout";
 }
 <div class="container">
     <p class="text-danger">@Model.ErrorMessage</p>

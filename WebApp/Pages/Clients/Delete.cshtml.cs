@@ -1,4 +1,4 @@
-using System.Linq;
+using System;
 using System.Threading.Tasks;
 using ChatChainCommon.DatabaseModels;
 using ChatChainCommon.DatabaseServices;
@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using MongoDB.Bson;
+using WebApp.Utilities;
 
 namespace WebApp.Pages.Clients
 {
@@ -15,11 +16,13 @@ namespace WebApp.Pages.Clients
     {
         private readonly CustomClientStore _is4ClientStore;
         private readonly ClientService _clientsContext;
+        private readonly OrganisationService _organisationsContext;
 
-        public DeleteModel(CustomClientStore is4ClientStore, ClientService clientsContext)
+        public DeleteModel(CustomClientStore is4ClientStore, ClientService clientsContext, OrganisationService organisationsContext)
         {
             _is4ClientStore = is4ClientStore;
             _clientsContext = clientsContext;
+            _organisationsContext = organisationsContext;
         }
         
         [BindProperty]
@@ -27,52 +30,62 @@ namespace WebApp.Pages.Clients
         // ReSharper disable once UnusedAutoPropertyAccessor.Global
         public string ErrorMessage { get; set; }
         
-        public async Task<IActionResult> OnGetAsync(string id)
+        public Organisation Organisation { get; set; }
+        
+        public async Task<IActionResult> OnGetAsync(string organisation, string client)
         {
-            if (id == null)
+            if (client == null)
             {
-                return RedirectToPage("./Index");
+                return RedirectToPage("./Index", new { organisation = Organisation.Id });
             }
-
-            Client = await _clientsContext.GetAsync(new ObjectId(id));
             
-            if (Client == null || Client.OwnerId != User.Claims.First(claim => claim.Type.Equals("sub")).Value)
+            (bool result, Organisation org) = await this.VerifyUserPermissions(organisation, _organisationsContext, OrganisationPermissions.DeleteClients);
+            Organisation = org;
+            if (!result) return NotFound();
+
+            Client = await _clientsContext.GetAsync(new ObjectId(client));
+            
+            if (Client == null || Client.OwnerId != Organisation.Id.ToString())
             {
-                return RedirectToPage("./Index");
+                return RedirectToPage("./Index", new { organisation = Organisation.Id });
             }
 
             return Page();
         }
         
-        public async Task<IActionResult> OnPostAsync(string id)
+        public async Task<IActionResult> OnPostAsync(string organisation, string client)
         {
-            if (id == null)
+            if (client == null)
             {
                 return NotFound();
             }
+            
+            (bool result, Organisation org) = await this.VerifyUserPermissions(organisation, _organisationsContext, OrganisationPermissions.DeleteClients);
+            Organisation = org;
+            if (!result) return NotFound();
 
-            Client groupClient = await _clientsContext.GetAsync(new ObjectId(id));
+            Client groupClient = await _clientsContext.GetAsync(new ObjectId(client));
 
             if (groupClient == null)
             {
                 return NotFound();
             }
             
-            if (groupClient.OwnerId != User.Claims.First(claim => claim.Type.Equals("sub")).Value)
+            if (groupClient.OwnerId != Organisation.Id.ToString())
             {
-                return RedirectToPage("./Index");
+                return RedirectToPage("./Index", new { organisation = Organisation.Id });
             }
 
-            IdentityServer4.Models.Client client = await _is4ClientStore.FindClientByIdAsync(groupClient.ClientId);
+            IdentityServer4.Models.Client is4Client = await _is4ClientStore.FindClientByIdAsync(groupClient.ClientId);
             
-            if (client == null)
+            if (is4Client == null)
             {
                 return NotFound();
             }
 
-            _is4ClientStore.RemoveClient(client);
+            _is4ClientStore.RemoveClient(is4Client);
             await _clientsContext.RemoveAsync(groupClient.Id);
-            return RedirectToPage("./Index");
+            return RedirectToPage("./Index", new { organisation = Organisation.Id });
         }
     }
 }

@@ -1,7 +1,8 @@
-﻿@page
+﻿@page "/{organisation}/Clients/{client}/EditClientConfig"
 @model EditClientConfig
 @{
     ViewData["Title"] = "Client Config";
+    Layout = "Shared/_ClientGroupsLayout";
 }
 <div class="container">
     <script src="~/js/chosen.jquery.min.js" asp-append-version="true"></script>
@@ -30,7 +31,7 @@
                 </div>
                 <div class="form-group">
                     <input type="submit" value="Save" class="btn btn-success"/>
-                    <a asp-page="./Index" class="btn btn-danger">Back to List</a>
+                    <a asp-page="./Index" asp-route-organisation="@Model.Organisation.Id" class="btn btn-danger">Back to List</a>
                 </div>
             </form>
         </div>
