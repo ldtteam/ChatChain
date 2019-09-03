@@ -1,0 +1,40 @@
+@page
+@using ChatChainCommon.DatabaseModels
+@model WebApp.Pages.Organisations.Users.Permissions
+@{
+    ViewData["Title"] = "Permissions";
+}
+<div class="container">
+    <script src="~/js/chosen.jquery.min.js" asp-append-version="true"></script>
+    <link rel="stylesheet" href="~/css/chosen.min.css">
+    
+    <h2>Permissions for @Model.RUser.DisplayName (@Model.RUser.EmailAddress)</h2>
+    <hr/>
+    <div class="row">
+            <div class="col-md-4">
+                <form method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <input type="hidden" asp-for="RUser.Id"/>
+                    <div class="form-group">
+                        <br/>
+                        <label>
+                            <select asp-for="SelectedPermissions" asp-items="Html.GetEnumSelectList<OrganisationPermissions>()" 
+                                    class="SelectedClients" style="width: 300px"></select>
+                        </label>
+                    </div>
+                    <hr/>
+                    <div class="form-group">
+                        <input type="submit" value="Save" class="btn btn-success"/>
+                        <a asp-page="./Index" asp-route-organisation="@Model.Organisation.Id" class="btn btn-danger">Back to Users</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    <script>
+        $(".SelectedClients").chosen();
+    </script>
+</div>
+
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+}

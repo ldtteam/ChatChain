@@ -1,0 +1,32 @@
+@page "/Organisations/{organisation}/Invite/Create"
+@model WebApp.Pages.Organisations.Invite.Create
+@{
+    ViewData["Title"] = "Create";
+}
+<!--suppress HtmlFormInputWithoutLabel -->
+<div class="container">
+    <h2>Create User Invite</h2>
+    <hr/>
+    <div class="row">
+        <div class="col-md-6">
+            <form method="post" id="edit">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <p>The user you are inviting must have their email address exactly matching the below input.
+                    This is to ensure the most secure inviting experience, the invite will expire after 24 hours.</p>
+                <div class="form-group">
+                    <label asp-for="Input.UserEmail" class="control-label"></label>
+                    <input asp-for="Input.UserEmail" class="form-control"/>
+                    <span asp-validation-for="Input.UserEmail" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <input type="submit" value="Invite" class="btn btn-success"/>
+                    <a asp-page="../Users/Index" asp-route-organisation="@Model.Organisation.Id" class="btn btn-danger">Back to Users</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+}

@@ -1,7 +1,8 @@
 @if (User.Identity.IsAuthenticated)
 {
     <ul class="navbar-nav mr-auto">
-        <li class="nav-item"><a class="nav-link" asp-page="/Clients/Index">Clients</a></li>
-        <li class="nav-item"><a class="nav-link" asp-page="/Groups/Index">Groups</a></li>
+        <li class="nav-item"><a class="nav-link" asp-page="/Organisations/Index">@Model.Organisation.Name</a></li>
+        <li class="nav-item"><a class="nav-link" asp-page="/Clients/Index" asp-route-organisation="@Model.Organisation.Id">Clients</a></li>
+        <li class="nav-item"><a class="nav-link" asp-page="/Groups/Index" asp-route-organisation="@Model.Organisation.Id">Groups</a></li>
     </ul>
 }

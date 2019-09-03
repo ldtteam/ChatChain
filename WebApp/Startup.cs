@@ -14,6 +14,8 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Bson.Serialization;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using StackExchange.Redis;
 
 namespace WebApp
@@ -49,6 +51,7 @@ namespace WebApp
             if (redisConnectionVariable != null && !redisConnectionVariable.IsNullOrEmpty())
             {
                 ConnectionMultiplexer redis = ConnectionMultiplexer.Connect(redisConnectionVariable);
+                services.AddSingleton<IConnectionMultiplexer>(redis);
                 services.AddDataProtection()
                     .PersistKeysToStackExchangeRedis(redis, "DataProtection-Keys")
                     .SetApplicationName("WebApp");
@@ -65,6 +68,7 @@ namespace WebApp
             
             IdentityServerConnection identityServerConnection = new IdentityServerConnection();
             _configuration.GetSection("IdentityServerConnection").Bind(identityServerConnection);
+            services.AddSingleton(identityServerConnection);
 
             services.AddAuthentication(options =>
                 {
@@ -91,7 +95,17 @@ namespace WebApp
                 //options.AccessDeniedPath = "/Identity/Account/AccessDenied";
             });
 
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            services.AddMvc()
+                .SetCompatibilityVersion(CompatibilityVersion.Version_2_1)
+                .AddJsonOptions(options =>
+                {
+                    options.SerializerSettings.Converters.Add(new StringEnumConverter());
+                    options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
+                })
+                /*.AddRazorPagesOptions(options =>
+                    {
+                        options.Conventions.AddPageRoute("/Organisations/View/{organisation}", "/Organisations/{organisation}/View");
+                    })*/;
 
             MongoConnections mongoConnections = new MongoConnections();
             _configuration.GetSection("MongoConnections").Bind(mongoConnections);
@@ -100,6 +114,7 @@ namespace WebApp
             services.AddScoped<ClientService>();
             services.AddScoped<GroupService>();
             services.AddScoped<ClientConfigService>();
+            services.AddScoped<OrganisationService>();
 
             services.AddTransient<IRepository, MongoRepository>();
             services.AddScoped<CustomClientStore>();

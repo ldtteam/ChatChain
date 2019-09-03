@@ -1,5 +1,5 @@
+using System;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
 using System.Threading.Tasks;
 using ChatChainCommon.DatabaseModels;
 using ChatChainCommon.DatabaseServices;
@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using MongoDB.Bson;
+using WebApp.Utilities;
 
 namespace WebApp.Pages.Clients
 {
@@ -16,17 +17,21 @@ namespace WebApp.Pages.Clients
     {
         private readonly CustomClientStore _is4ClientStore;
         private readonly ClientService _clientsContext;
+        private readonly OrganisationService _organisationsContext;
 
-        public EditModel(CustomClientStore is4ClientStore, ClientService clientsContext)
+        public EditModel(CustomClientStore is4ClientStore, ClientService clientsContext, OrganisationService organisationsContext)
         {
             _is4ClientStore = is4ClientStore;
             _clientsContext = clientsContext;
+            _organisationsContext = organisationsContext;
         }
         
         public Client Client { get; set; }
         [BindProperty]
         public InputModel Input { get; set; }
-        
+
+        public Organisation Organisation { get; set; }
+
         public class InputModel
         {
             [Required]
@@ -40,18 +45,22 @@ namespace WebApp.Pages.Clients
             public string ClientDescription { get; set; }
         }
         
-        public async Task<IActionResult> OnGetAsync(string id)
+        public async Task<IActionResult> OnGetAsync(string organisation, string client)
         {
-            if (id == null)
+            if (client == null)
             {
                 return NotFound();
             }
+            
+            (bool result, Organisation org) = await this.VerifyUserPermissions(organisation, _organisationsContext, OrganisationPermissions.EditClients);
+            Organisation = org;
+            if (!result) return NotFound();
 
-            Client = await _clientsContext.GetAsync(new ObjectId(id));
+            Client = await _clientsContext.GetAsync(new ObjectId(client));
            
-            if (Client == null || Client.OwnerId != User.Claims.First(claim => claim.Type.Equals("sub")).Value)
+            if (Client == null || Client.OwnerId != Organisation.Id.ToString())
             {
-                return RedirectToPage("./Index");
+                return RedirectToPage("./Index", new { organisation = Organisation.Id });
             }
             
             Input = new InputModel
@@ -63,9 +72,13 @@ namespace WebApp.Pages.Clients
             return Page();
         }
         
-        public async Task<IActionResult> OnPostAsync(string id)
+        public async Task<IActionResult> OnPostAsync(string organisation, string client)
         {
-            if (id == null)
+            (bool result, Organisation org) = await this.VerifyUserPermissions(organisation, _organisationsContext, OrganisationPermissions.EditClients);
+            Organisation = org;
+            if (!result) return NotFound();
+            
+            if (client == null)
             {
                 return NotFound();
             }
@@ -74,12 +87,12 @@ namespace WebApp.Pages.Clients
             {
                 return Page();
             }
-            
-            Client groupsClient = await _clientsContext.GetAsync(new ObjectId(id));
 
-            if (groupsClient.OwnerId != User.Claims.First(claim => claim.Type.Equals("sub")).Value)
+            Client groupsClient = await _clientsContext.GetAsync(new ObjectId(client));
+
+            if (groupsClient.OwnerId != Organisation.Id.ToString())
             {
-                return RedirectToPage("./Index");
+                return RedirectToPage("./Index", new { organisation = Organisation.Id });
             }
 
             IdentityServer4.Models.Client clientToUpdate = await _is4ClientStore.FindClientByIdAsync(groupsClient.ClientId);
@@ -91,7 +104,7 @@ namespace WebApp.Pages.Clients
             groupsClient.ClientDescription = Input.ClientDescription;
             await _clientsContext.UpdateAsync(groupsClient.Id, groupsClient);
 
-            return RedirectToPage("./Index");
+            return RedirectToPage("./Index", new { organisation = Organisation.Id });
         } 
     }
 }

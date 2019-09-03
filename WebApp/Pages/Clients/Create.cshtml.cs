@@ -2,13 +2,15 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
+using ChatChainCommon.DatabaseModels;
 using ChatChainCommon.DatabaseServices;
 using ChatChainCommon.IdentityServerStore;
+using ChatChainCommon.RandomGenerator;
 using IdentityServer4.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using WebApp.Util;
+using WebApp.Utilities;
 using Client = IdentityServer4.Models.Client;
 using Secret = IdentityServer4.Models.Secret;
 
@@ -19,12 +21,16 @@ namespace WebApp.Pages.Clients
     {
         private readonly CustomClientStore _clientStore;
         private readonly ClientService _clientsContext;
+        private readonly OrganisationService _organisationsContext;
 
-        public CreateModel(CustomClientStore clientStore, ClientService clientsContext)
+        public CreateModel(CustomClientStore clientStore, ClientService clientsContext, OrganisationService organisationsContext)
         {
             _clientStore = clientStore;
             _clientsContext = clientsContext;
+            _organisationsContext = organisationsContext;
         }
+        
+        public Organisation Organisation { get; set; }
         
         [BindProperty]
         public InputModel Input { get; set; }
@@ -57,14 +63,23 @@ namespace WebApp.Pages.Clients
             public string ConfirmPassword { get; set; }
         }
 
-        public void OnGet()
+        public async Task<IActionResult> OnGetAsync(string organisation)
         {
+            (bool result, Organisation org) = await this.VerifyUserPermissions(organisation, _organisationsContext, OrganisationPermissions.CreateClients);
+            Organisation = org;
+            if (!result) return NotFound();
+            
             Input = new InputModel {Password = PasswordGenerator.Generate()};
             StatusMessage = $"Client password is: {Input.Password}\n You Will Not Receive This Again!";
+            return Page();
         }
         
-        public async Task<IActionResult> OnPostAsync()
+        public async Task<IActionResult> OnPostAsync(string organisation)
         {
+            (bool result, Organisation org) = await this.VerifyUserPermissions(organisation, _organisationsContext, OrganisationPermissions.CreateClients);
+            Organisation = org;
+            if (!result) return NotFound();
+            
             if (!ModelState.IsValid)
             {
                 return Page();
@@ -99,7 +114,7 @@ namespace WebApp.Pages.Clients
             ChatChainCommon.DatabaseModels.Client newClient = new ChatChainCommon.DatabaseModels.Client
             {
                 //OwnerId = _userManager.GetUserAsync(User).Result.Id,
-                OwnerId = User.Claims.First(claim => claim.Type.Equals("sub")).Value,
+                OwnerId = Organisation.Id.ToString(),
                 ClientId = is4Client.ClientId,
                 ClientGuid = is4Client.ClientId,
                 ClientName = is4Client.ClientName,
@@ -108,7 +123,7 @@ namespace WebApp.Pages.Clients
 
             await _clientsContext.CreateAsync(newClient);
             
-            return RedirectToPage("./Index");
+            return RedirectToPage("./Index", new { organisation = Organisation.Id });
         }
         
     }

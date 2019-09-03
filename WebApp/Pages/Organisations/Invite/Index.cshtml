@@ -1,0 +1,25 @@
+@page "/Organisations/{organisation}/Invite/{invite}"
+@model WebApp.Pages.Organisations.Invite.Index
+@{
+    ViewData["Title"] = "Invite";
+}
+<!--suppress HtmlFormInputWithoutLabel -->
+<div class="container">
+    <h2>Join Organisation</h2>
+    <hr/>
+    <div class="row">
+        <div class="col-md-6">
+            <form method="post">
+                <p>You've been invited to the organisation: @Model.Organisation.Name, would you like to join?</p>
+                <div class="form-group">
+                    <input type="submit" value="Join" class="btn btn-success btn-sm"/>
+                    <a class="btn btn-danger  btn-sm" asp-page="../Index">Ignore</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+}

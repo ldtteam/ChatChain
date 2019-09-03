@@ -18,6 +18,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Bson.Serialization;
 using StackExchange.Redis;
+using Swashbuckle.AspNetCore.Swagger;
 using Secret = IdentityServer4.Models.Secret;
 
 namespace IdentityServer
@@ -152,6 +153,11 @@ namespace IdentityServer
             {
                 identityServerBuilder.AddCertificateFromFile(identityServerOptions);
             }
+
+            services.AddSwaggerGen(options =>
+            {
+                options.SwaggerDoc("v1", new Info {Title = "ChatChain Identity API", Version = "version 1"});
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -180,6 +186,16 @@ namespace IdentityServer
             app.UseIdentityServer();
 
             app.UseMvc();
+
+            if (env.IsDevelopment())
+            {
+                app.UseSwagger();
+
+                app.UseSwaggerUI(options =>
+                {
+                    options.SwaggerEndpoint("/swagger/v1/swagger.json", "ChatChain Identity API V1");
+                });
+            }
 
             ConfigureMongoDriver2IgnoreExtraElements();
 
