@@ -92,7 +92,7 @@ namespace WebApp.Pages.Organisations.Users
             if (string.Equals(Organisation.Owner, id, StringComparison.OrdinalIgnoreCase))
                 return StatusCode(403);
 
-            Organisation.Users[id].Permissions = SelectedPermissions;
+            Organisation.Users[id].Permissions = SelectedPermissions.ToList();
             await _organisationsContext.UpdateAsync(Organisation.Id, Organisation);
             
             return RedirectToPage("./Index", new { organisation = Organisation.Id } );
