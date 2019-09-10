@@ -11,7 +11,7 @@
         <div class="col-md-6">
             <p>Your new invite, Please send this to your invitee.</p>
             <a asp-page="./Index" asp-route-organisation="@Model.Organisation.Id" asp-route-invite="@Model.Token">Copy this link, or the below: </a>
-            <p>@($"{Request.Scheme}://{Request.Host}")@Url.Page("./Index", new { organisation = Model.Organisation.Id, invite = Model.Token })</p>
+            <p>@($"{Request.Scheme}://{Request.Host}")@Url.Page("./Index", new {organisation = Model.Organisation.Id, invite = Model.Token})</p>
             <a asp-page="../Users/Index" asp-route-organisation="@Model.Organisation.Id" class="btn btn-danger">Back to Users</a>
         </div>
     </div>

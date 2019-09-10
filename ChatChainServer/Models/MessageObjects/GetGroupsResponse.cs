@@ -5,6 +5,6 @@ namespace ChatChainServer.Models.MessageObjects
 {
     public class GetGroupsResponse
     {
-        public List<Group> Groups { get; set; }
+        public IEnumerable<Group> Groups { get; set; }
     }
 }

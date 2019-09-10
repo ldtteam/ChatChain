@@ -1,10 +1,7 @@
 using System;
 using System.IdentityModel.Tokens.Jwt;
 using ChatChainCommon.Config;
-using ChatChainCommon.DatabaseServices;
-using ChatChainCommon.IdentityServerRepository;
-using ChatChainCommon.IdentityServerStore;
-using IdentityServer4.Extensions;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -17,6 +14,7 @@ using MongoDB.Bson.Serialization;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using StackExchange.Redis;
+using WebApp.Services;
 
 namespace WebApp
 {
@@ -40,6 +38,10 @@ namespace WebApp
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddSingleton(_configuration);
+         
+            ApiConnection apiConnection = new ApiConnection();
+            _configuration.GetSection("ApiConnection").Bind(apiConnection);
+            services.AddSingleton(apiConnection);
             
             services.Configure<ForwardedHeadersOptions>(options =>
             {
@@ -47,15 +49,11 @@ namespace WebApp
             });
             
             string redisConnectionVariable = _configuration.GetValue<string>("RedisConnection");
-
-            if (redisConnectionVariable != null && !redisConnectionVariable.IsNullOrEmpty())
-            {
-                ConnectionMultiplexer redis = ConnectionMultiplexer.Connect(redisConnectionVariable);
-                services.AddSingleton<IConnectionMultiplexer>(redis);
-                services.AddDataProtection()
-                    .PersistKeysToStackExchangeRedis(redis, "DataProtection-Keys")
-                    .SetApplicationName("WebApp");
-            }
+            ConnectionMultiplexer redis = ConnectionMultiplexer.Connect(redisConnectionVariable);
+            services.AddSingleton<IConnectionMultiplexer>(redis);
+            services.AddDataProtection()
+                .PersistKeysToStackExchangeRedis(redis, "DataProtection-Keys")
+                .SetApplicationName("WebApp");
 
             services.Configure<CookiePolicyOptions>(options =>
             {
@@ -78,12 +76,23 @@ namespace WebApp
                 .AddCookie("Cookies")
                 .AddOpenIdConnect("oidc", options =>
                 {
+                    options.SignInScheme = "Cookies";
+                    
                     options.Authority = identityServerConnection.ServerUrl;
                     options.RequireHttpsMetadata = false;
 
                     options.ClientId = identityServerConnection.ClientId;
                     options.ClientSecret = identityServerConnection.ClientSecret;
+                    options.ResponseType = "code id_token";
+                    
                     options.SaveTokens = true;
+                    options.GetClaimsFromUserInfoEndpoint = true;
+                    
+                    options.Scope.Add("ChatChainAPI");
+                    options.Scope.Add("offline_access");
+                    options.ClaimActions.MapJsonKey("DisplayName", "DisplayName");
+                    options.ClaimActions.MapJsonKey("EmailAddress", "EmailAddress");
+                    options.ClaimActions.MapJsonKey("sub", "sub");
                 });
 
             services.ConfigureApplicationCookie(options =>
@@ -101,23 +110,9 @@ namespace WebApp
                 {
                     options.SerializerSettings.Converters.Add(new StringEnumConverter());
                     options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
-                })
-                /*.AddRazorPagesOptions(options =>
-                    {
-                        options.Conventions.AddPageRoute("/Organisations/View/{organisation}", "/Organisations/{organisation}/View");
-                    })*/;
+                });
 
-            MongoConnections mongoConnections = new MongoConnections();
-            _configuration.GetSection("MongoConnections").Bind(mongoConnections);
-            services.AddSingleton(mongoConnections);
-            
-            services.AddScoped<ClientService>();
-            services.AddScoped<GroupService>();
-            services.AddScoped<ClientConfigService>();
-            services.AddScoped<OrganisationService>();
-
-            services.AddTransient<IRepository, MongoRepository>();
-            services.AddScoped<CustomClientStore>();
+            services.AddScoped<ApiService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

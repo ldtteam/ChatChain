@@ -79,7 +79,7 @@ namespace IdentityServer.Pages.Account
                 return RedirectToPage("./Login");
             }
 
-            foreach (var error in result.Errors)
+            foreach (IdentityError error in result.Errors)
             {
                 ModelState.AddModelError(string.Empty, error.Description);
             }

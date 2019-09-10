@@ -64,21 +64,29 @@
     </div>
 </section>
 
-<section class="circuit-background" >
+<section class="circuit-background">
     <div class="container">
-        <div class="row " id="footer" >
+        <div class="row " id="footer">
             <div class="col" style="text-align: left">
-                <h5><a class="navbar-brand" href="/">
-                    <img src="/images/ChatChainLogo.png" width="32" height="32" alt="ChatChain Logo"/>
-                </a></h5>
+                <h5>
+                    <a class="navbar-brand" href="/">
+                        <img src="/images/ChatChainLogo.png" width="32" height="32" alt="ChatChain Logo"/>
+                    </a>
+                </h5>
                 ChatChain aims to bring the online chat service community closer than ever before.
             </div>
             <div class="col" style="text-align: right">
-                <h5><a class="navbar-brand" hrerf="https://github.com/ldtteam">
-                    <img src="/images/LDTTeamLogo.png" width="32" height="32" alt="LDTTeam Logo"/>
-                </a></h5>
+                <h5>
+                    <a class="navbar-brand" hrerf="https://github.com/ldtteam">
+                        <img src="/images/LDTTeamLogo.png" width="32" height="32" alt="LDTTeam Logo"/>
+                    </a>
+                </h5>
                 <span>Brougt to you by Let's Dev Together</span>
             </div>
         </div>
     </div>
 </section>
+
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+}

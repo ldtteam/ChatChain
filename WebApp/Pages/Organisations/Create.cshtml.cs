@@ -1,31 +1,29 @@
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
 using System.Threading.Tasks;
-using ChatChainCommon.DatabaseModels;
-using ChatChainCommon.DatabaseServices;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using WebApp.Api;
+using WebApp.Services;
 
 namespace WebApp.Pages.Organisations
 {
     [Authorize]
     public class Create : PageModel
     {
-        private readonly OrganisationService _organisationsContext;
+        private readonly ApiService _apiService;
 
-        public Create(OrganisationService organisationsContext)
+        public Create(ApiService apiService)
         {
-            _organisationsContext = organisationsContext;
+            _apiService = apiService;
         }
-        
-        [BindProperty]
-        public InputModel Input { get; set; }
+
+        [BindProperty] public InputModel Input { get; set; }
 
         public class InputModel
         {
-            
             [Required]
             [DataType(DataType.Text)]
             [Display(Name = "Organisation Name")]
@@ -34,34 +32,28 @@ namespace WebApp.Pages.Organisations
 
         public async Task<IActionResult> OnPostAsync()
         {
-            if (!ModelState.IsValid)
-            {
-                return Page();
-            }
+            if (!ModelState.IsValid) return Page();
 
             Organisation organisation = new Organisation
             {
-                Name = Input.Name,
-                Owner = User.Claims.First(claim => claim.Type.Equals("sub")).Value,
-                Users = new Dictionary<string, OrganisationUser>
-                {
-                    { 
-                        User.Claims.First(claim => claim.Type.Equals("sub")).Value,
-                        new OrganisationUser
-                        {
-                            Permissions = new List<OrganisationPermissions>
-                            {
-                                OrganisationPermissions.All
-                            }
-                        }
-                    }
-                }
+                Name = Input.Name
             };
 
-            await _organisationsContext.CreateAsync(organisation);
+            if (!await _apiService.VerifyTokensAsync(HttpContext))
+                return SignOut(new AuthenticationProperties {RedirectUri = HttpContext.Request.GetDisplayUrl()},
+                    "Cookies");
+            ApiClient client = await _apiService.GetApiClientAsync(HttpContext);
+            try
+            {
+                await client.CreateOrganisationAsync(organisation);
+            }
+            catch (ApiException e)
+            {
+                // Relays the status code and response from the API
+                return StatusCode(e.StatusCode, e.Response);
+            }
 
             return RedirectToPage("./Index");
-
         }
     }
 }

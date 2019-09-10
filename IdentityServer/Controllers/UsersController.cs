@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace IdentityServer.Controllers
 {
+    [Produces("application/json")]
     [Route("api/[controller]")]
     [ApiController]
     public class UsersController
@@ -17,13 +18,13 @@ namespace IdentityServer.Controllers
             _userManager = userManager;
         }
 
-        [HttpPost]
-        public async Task<IEnumerable<ResponseUser>> PostAsync([FromBody] IEnumerable<string> userIds)
+        [HttpPost("", Name = "GetUserDetails")]
+        public async Task<IEnumerable<UserDetails>> PostAsync([FromBody] IEnumerable<string> userIds)
         {
-            IList<ResponseUser> returnList = new List<ResponseUser>();
+            IList<UserDetails> returnList = new List<UserDetails>();
             foreach (string userId in userIds)
             {
-                returnList.Add(new ResponseUser
+                returnList.Add(new UserDetails
                 {
                     DisplayName = (await _userManager.FindByIdAsync(userId))?.DisplayName,
                     EmailAddress = (await _userManager.FindByIdAsync(userId))?.Email,
@@ -33,7 +34,7 @@ namespace IdentityServer.Controllers
             return returnList;
         }
 
-        public class ResponseUser
+        public class UserDetails
         {
             public string DisplayName { get; set; }
             public string EmailAddress { get; set; }

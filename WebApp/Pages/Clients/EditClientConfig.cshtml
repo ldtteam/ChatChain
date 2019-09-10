@@ -15,19 +15,21 @@
         <div class="col-md-4">
             <form method="post">
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                <input type="hidden" asp-for="Client.ClientId"/>
+                <input type="hidden" asp-for="Client.Id"/>
                 <div class="form-group">
                     <label class="control-label">Which Groups to send Client Events to: </label>
                     <br/>
-                    <select asp-for="SelectedClientEventGroups" asp-items="Model.GroupOptions" 
-                            class="SelectedClientEventGroups" style="width: 300px"></select>
+                    <select asp-for="SelectedClientEventGroups" asp-items="Model.GroupOptions"
+                            class="SelectedClientEventGroups" style="width: 300px">
+                    </select>
                 </div>
                 <hr/>
                 <div class="form-group">
                     <label class="control-label">Which Groups to send User Events to: </label>
                     <br/>
-                    <select asp-for="SelectedUserEventGroups" asp-items="Model.GroupOptions" 
-                            class="SelectedUserEventGroups" style="width: 300px"></select>
+                    <select asp-for="SelectedUserEventGroups" asp-items="Model.GroupOptions"
+                            class="SelectedUserEventGroups" style="width: 300px">
+                    </select>
                 </div>
                 <div class="form-group">
                     <input type="submit" value="Save" class="btn btn-success"/>

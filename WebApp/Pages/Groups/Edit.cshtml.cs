@@ -1,99 +1,100 @@
 using System;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
 using System.Threading.Tasks;
-using ChatChainCommon.DatabaseModels;
-using ChatChainCommon.DatabaseServices;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using MongoDB.Bson;
-using WebApp.Utilities;
+using WebApp.Api;
+using WebApp.Services;
+using Group = WebApp.Api.Group;
+using Organisation = WebApp.Api.Organisation;
 
 namespace WebApp.Pages.Groups
 {
     [Authorize]
     public class EditModel : PageModel
     {
-        private readonly GroupService _groupsContext;
-        private readonly OrganisationService _organisationsContext; 
+        private readonly ApiService _apiService;
 
-        public EditModel(GroupService groupContext, OrganisationService organisationsContext)
+        public EditModel(ApiService apiService)
         {
-            _groupsContext = groupContext;
-            _organisationsContext = organisationsContext;
+            _apiService = apiService;
         }
-        
+
         public Group Group { get; set; }
-        [BindProperty]
-        public InputModel Input { get; set; }
-        
+        [BindProperty] public InputModel Input { get; set; } = new InputModel();
+
         public Organisation Organisation { get; set; }
-        
+
         public class InputModel
         {
             [Required]
             [Display(Name = "Group Name")]
             public string GroupName { get; set; }
-            
+
             [Required]
             [DataType(DataType.MultilineText)]
             [Display(Name = "Group Description")]
             public string GroupDescription { get; set; }
         }
-        
-        public async Task<IActionResult> OnGetAsync(string organisation, string group)
+
+        public async Task<IActionResult> OnGetAsync(Guid organisation, Guid group)
         {
-            if (group == null)
+            if (!await _apiService.VerifyTokensAsync(HttpContext))
+                return SignOut(new AuthenticationProperties {RedirectUri = HttpContext.Request.GetDisplayUrl()},
+                    "Cookies");
+            ApiClient client = await _apiService.GetApiClientAsync(HttpContext);
+
+            try
             {
-                return RedirectToPage("./Index");
+                await client.CanUpdateGroupAsync(false, organisation, group);
+                Organisation = await client.GetOrganisationAsync(organisation);
+                Group = await client.GetGroupAsync(organisation, group);
             }
-
-            (bool result, Organisation org) = await this.VerifyUserPermissions(organisation, _organisationsContext, OrganisationPermissions.EditGroups);
-            Organisation = org;
-            if (!result) return NotFound();
-
-            Group = await _groupsContext.GetAsync(new ObjectId(group));
-            
-            if (Group == null || Group.OwnerId != Organisation.Id.ToString())
+            catch (ApiException e)
             {
-                return RedirectToPage("./Index");
+                return StatusCode(e.StatusCode, e.Response);
             }
-
-            Input = new InputModel
-            {
-                GroupName = Group.GroupName,
-                GroupDescription = Group.GroupDescription
-            };
 
             return Page();
         }
-        
-        public async Task<IActionResult> OnPostAsync(string organisation, string group)
+
+        public async Task<IActionResult> OnPostAsync(Guid organisation, Guid group)
         {
-            (bool result, Organisation org) = await this.VerifyUserPermissions(organisation, _organisationsContext, OrganisationPermissions.EditGroups);
-            Organisation = org;
-            if (!result) return NotFound();
-            
-            if (!ModelState.IsValid)
+            if (!ModelState.IsValid) return await OnGetAsync(organisation, group);
+
+            if (!await _apiService.VerifyTokensAsync(HttpContext))
+                return SignOut(new AuthenticationProperties {RedirectUri = HttpContext.Request.GetDisplayUrl()},
+                    "Cookies");
+            ApiClient client = await _apiService.GetApiClientAsync(HttpContext);
+
+            try
             {
-                return Page();
+                Group = await client.GetGroupAsync(organisation, group);
+                Group.GroupName = Input.GroupName;
+                Group.GroupDescription = Input.GroupDescription;
+            }
+            catch (ApiException e)
+            {
+                return StatusCode(e.StatusCode, e.Response);
             }
 
-            Group = await _groupsContext.GetAsync(new ObjectId(group));
-            
-            if (Group.OwnerId != Organisation.Id.ToString())
+            try
             {
-                return RedirectToPage("./Index");
+                await client.UpdateGroupAsync(organisation, group, Group);
+            }
+            catch (ApiException e)
+            {
+                // Relays the status code and response from the API
+                if (e.StatusCode != 403) return StatusCode(e.StatusCode, e.Response);
+
+                ModelState.AddModelError(string.Empty, e.Response);
+                return await OnGetAsync(organisation, group);
             }
 
-            Group.GroupName = Input.GroupName;
-            Group.GroupDescription = Input.GroupDescription;
-            
-            await _groupsContext.UpdateAsync(Group.Id, Group);
-            
             return RedirectToPage("./Index");
-
-        } 
+        }
     }
 }

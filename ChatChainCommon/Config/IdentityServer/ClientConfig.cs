@@ -20,7 +20,7 @@ namespace ChatChainCommon.Config.IdentityServer
         
         public ICollection<string> AllowedCorsOrigins { get; set; }
 
-        public ICollection<string> AllowedGrantTypes { get; set; } = GrantTypes.Implicit;
+        public ICollection<string> AllowedGrantTypes { get; set; }// = GrantTypes.Implicit;
         
         public ICollection<string> Secrets { get; set; }
 
@@ -28,7 +28,7 @@ namespace ChatChainCommon.Config.IdentityServer
         {
             IdentityServerConstants.StandardScopes.OpenId,
             IdentityServerConstants.StandardScopes.Profile,
-            "ChatChatAPI"
+            "ChatChainAPI"
         };
     }
 }

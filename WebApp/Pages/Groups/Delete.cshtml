@@ -5,8 +5,6 @@
     Layout = "Shared/_ClientGroupsLayout";
 }
 <div class="container">
-    <p class="text-danger">@Model.ErrorMessage</p>
-
     <h3>Are you sure you want to delete this Group?</h3>
     <div>
         <hr/>
@@ -24,14 +22,11 @@
                 @Html.DisplayFor(m => m.Group.GroupDescription)
             </dd>
             <dt>
-                <p>Clients:</p>
+                <p>Client Count:</p>
             </dt>
-            @foreach (string client in Model.Clients)
-            {
-                <dd>
-                    @Html.DisplayFor(m => client)
-                </dd>
-            }
+            <dd>
+                @Html.DisplayFor(m => m.Group.ClientIds.Count)
+            </dd>
         </dl>
 
         <form method="post">

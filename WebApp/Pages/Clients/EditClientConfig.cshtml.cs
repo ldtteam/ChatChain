@@ -2,123 +2,98 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using ChatChainCommon.DatabaseModels;
-using ChatChainCommon.DatabaseServices;
-using IdentityServer4.Extensions;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using MongoDB.Bson;
-using WebApp.Utilities;
+using WebApp.Api;
+using WebApp.Services;
 
 namespace WebApp.Pages.Clients
 {
     [Authorize]
     public class EditClientConfig : PageModel
     {
-        private readonly ClientService _clientsContext;
-        private readonly ClientConfigService _clientConfigsContext;
-        private readonly OrganisationService _organisationsContext;
+        private readonly ApiService _apiService;
 
-        public EditClientConfig(ClientService clientsContext, ClientConfigService clientConfigsContext, OrganisationService organisationsContext)
+        public EditClientConfig(ApiService apiService)
         {
-            _clientsContext = clientsContext;
-            _clientConfigsContext = clientConfigsContext;
-            _organisationsContext = organisationsContext;
+            _apiService = apiService;
         }
 
         public Client Client { get; set; }
-        [BindProperty]
-        public string[] SelectedClientEventGroups { get; set; }
-        [BindProperty]
-        public string[] SelectedUserEventGroups { get; set; }
+        [BindProperty] public Guid[] SelectedClientEventGroups { get; set; }
+        [BindProperty] public Guid[] SelectedUserEventGroups { get; set; }
         public SelectList GroupOptions { get; set; }
-        
+
         public Organisation Organisation { get; set; }
 
-        public async Task<IActionResult> OnGetAsync(string organisation, string client)
+        public async Task<IActionResult> OnGetAsync(Guid organisation, Guid client)
         {
-            if (client.IsNullOrEmpty())
-            {
-                return RedirectToPage("./Index", new { organisation = Organisation.Id });
-            }
-            
-            (bool result, Organisation org) = await this.VerifyUserPermissions(organisation, _organisationsContext, OrganisationPermissions.EditClients);
-            Organisation = org;
-            if (!result) return NotFound();
+            if (!await _apiService.VerifyTokensAsync(HttpContext))
+                return SignOut(new AuthenticationProperties {RedirectUri = HttpContext.Request.GetDisplayUrl()},
+                    "Cookies");
+            ApiClient apiClient = await _apiService.GetApiClientAsync(HttpContext);
 
-            Client = await _clientsContext.GetAsync(new ObjectId(client)); 
-            
-            if (Client == null || Client.OwnerId != Organisation.Id.ToString())
+            try
             {
-                return RedirectToPage("./Index", new { organisation = Organisation.Id });
+                await apiClient.CanUpdateClientConfigAsync(false, organisation, client);
+                Organisation = await apiClient.GetOrganisationAsync(organisation);
+                Client = await apiClient.GetClientAsync(organisation, client);
+                ClientConfig clientConfig = await apiClient.GetClientConfigAsync(organisation, Client.Id);
+                ICollection<Group> clientGroups = await apiClient.GetGroupsForClientAsync(organisation, Client.Id);
+
+                GroupOptions = new SelectList(clientGroups, nameof(Group.Id), nameof(Group.GroupName));
+                SelectedClientEventGroups = clientConfig.ClientEventGroups.ToArray();
+                SelectedUserEventGroups = clientConfig.UserEventGroups.ToArray();
+
+                return Page();
             }
-            
-            if (await _clientConfigsContext.GetAsync(Client.ClientConfigId) == null)
+            catch (ApiException e)
             {
-                ClientConfig newConfig = new ClientConfig
-                {
-                    ClientId = Client.Id
-                };
-                await _clientConfigsContext.CreateAsync(newConfig);
+                return StatusCode(e.StatusCode, e.Response);
             }
-            GroupOptions = new SelectList(await _clientsContext.GetGroupsAsync(Client.Id), nameof(Group.Id), nameof(Group.GroupName));
-            
-            List<string> clientEventGroupIds = new List<string>();
-
-            foreach (ObjectId groupId in (await _clientsContext.GetClientConfigAsync(Client.Id)).ClientEventGroups)
-            {
-                clientEventGroupIds.Add(groupId.ToString());
-            }
-
-            List<string> userEventGroupIds = new List<string>();
-            
-            foreach (ObjectId groupId in (await _clientsContext.GetClientConfigAsync(Client.Id)).UserEventGroups)
-            {
-                userEventGroupIds.Add(groupId.ToString());
-            }
-
-            if (await _clientsContext.GetClientConfigAsync(Client.Id) == null) return Page();
-            SelectedClientEventGroups = clientEventGroupIds.ToArray();
-            SelectedUserEventGroups = userEventGroupIds.ToArray();
-
-            return Page();
         }
-        
-        public async Task<IActionResult> OnPostAsync(string organisation, string client)
+
+        public async Task<IActionResult> OnPostAsync(Guid organisation, Guid client)
         {
-            if (client.IsNullOrEmpty())
-            {
-                return RedirectToPage("./Index", new { organisation = Organisation.Id });
-            }
-            
-            (bool result, Organisation org) = await this.VerifyUserPermissions(organisation, _organisationsContext, OrganisationPermissions.EditClients);
-            Organisation = org;
-            if (!result) return NotFound();
+            if (!ModelState.IsValid) return await OnGetAsync(organisation, client);
 
-            Client = await _clientsContext.GetAsync(new ObjectId(client));
+            if (!await _apiService.VerifyTokensAsync(HttpContext))
+                return SignOut(new AuthenticationProperties {RedirectUri = HttpContext.Request.GetDisplayUrl()},
+                    "Cookies");
+            ApiClient apiClient = await _apiService.GetApiClientAsync(HttpContext);
 
-            if (Client == null || Client.OwnerId != Organisation.Id.ToString())
+            try
             {
-                return RedirectToPage("./Index", new { organisation = Organisation.Id });
+                Client = await apiClient.GetClientAsync(organisation, client);
             }
-            
-            if (await _clientConfigsContext.GetAsync(Client.ClientConfigId) == null)
+            catch (ApiException e)
             {
-                Console.WriteLine("ClientConfig is null for client: " + client);
-                return RedirectToPage("./Index", new { organisation = Organisation.Id });
+                return StatusCode(e.StatusCode, e.Response);
             }
 
-            List<ObjectId> clientEventGroupIds = SelectedClientEventGroups.Select(group => new ObjectId(group)).ToList();
-            List<ObjectId> userEventGroupIds = SelectedUserEventGroups.Select(group => new ObjectId(group)).ToList();
+            try
+            {
+                ClientConfig clientConfig = new ClientConfig
+                {
+                    ClientEventGroups = SelectedClientEventGroups.ToList(),
+                    UserEventGroups = SelectedUserEventGroups.ToList()
+                };
+                await apiClient.UpdateClientConfigAsync(organisation, Client.Id, clientConfig);
+            }
+            catch (ApiException e)
+            {
+                // Relays the status code and response from the API
+                if (e.StatusCode != 403) return StatusCode(e.StatusCode, e.Response);
 
-            ClientConfig clientConfig = await _clientsContext.GetClientConfigAsync(Client.Id);
-            clientConfig.ClientEventGroups = clientEventGroupIds;
-            clientConfig.UserEventGroups = userEventGroupIds;
-            await _clientConfigsContext.UpdateAsync(clientConfig.Id, clientConfig);
-            
-            return RedirectToPage("./Index", new { organisation = Organisation.Id });
+                ModelState.AddModelError(string.Empty, e.Response);
+                return await OnGetAsync(organisation, client);
+            }
+
+            return RedirectToPage("./Index");
         }
     }
 }

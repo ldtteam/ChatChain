@@ -36,9 +36,9 @@ namespace ChatChainCommon.IdentityServerStore
             return Task.FromResult(clients);
         }
 
-        public void RemoveClient(Client client)
+        public void RemoveClient(string clientId)
         {
-            _dbRepository.Delete<Client>(c => c.ClientId == client.ClientId);
+            _dbRepository.Delete<Client>(c => c.ClientId == clientId);
         }
 
         public void AddClient(Client client)
