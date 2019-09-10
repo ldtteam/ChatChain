@@ -1,5 +1,5 @@
 @page
-@using ChatChainCommon.DatabaseModels
+@using WebApp.Api
 @model WebApp.Pages.Organisations.Index
 
 @{
@@ -16,7 +16,9 @@
                 <th>Organisation Name</th>
                 <th>Clients & Groups</th>
                 <th>Users</th>
-                <th><a class="btn btn-success btn-sm" asp-page="./Create">Create New</a></th>
+                <th>
+                    <a class="btn btn-success btn-sm" asp-page="./Create">Create New</a>
+                </th>
             </tr>
             </thead>
             <tbody>
@@ -37,16 +39,15 @@
                     </td>
                     <td>
                         <div class="btn-group">
-                            @if (org.Users[User.Claims.First(claim => claim.Type.Equals("sub")).Value].Permissions.Contains(OrganisationPermissions.EditOrg) 
-                                 || org.Users[User.Claims.First(claim => claim.Type.Equals("sub")).Value].Permissions.Contains(OrganisationPermissions.All))
+                            @if (await Model.Client.CanUpdateOrganisationAsync(true, org.Id))
                             {
                                 <a class="btn btn-primary btn-sm" asp-page="./Edit" asp-route-organisation="@org.Id">Edit</a>
                             }
-                            @if (org.Owner == User.Claims.First(claim => claim.Type.Equals("sub")).Value)
+                            @if (await Model.Client.CanDeleteOrganisationAsync(true, org.Id))
                             {
                                 <a class="btn btn-danger btn-sm" asp-page="./Delete" asp-route-organisation="@org.Id">Delete</a>
                             }
-                            @if (org.Owner != User.Claims.First(claim => claim.Type.Equals("sub")).Value)
+                            @if (await Model.Client.CanLeaveOrganisationAsync(true, org.Id))
                             {
                                 <a class="btn btn-danger btn-sm" asp-page="./Leave" asp-route-organisation="@org.Id">Leave</a>
                             }
@@ -58,3 +59,7 @@
         </table>
     </div>
 </div>
+
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+}

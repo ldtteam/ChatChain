@@ -12,7 +12,7 @@ namespace WebApp.Pages
         }
 
         public void OnPost()
-        { 
+        {
             HttpContext.SignOutAsync();
         }
     }

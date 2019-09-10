@@ -1,5 +1,5 @@
 ﻿@page "/{organisation}/Groups"
-@using ChatChainCommon.DatabaseModels
+@using WebApp.Api
 @model IndexModel
 @{
     ViewData["Title"] = "Groups";
@@ -13,13 +13,11 @@
         <table class="table">
             <thead>
             <tr>
-                <th>Database Id</th>
-                <th>Group Name</th>
                 <th>Group Id</th>
+                <th>Group Name</th>
                 <th>Group Description</th>
                 <th>
-                    @if (Model.Organisation.Users[User.Claims.First(claim => claim.Type.Equals("sub")).Value].Permissions.Contains(OrganisationPermissions.CreateGroups)
-                         || Model.Organisation.Users[User.Claims.First(claim => claim.Type.Equals("sub")).Value].Permissions.Contains(OrganisationPermissions.All))
+                    @if (await Model.Client.CanCreateGroupAsync(true, Model.Organisation.Id))
                     {
                         <a class="btn btn-success btn-sm" asp-page="./Create" asp-route-organisation="@Model.Organisation.Id">Create New</a>
                     }
@@ -37,21 +35,16 @@
                         @Html.DisplayFor(m => group.GroupName)
                     </td>
                     <td>
-                        @Html.DisplayFor(m => group.GroupId)
-                    </td>
-                    <td>
                         @Html.DisplayFor(m => group.GroupDescription)
                     </td>
                     <td>
                         <div class="btn-group">
-                            <a class="btn btn-primary btn-sm" asp-page="./Clients" asp-route-organisation="@Model.Organisation.Id" asp-route-group="@group.Id">View Clients</a>
-                            @if (Model.Organisation.Users[User.Claims.First(claim => claim.Type.Equals("sub")).Value].Permissions.Contains(OrganisationPermissions.EditGroups)
-                                 || Model.Organisation.Users[User.Claims.First(claim => claim.Type.Equals("sub")).Value].Permissions.Contains(OrganisationPermissions.All))
+                            @if (await Model.Client.CanUpdateGroupAsync(true, Model.Organisation.Id, group.Id))
                             {
+                                <a class="btn btn-primary btn-sm" asp-page="./EditClients" asp-route-organisation="@Model.Organisation.Id" asp-route-group="@group.Id">Edit Clients</a>
                                 <a class="btn btn-primary btn-sm" asp-page="./Edit" asp-route-organisation="@Model.Organisation.Id" asp-route-group="@group.Id">Edit</a>
                             }
-                            @if (Model.Organisation.Users[User.Claims.First(claim => claim.Type.Equals("sub")).Value].Permissions.Contains(OrganisationPermissions.DeleteGroups)
-                                 || Model.Organisation.Users[User.Claims.First(claim => claim.Type.Equals("sub")).Value].Permissions.Contains(OrganisationPermissions.All))
+                            @if (await Model.Client.CanDeleteGroupAsync(true, Model.Organisation.Id, group.Id))
                             {
                                 <a class="btn btn-danger  btn-sm" asp-page="./Delete" asp-route-organisation="@Model.Organisation.Id" asp-route-group="@group.Id">Delete</a>
                             }

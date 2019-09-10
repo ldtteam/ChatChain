@@ -1,33 +1,42 @@
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using ChatChainCommon.DatabaseModels;
-using ChatChainCommon.DatabaseServices;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.Extensions;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using WebApp.Api;
+using WebApp.Services;
+using Organisation = WebApp.Api.Organisation;
 
 namespace WebApp.Pages.Organisations
 {
     [Authorize]
     public class Index : PageModel
     {
-        private readonly OrganisationService _organisationsContext;
+        private readonly ApiService _apiService;
 
-        public Index(OrganisationService organisationsContext)
+        public Index(ApiService apiService)
         {
-            _organisationsContext = organisationsContext;
+            _apiService = apiService;
         }
-        
+
         public IList<Organisation> Organisations { get; private set; }
 
-        public async Task OnGet()
+        public ApiClient Client { get; set; }
+
+        public async Task<ActionResult> OnGet()
         {
+            if (!await _apiService.VerifyTokensAsync(HttpContext))
+                return SignOut(new AuthenticationProperties {RedirectUri = HttpContext.Request.GetDisplayUrl()},
+                    "Cookies");
+            Client = await _apiService.GetApiClientAsync(HttpContext);
+
+            ICollection<Organisation> organisations = await Client.GetOrganisationsAsync();
             Organisations = new List<Organisation>();
 
-            foreach (Organisation organisation in await _organisationsContext.GetForUserAsync(User.Claims.First(claim => claim.Type.Equals("sub")).Value))
-            {
-                Organisations.Add(organisation);
-            }
+            foreach (Organisation organisation in organisations) Organisations.Add(organisation);
+            return Page();
         }
     }
 }

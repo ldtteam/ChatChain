@@ -23,7 +23,7 @@ namespace ChatChainServer.Utils
 
         public static string FromHeaderAndQueryString(HttpRequest request)
         {
-            var token = AuthHeaderTokenRetriever(request);
+            string token = AuthHeaderTokenRetriever(request);
 
             if (string.IsNullOrEmpty(token))
             {

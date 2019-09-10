@@ -1,70 +1,69 @@
 using System;
-using System.Linq;
 using System.Threading.Tasks;
-using ChatChainCommon.DatabaseModels;
-using ChatChainCommon.DatabaseServices;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using WebApp.Utilities;
+using WebApp.Api;
+using WebApp.Services;
+using Organisation = WebApp.Api.Organisation;
 
 namespace WebApp.Pages.Organisations.Invite
 {
     [Authorize]
     public class Index : PageModel
     {
-        private readonly OrganisationService _organisationsContext;
+        private readonly ApiService _apiService;
 
-        public Index(OrganisationService organisationsContext)
+        public Index(ApiService apiService)
         {
-            _organisationsContext = organisationsContext;
+            _apiService = apiService;
         }
-        
+
         public Organisation Organisation { get; private set; }
-        
-        public OrganisationInvite OrganisationInvite { get; private set; }
-        
-        public async Task<IActionResult> OnGetAsync(string organisation, string invite)
+
+        public async Task<IActionResult> OnGetAsync(Guid organisation, string invite)
         {
-            (bool result, Organisation org) = await this.VerifyOrganisationId(organisation, _organisationsContext);
-            Organisation = org;
-            if (!result) return NotFound();
+            if (!await _apiService.VerifyTokensAsync(HttpContext))
+                return SignOut(new AuthenticationProperties {RedirectUri = HttpContext.Request.GetDisplayUrl()},
+                    "Cookies");
+            ApiClient client = await _apiService.GetApiClientAsync(HttpContext);
 
-            if (invite == null)
-                return StatusCode(403);
+            try
+            {
+                Organisation = await client.GetOrganisationWithInviteAsync(organisation, invite);
+            }
+            catch (ApiException e)
+            {
+                // Relays the status code and response from the API
+                return StatusCode(e.StatusCode, e.Response);
+            }
 
-            OrganisationInvite = await _organisationsContext.GetInviteAsync(Organisation.Id, invite);
-
-            if (OrganisationInvite == null)
-                return StatusCode(403);
-            
-            if (!string.Equals(OrganisationInvite.Email, User.Claims.First(claim => claim.Type.Equals("EmailAddress")).Value, StringComparison.OrdinalIgnoreCase))
-                return StatusCode(403);
-            
             return Page();
         }
 
-        public async Task<IActionResult> OnPostAsync(string organisation, string invite)
+        public async Task<IActionResult> OnPostAsync(Guid organisation, string invite)
         {
-            (bool result, Organisation org) = await this.VerifyOrganisationId(organisation, _organisationsContext);
-            Organisation = org;
-            if (!result) return NotFound();
+            if (!ModelState.IsValid) return await OnGetAsync(organisation, invite);
 
-            if (invite == null)
-                return StatusCode(403);
+            if (!await _apiService.VerifyTokensAsync(HttpContext))
+                return SignOut(new AuthenticationProperties {RedirectUri = HttpContext.Request.GetDisplayUrl()},
+                    "Cookies");
+            ApiClient client = await _apiService.GetApiClientAsync(HttpContext);
 
-            OrganisationInvite = await _organisationsContext.GetInviteAsync(Organisation.Id, invite);
+            try
+            {
+                await client.UseInviteAsync(organisation, invite);
+            }
+            catch (ApiException e)
+            {
+                // Relays the status code and response from the API
+                if (e.StatusCode != 403) return StatusCode(e.StatusCode, e.Response);
 
-            if (OrganisationInvite == null)
-                return StatusCode(403);
-            
-            if (!string.Equals(OrganisationInvite.Email, User.Claims.First(claim => claim.Type.Equals("EmailAddress")).Value, StringComparison.OrdinalIgnoreCase))
-                return StatusCode(403);
-
-            Organisation.Users.Add(User.Claims.First(claim => claim.Type.Equals("sub")).Value, new OrganisationUser());
-
-            await _organisationsContext.UpdateAsync(Organisation.Id, Organisation);
-            await _organisationsContext.RemoveInviteAsync(Organisation.Id, invite);
+                ModelState.AddModelError(string.Empty, e.Response);
+                return await OnGetAsync(organisation, invite);
+            }
 
             return RedirectToPage("../Index");
         }

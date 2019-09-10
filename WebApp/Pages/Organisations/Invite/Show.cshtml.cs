@@ -1,39 +1,51 @@
 using System;
 using System.Threading.Tasks;
-using ChatChainCommon.DatabaseModels;
-using ChatChainCommon.DatabaseServices;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using WebApp.Utilities;
+using WebApp.Api;
+using WebApp.Services;
 
 namespace WebApp.Pages.Organisations.Invite
 {
     [Authorize]
     public class Show : PageModel
     {
-        private readonly OrganisationService _organisationsContext;
+        private readonly ApiService _apiService;
 
-        public Show(OrganisationService organisationsContext)
+        public Show(ApiService apiService)
         {
-            _organisationsContext = organisationsContext;
+            _apiService = apiService;
         }
-        
+
         [TempData]
         // ReSharper disable once UnusedAutoPropertyAccessor.Global
         public string Token { get; set; }
-        
+
         public Organisation Organisation { get; private set; }
 
-        public async Task<IActionResult> OnGetAsync(string organisation)
+        public async Task<IActionResult> OnGetAsync(Guid organisation)
         {
-            (bool result, Organisation org) = await this.VerifyUserPermissions(organisation, _organisationsContext, OrganisationPermissions.CreateOrgUsers);
-            Organisation = org;
-            if (!result) return NotFound();
-            
-            if (Token == null)
-                return RedirectToPage("../Index");
-            
+            if (Token == null) return RedirectToPage("../Users/Index");
+
+            if (!await _apiService.VerifyTokensAsync(HttpContext))
+                return SignOut(new AuthenticationProperties {RedirectUri = HttpContext.Request.GetDisplayUrl()},
+                    "Cookies");
+            ApiClient client = await _apiService.GetApiClientAsync(HttpContext);
+
+            try
+            {
+                await client.CanCreateInviteAsync(false, organisation);
+                Organisation = await client.GetOrganisationAsync(organisation);
+            }
+            catch (ApiException e)
+            {
+                // Relays the status code and response from the API
+                return StatusCode(e.StatusCode, e.Response);
+            }
+
             return Page();
         }
     }

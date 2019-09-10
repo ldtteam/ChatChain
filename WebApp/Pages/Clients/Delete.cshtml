@@ -15,10 +15,10 @@
         <hr/>
         <dl class="dl-horizontal">
             <dt>
-                @Html.DisplayNameFor(m => m.Client.ClientId)
+                @Html.DisplayNameFor(m => m.Client.Id)
             </dt>
             <dd>
-                @Html.DisplayFor(m => m.Client.ClientId)
+                @Html.DisplayFor(m => m.Client.Id)
             </dd>
             <dt>
                 @Html.DisplayNameFor(m => m.Client.ClientName)
@@ -35,7 +35,7 @@
         </dl>
 
         <form method="post">
-            <input type="hidden" asp-for="Client.ClientId"/>
+            <input type="hidden" asp-for="Client.Id"/>
             <input type="submit" value="Delete" class="btn btn-danger"/>
             <a asp-page="./Index" asp-route-organisation="@Model.Organisation.Id" class="btn btn-success">Back to List</a>
         </form>

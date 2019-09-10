@@ -1,12 +1,13 @@
 ﻿@page
 @model AboutModel
 
+@using System.Security.Claims
 @using Microsoft.AspNetCore.Authentication
 
 <h2>User Claims</h2>
 
 <dl>
-    @foreach (var claim in User.Claims)
+    @foreach (Claim claim in User.Claims)
     {
         <dt>@claim.Type</dt>
         <dd>@claim.Value</dd>
@@ -16,7 +17,7 @@
 <h2>User Properties</h2>
 
 <dl>
-    @foreach (var prop in (await HttpContext.AuthenticateAsync()).Properties.Items)
+    @foreach (KeyValuePair<string, string> prop in (await HttpContext.AuthenticateAsync()).Properties.Items)
     {
         <dt>@prop.Key</dt>
         <dd>@prop.Value</dd>

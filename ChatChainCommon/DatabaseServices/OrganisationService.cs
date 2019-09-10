@@ -4,14 +4,13 @@ using System.Linq;
 using System.Threading.Tasks;
 using ChatChainCommon.Config;
 using ChatChainCommon.DatabaseModels;
-using MongoDB.Bson;
 using MongoDB.Driver;
 using Newtonsoft.Json;
 using StackExchange.Redis;
 
 namespace ChatChainCommon.DatabaseServices
 {
-    public class OrganisationService
+    public class OrganisationService : IOrganisationService
     {
         private readonly IMongoCollection<Organisation> _organisations;
         private readonly IDatabaseAsync _redisDatabase;
@@ -30,7 +29,7 @@ namespace ChatChainCommon.DatabaseServices
             return await cursor.ToListAsync();
         }
 
-        public async Task<Organisation> GetAsync(ObjectId orgId)
+        public async Task<Organisation> GetAsync(Guid orgId)
         {
             IAsyncCursor<Organisation> cursor = await _organisations.FindAsync(org => org.Id == orgId);
             return await cursor.FirstOrDefaultAsync();
@@ -38,22 +37,17 @@ namespace ChatChainCommon.DatabaseServices
 
         public async Task<IEnumerable<Organisation>> GetForUserAsync(string userId)
         {
-            /*IList<Organisation> organisations = 
-                (await GetAsync())
-                .Where(organisation => 
-                    organisation.Users.Select(orgUser => orgUser.IdentityUserId)
-                        .Contains(userId)).ToList();*/
             IAsyncCursor<Organisation> cursor = await _organisations.FindAsync(org => org.Users.ContainsKey(userId));
 
             return await cursor.ToListAsync();
         }
 
-        public async Task UpdateAsync(ObjectId orgId, Organisation orgIn)
+        public async Task UpdateAsync(Guid orgId, Organisation orgIn)
         {
             await _organisations.ReplaceOneAsync(org => org.Id == orgId, orgIn);
         }
 
-        public async Task RemoveAsync(ObjectId orgId)
+        public async Task RemoveAsync(Guid orgId)
         {
             await _organisations.DeleteOneAsync(org => org.Id == orgId);
         }
@@ -63,14 +57,14 @@ namespace ChatChainCommon.DatabaseServices
             await _organisations.InsertOneAsync(org);
         }
 
-        public async Task<OrganisationInvite> GetInviteAsync(ObjectId orgId, string inviteToken)
+        public async Task<OrganisationInvite> GetInviteAsync(Guid orgId, string inviteToken)
         {
             return (from redisValue in await _redisDatabase
                 .SetMembersAsync(orgId.ToString()) select JsonConvert.DeserializeObject<OrganisationInvite>(redisValue))
                 .FirstOrDefault(orgInvite => orgInvite.Token == inviteToken);
         }
 
-        public async Task RemoveInviteAsync(ObjectId orgId, string inviteToken)
+        public async Task RemoveInviteAsync(Guid orgId, string inviteToken)
         {
             foreach (RedisValue redisValue in await _redisDatabase.SetMembersAsync(orgId.ToString()))
             {
@@ -84,16 +78,16 @@ namespace ChatChainCommon.DatabaseServices
 
         public async Task CreateInviteAsync(OrganisationInvite invite)
         {
-            foreach (RedisValue redisValue in await _redisDatabase.SetMembersAsync(invite.OrganisationId))
+            foreach (RedisValue redisValue in await _redisDatabase.SetMembersAsync(invite.OrganisationId.ToString()))
             {
                 OrganisationInvite orgInvite = JsonConvert.DeserializeObject<OrganisationInvite>(redisValue);
                 if (invite.Email != orgInvite.Email) continue;
                 
-                await _redisDatabase.SetRemoveAsync(invite.OrganisationId, redisValue);
+                await _redisDatabase.SetRemoveAsync(invite.OrganisationId.ToString(), redisValue);
                 break;
             }
-            await _redisDatabase.SetAddAsync(invite.OrganisationId, JsonConvert.SerializeObject(invite));
-            await _redisDatabase.KeyExpireAsync(invite.OrganisationId, DateTime.Now.AddDays(1));
+            await _redisDatabase.SetAddAsync(invite.OrganisationId.ToString(), JsonConvert.SerializeObject(invite));
+            await _redisDatabase.KeyExpireAsync(invite.OrganisationId.ToString(), DateTime.Now.AddDays(1));
         }
 
     }

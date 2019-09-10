@@ -1,6 +1,6 @@
+using System;
 using System.Collections.Generic;
-using MongoDB.Bson;
-using MongoDB.Bson.Serialization.Attributes;
+using System.ComponentModel.DataAnnotations;
 
 namespace ChatChainCommon.DatabaseModels
 {
@@ -13,21 +13,16 @@ namespace ChatChainCommon.DatabaseModels
      */
     public class Group
     {
-        public ObjectId Id { get; set; }
+        [Required]
+        public Guid Id { get; set; }
 
-        [BsonElement("GroupId")]
-        public string GroupId { get; set; }
-        
-        [BsonElement("GroupName")]
         public string GroupName { get; set; }
+
+        [Required]
+        public Guid OwnerId { get; set; }
         
-        [BsonElement("OwnerId")]
-        public string OwnerId { get; set; }
-        
-        [BsonElement("GroupDescription")]
         public string GroupDescription { get; set; }
         
-        [BsonElement("ClientIds")]
-        public List<ObjectId> ClientIds { get; set; } = new List<ObjectId>();
+        public List<Guid> ClientIds { get; set; } = new List<Guid>();
     }
 }

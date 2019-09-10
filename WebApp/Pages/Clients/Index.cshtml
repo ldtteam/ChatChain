@@ -1,5 +1,5 @@
 @page "/{organisation}/Clients"
-@using ChatChainCommon.DatabaseModels
+@using Client = WebApp.Api.Client
 @model IndexModel
 @{
     ViewData["Title"] = "Clients";
@@ -18,8 +18,7 @@
                 <th>Client Name</th>
                 <th>Client Description</th>
                 <th>
-                    @if (Model.Organisation.Users[User.Claims.First(claim => claim.Type.Equals("sub")).Value].Permissions.Contains(OrganisationPermissions.CreateClients)
-                         || Model.Organisation.Users[User.Claims.First(claim => claim.Type.Equals("sub")).Value].Permissions.Contains(OrganisationPermissions.All))
+                    @if (await Model.ApiClient.CanCreateClientAsync(true, Model.Organisation.Id))
                     {
                         <a class="btn btn-success btn-sm" asp-page="./Create" asp-route-organisation="@Model.Organisation.Id">Create New</a>
                     }
@@ -31,7 +30,7 @@
             {
                 <tr>
                     <td>
-                        @Html.DisplayFor(m => client.ClientId)
+                        @Html.DisplayFor(m => client.Id)
                     </td>
                     <td>
                         @Html.DisplayFor(m => client.ClientName)
@@ -41,14 +40,15 @@
                     </td>
                     <td>
                         <div class="btn-group">
-                            @if (Model.Organisation.Users[User.Claims.First(claim => claim.Type.Equals("sub")).Value].Permissions.Contains(OrganisationPermissions.EditClients)
-                                 || Model.Organisation.Users[User.Claims.First(claim => claim.Type.Equals("sub")).Value].Permissions.Contains(OrganisationPermissions.All))
+                            @if (await Model.ApiClient.CanUpdateClientConfigAsync(true, Model.Organisation.Id, client.Id))
                             {
                                 <a class="btn btn-primary btn-sm" asp-page="./EditClientConfig" asp-route-organisation="@Model.Organisation.Id" asp-route-client="@client.Id">Config</a>
+                            }
+                            @if (await Model.ApiClient.CanUpdateClientAsync(true, Model.Organisation.Id, client.Id))
+                            {
                                 <a class="btn btn-primary btn-sm" asp-page="./Edit" asp-route-organisation="@Model.Organisation.Id" asp-route-client="@client.Id">Edit</a>
                             }
-                            @if (Model.Organisation.Users[User.Claims.First(claim => claim.Type.Equals("sub")).Value].Permissions.Contains(OrganisationPermissions.DeleteClients)
-                                 || Model.Organisation.Users[User.Claims.First(claim => claim.Type.Equals("sub")).Value].Permissions.Contains(OrganisationPermissions.All))
+                            @if (await Model.ApiClient.CanDeleteClientAsync(true, Model.Organisation.Id, client.Id))
                             {
                                 <a class="btn btn-danger  btn-sm" asp-page="./Delete" asp-route-organisation="@Model.Organisation.Id" asp-route-client="@client.Id">Delete</a>
                             }

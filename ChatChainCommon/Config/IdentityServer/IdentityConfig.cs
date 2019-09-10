@@ -11,7 +11,8 @@ namespace ChatChainCommon.Config.IdentityServer
         {
             return new List<ApiResource>
             {
-                new ApiResource("ChatChain", "ChatChain API")
+                new ApiResource("ChatChain", "ChatChain API"),
+                new ApiResource("ChatChainAPI", "ChatChain WebApp API")
             };
         }
         

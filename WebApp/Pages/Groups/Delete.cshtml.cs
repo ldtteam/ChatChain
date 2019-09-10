@@ -1,110 +1,71 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using ChatChainCommon.DatabaseModels;
-using ChatChainCommon.DatabaseServices;
-using ChatChainCommon.IdentityServerStore;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.EntityFrameworkCore;
-using MongoDB.Bson;
-using WebApp.Utilities;
-using Client = IdentityServer4.Models.Client;
+using WebApp.Api;
+using WebApp.Services;
 
 namespace WebApp.Pages.Groups
 {
     [Authorize]
     public class DeleteModel : PageModel
     {
-        private readonly CustomClientStore _clientStore;
-        private readonly GroupService _groupsContext;
-        private readonly OrganisationService _organisationsContext; 
+        private readonly ApiService _apiService;
 
-        public DeleteModel(CustomClientStore clientStore, GroupService groupsContext, OrganisationService organisationsContext)
+        public DeleteModel(ApiService apiService)
         {
-            _clientStore = clientStore;
-            _groupsContext = groupsContext;
-            _organisationsContext = organisationsContext;
+            _apiService = apiService;
         }
-        
-        [BindProperty]
-        public Group Group { get; set; }
-        public List<string> Clients { get; private set; }
-        public string ErrorMessage { get; private set; }
-        
+
+        [BindProperty] public Group Group { get; set; }
+
         public Organisation Organisation { get; set; }
-        
-        public async Task<IActionResult> OnGetAsync(string organisation, string group, bool? saveChangesError = false)
+
+        public async Task<IActionResult> OnGetAsync(Guid organisation, Guid group, bool? saveChangesError = false)
         {
-            if (group == null)
+            if (!await _apiService.VerifyTokensAsync(HttpContext))
+                return SignOut(new AuthenticationProperties {RedirectUri = HttpContext.Request.GetDisplayUrl()},
+                    "Cookies");
+            ApiClient client = await _apiService.GetApiClientAsync(HttpContext);
+
+            try
             {
-                return RedirectToPage("./Index");
+                await client.CanDeleteGroupAsync(false, organisation, group);
+                Organisation = await client.GetOrganisationAsync(organisation);
+                Group = await client.GetGroupAsync(organisation, group);
             }
-            
-            (bool result, Organisation org) = await this.VerifyUserPermissions(organisation, _organisationsContext, OrganisationPermissions.DeleteGroups);
-            Organisation = org;
-            if (!result) return NotFound();
-
-            Group = await _groupsContext.GetAsync(new ObjectId(group));
-            
-            if (Group == null || Group.OwnerId != Organisation.Id.ToString())
+            catch (ApiException e)
             {
-                return RedirectToPage("./Index");
-            }
-
-            Clients = new List<string>();
-
-            foreach (ChatChainCommon.DatabaseModels.Client client in await _groupsContext.GetClientsAsync(Group.Id))
-            {
-                Client is4Client = await _clientStore.FindClientByIdAsync(client.ClientId);
-                Clients.Add(is4Client.ClientName);
-            }
-
-            if (saveChangesError.GetValueOrDefault())
-            {
-                ErrorMessage = "Delete failed. Try again";
+                return StatusCode(e.StatusCode, e.Response);
             }
 
             return Page();
         }
-        
-        public async Task<IActionResult> OnPost(string organisation, string group)
-        {
-            if (group == null)
-            {
-                return RedirectToPage("./Index");
-            }
-            
-            (bool result, Organisation org) = await this.VerifyUserPermissions(organisation, _organisationsContext, OrganisationPermissions.DeleteGroups);
-            Organisation = org;
-            if (!result) return NotFound();
 
-            Group = await _groupsContext.GetAsync(new ObjectId(group));
-            
-            if (Group.OwnerId != Organisation.Id.ToString())
-            {
-                return RedirectToPage("./Index");
-            }
-            
-            if (Group == null)
-            {
-                return RedirectToPage("./Index");
-            }
+        public async Task<IActionResult> OnPost(Guid organisation, Guid group)
+        {
+            if (!await _apiService.VerifyTokensAsync(HttpContext))
+                return SignOut(new AuthenticationProperties {RedirectUri = HttpContext.Request.GetDisplayUrl()},
+                    "Cookies");
+            ApiClient apiClient = await _apiService.GetApiClientAsync(HttpContext);
 
             try
             {
-                await _groupsContext.RemoveAsync(Group.Id);
-
-                return RedirectToPage("./Index");
+                await apiClient.DeleteGroupAsync(organisation, group);
             }
-            catch (DbUpdateException /* ex */)
+            catch (ApiException e)
             {
-                //Log the error (uncomment ex variable name and write a log.)
-                return RedirectToAction("./Delete",
-                    new { group, saveChangesError = true });
+                // Relays the status code and response from the API
+                if (e.StatusCode != 403) return StatusCode(e.StatusCode, e.Response);
+
+                ModelState.AddModelError(string.Empty, e.Response);
+                return await OnGetAsync(organisation, group);
             }
+
+            return RedirectToPage("./Index");
         }
     }
 }

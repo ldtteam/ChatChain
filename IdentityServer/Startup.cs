@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using ChatChainCommon.Config;
 using ChatChainCommon.Config.IdentityServer;
@@ -138,7 +139,8 @@ namespace IdentityServer
                         AllowedGrantTypes = clientConfig.AllowedGrantTypes,
                         ClientSecrets = clientConfig.Secrets.Select(secret => new Secret(secret.Sha256())).ToList(),
                         AllowedScopes = clientConfig.AllowedScopes,
-                        FrontChannelLogoutUri = clientConfig.FrontChannelLogoutUri
+                        FrontChannelLogoutUri = clientConfig.FrontChannelLogoutUri,
+                        AllowOfflineAccess = true
                     });
                 }
 
@@ -186,16 +188,13 @@ namespace IdentityServer
             app.UseIdentityServer();
 
             app.UseMvc();
+            
+            app.UseSwagger();
 
-            if (env.IsDevelopment())
+            app.UseSwaggerUI(options =>
             {
-                app.UseSwagger();
-
-                app.UseSwaggerUI(options =>
-                {
-                    options.SwaggerEndpoint("/swagger/v1/swagger.json", "ChatChain Identity API V1");
-                });
-            }
+                options.SwaggerEndpoint("/swagger/v1/swagger.json", "ChatChain Identity API V1");
+            });
 
             ConfigureMongoDriver2IgnoreExtraElements();
 
@@ -245,6 +244,16 @@ namespace IdentityServer
                 }
                 createdNewRepository = true;
             }
+            else
+            {
+                foreach (IdentityResource res in IdentityConfig.GetIdentityResources())
+                {
+                    if (repository.Where<IdentityResource>(lRes => lRes.Name == res.Name).FirstOrDefault() == null)
+                    {
+                        repository.Add(res);
+                    }
+                }
+            }
 
             //  --ApiResource
             if (!repository.CollectionExists<ApiResource>())
@@ -254,6 +263,16 @@ namespace IdentityServer
                     repository.Add(api);
                 }
                 createdNewRepository = true;
+            }
+            else
+            {
+                foreach (ApiResource api in IdentityConfig.GetApis())
+                {
+                    if (repository.Where<ApiResource>(lApi => lApi.Name == api.Name).FirstOrDefault() == null)
+                    {
+                        repository.Add(api);
+                    }
+                }
             }
 
             // If it's a new Repository (database), need to restart the website to configure Mongo to ignore Extra Elements.

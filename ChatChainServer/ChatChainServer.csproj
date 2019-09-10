@@ -70,6 +70,15 @@
     <Compile Include="..\ChatChainCommon\DatabaseServices\GroupService.cs">
       <Link>DatabaseServices\GroupService.cs</Link>
     </Compile>
+    <Compile Include="..\ChatChainCommon\DatabaseServices\IClientConfigService.cs">
+      <Link>DatabaseServices\IClientConfigService.cs</Link>
+    </Compile>
+    <Compile Include="..\ChatChainCommon\DatabaseServices\IClientService.cs">
+      <Link>DatabaseServices\IClientService.cs</Link>
+    </Compile>
+    <Compile Include="..\ChatChainCommon\DatabaseServices\IGroupService.cs">
+      <Link>DatabaseServices\IGroupService.cs</Link>
+    </Compile>
   </ItemGroup>
 
 </Project>

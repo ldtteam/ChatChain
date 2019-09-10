@@ -1,42 +1,47 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using ChatChainCommon.DatabaseModels;
-using ChatChainCommon.DatabaseServices;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using WebApp.Utilities;
+using WebApp.Api;
+using WebApp.Services;
 
 namespace WebApp.Pages.Groups
 {
     [Authorize]
     public class IndexModel : PageModel
     {
-        private readonly GroupService _groupsContext;
-        private readonly OrganisationService _organisationsContext; 
-        
-        public IndexModel(GroupService groupsContext, OrganisationService organisationsContext)
+        private readonly ApiService _apiService;
+
+        public IndexModel(ApiService apiService)
         {
-            _groupsContext = groupsContext;
-            _organisationsContext = organisationsContext;
+            _apiService = apiService;
         }
 
-        public IList<Group> Groups { get; private set; }
-        
+        public ICollection<Group> Groups { get; private set; }
+
         public Organisation Organisation { get; set; }
 
-        public async Task<IActionResult> OnGetAsync(string organisation)
-        {
-            (bool result, Organisation org) = await this.VerifyIsMember(organisation, _organisationsContext);
-            Organisation = org;
-            if (!result) return NotFound();
-            
-            Groups = new List<Group>();
+        public ApiClient Client { get; set; }
 
-            foreach (Group group in await _groupsContext.GetFromOwnerAsync(Organisation.Id.ToString()))
+        public async Task<IActionResult> OnGetAsync(Guid organisation)
+        {
+            if (!await _apiService.VerifyTokensAsync(HttpContext))
+                return SignOut(new AuthenticationProperties {RedirectUri = HttpContext.Request.GetDisplayUrl()},
+                    "Cookies");
+            Client = await _apiService.GetApiClientAsync(HttpContext);
+
+            try
             {
-                Groups.Add(group);
+                Organisation = await Client.GetOrganisationAsync(organisation);
+                Groups = await Client.GetGroupsAsync(organisation);
+            }
+            catch (ApiException e)
+            {
+                return StatusCode(e.StatusCode, e.Response);
             }
 
             return Page();

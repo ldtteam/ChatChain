@@ -7,10 +7,14 @@
 
     <ItemGroup>
         <None Update="Identity.db" CopyToOutputDirectory="PreserveNewest" />
+        <None Remove="DatabaseModels\**" />
+        <None Remove="DatabaseServices\**" />
+        <None Remove="IdentityServerRepository\**" />
+        <None Remove="IdentityServerStore\**" />
+        <None Remove="RandomGenerator\**" />
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="EntityFramework" Version="6.2.0" />
         <PackageReference Include="IdentityServer4" Version="2.3.2" />
         <PackageReference Include="Microsoft.AspNetCore.App" />
         <PackageReference Include="Microsoft.AspNetCore.Cryptography.Internal" Version="2.2.0" />
@@ -20,9 +24,7 @@
         <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.2.0" />
         <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.2.0" PrivateAssets="All" />
         <PackageReference Include="MongoDB.Driver" Version="2.7.3" />
-        <PackageReference Include="MySqlConnector" Version="0.49.3" />
-        <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="2.1.4" />
-        <PackageReference Include="RabbitMQ.Client" Version="6.0.0-pre3" />
+        <PackageReference Include="NSwag.CodeGeneration.CSharp" Version="13.0.6" />
         <PackageReference Include="StackExchange.Redis" Version="2.0.519" />
     </ItemGroup>
 
@@ -47,68 +49,14 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Compile Include="..\ChatChainCommon\Config\ApiConnection.cs">
+        <Link>Config\ApiConnection.cs</Link>
+      </Compile>
       <Compile Include="..\ChatChainCommon\Config\EmailConnection.cs">
         <Link>Config\EmailConnection.cs</Link>
       </Compile>
       <Compile Include="..\ChatChainCommon\Config\IdentityServerConnection.cs">
         <Link>Config\IdentityServerConnection.cs</Link>
-      </Compile>
-      <Compile Include="..\ChatChainCommon\Config\MongoConnections.cs">
-        <Link>Config\MongoConnections.cs</Link>
-      </Compile>
-      <Compile Include="..\ChatChainCommon\Config\MongoOptions.cs">
-        <Link>Config\MongoOptions.cs</Link>
-      </Compile>
-      <Compile Include="..\ChatChainCommon\DatabaseModels\Client.cs">
-        <Link>DatabaseModels\Client.cs</Link>
-      </Compile>
-      <Compile Include="..\ChatChainCommon\DatabaseModels\ClientConfig.cs">
-        <Link>DatabaseModels\ClientConfig.cs</Link>
-      </Compile>
-      <Compile Include="..\ChatChainCommon\DatabaseModels\Group.cs">
-        <Link>DatabaseModels\Group.cs</Link>
-      </Compile>
-      <Compile Include="..\ChatChainCommon\DatabaseModels\Organisation.cs">
-        <Link>DatabaseModels\Organisation.cs</Link>
-      </Compile>
-      <Compile Include="..\ChatChainCommon\DatabaseModels\OrganisationInvite.cs">
-        <Link>DatabaseModels\OrganisationInvite.cs</Link>
-      </Compile>
-      <Compile Include="..\ChatChainCommon\DatabaseModels\OrganisationPermissions.cs">
-        <Link>DatabaseModels\OrganisationPermissions.cs</Link>
-      </Compile>
-      <Compile Include="..\ChatChainCommon\DatabaseModels\OrganisationUser.cs">
-        <Link>DatabaseModels\OrganisationUser.cs</Link>
-      </Compile>
-      <Compile Include="..\ChatChainCommon\DatabaseServices\ClientConfigService.cs">
-        <Link>DatabaseServices\ClientConfigService.cs</Link>
-      </Compile>
-      <Compile Include="..\ChatChainCommon\DatabaseServices\ClientService.cs">
-        <Link>DatabaseServices\ClientService.cs</Link>
-      </Compile>
-      <Compile Include="..\ChatChainCommon\DatabaseServices\GroupService.cs">
-        <Link>DatabaseServices\GroupService.cs</Link>
-      </Compile>
-      <Compile Include="..\ChatChainCommon\DatabaseServices\OrganisationService.cs">
-        <Link>DatabaseServices\OrganisationService.cs</Link>
-      </Compile>
-      <Compile Include="..\ChatChainCommon\IdentityServerRepository\IRepository.cs">
-        <Link>IdentityServerRepository\IRepository.cs</Link>
-      </Compile>
-      <Compile Include="..\ChatChainCommon\IdentityServerRepository\MongoRepository.cs">
-        <Link>IdentityServerRepository\MongoRepository.cs</Link>
-      </Compile>
-      <Compile Include="..\ChatChainCommon\IdentityServerStore\CustomClientStore.cs">
-        <Link>IdentityServerStore\CustomClientStore.cs</Link>
-      </Compile>
-      <Compile Include="..\ChatChainCommon\IdentityServerStore\CustomPersistedGrantStore.cs">
-        <Link>IdentityServerStore\CustomPersistedGrantStore.cs</Link>
-      </Compile>
-      <Compile Include="..\ChatChainCommon\IdentityServerStore\CustomResourceStore.cs">
-        <Link>IdentityServerStore\CustomResourceStore.cs</Link>
-      </Compile>
-      <Compile Include="..\ChatChainCommon\RandomGenerator\PasswordGenerator.cs">
-        <Link>RandomGenerator\PasswordGenerator.cs</Link>
       </Compile>
     </ItemGroup>
 
