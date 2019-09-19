@@ -7,9 +7,8 @@ using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using WebApp.Api;
+using WebApp.Extensions;
 using WebApp.Services;
-using Client = WebApp.Api.Client;
-using Organisation = WebApp.Api.Organisation;
 
 namespace WebApp.Pages.Clients
 {
@@ -23,12 +22,13 @@ namespace WebApp.Pages.Clients
             _apiService = apiService;
         }
 
-        public Organisation Organisation { get; set; }
+        public OrganisationDetails Organisation { get; private set; }
 
         [BindProperty] public InputModel Input { get; set; }
 
+        // ReSharper disable once MemberCanBePrivate.Global
+        // ReSharper disable once UnusedAutoPropertyAccessor.Global
         [TempData] public string Password { get; set; }
-
 
         public class InputModel
         {
@@ -43,6 +43,7 @@ namespace WebApp.Pages.Clients
             public string ClientDescription { get; set; }
         }
 
+        // ReSharper disable once MemberCanBePrivate.Global
         public async Task<IActionResult> OnGetAsync(Guid organisation)
         {
             if (!await _apiService.VerifyTokensAsync(HttpContext))
@@ -52,8 +53,10 @@ namespace WebApp.Pages.Clients
 
             try
             {
-                await client.CanCreateClientAsync(false, organisation);
-                Organisation = await client.GetOrganisationAsync(organisation);
+                GetOrganisationResponse response = await client.GetOrganisationDetailsAsync(organisation);
+                Organisation = response.Organisation;
+                if (!Organisation.UserHasPermission(response.User, Permissions.CreateClients))
+                    return StatusCode(403);
             }
             catch (ApiException e)
             {
@@ -63,6 +66,7 @@ namespace WebApp.Pages.Clients
             return Page();
         }
 
+        // ReSharper disable once UnusedMember.Global
         public async Task<IActionResult> OnPostAsync(Guid organisation)
         {
             if (!ModelState.IsValid) return await OnGetAsync(organisation);
@@ -72,17 +76,17 @@ namespace WebApp.Pages.Clients
                     "Cookies");
             ApiClient client = await _apiService.GetApiClientAsync(HttpContext);
 
-            Client apiClient = new Client
+            CreateClientDTO createClientDTO = new CreateClientDTO
             {
-                ClientName = Input.ClientName,
-                ClientDescription = Input.ClientDescription
+                Name = Input.ClientName,
+                Description = Input.ClientDescription
             };
 
             try
             {
-                CreateClientResponse response = await client.CreateClientAsync(organisation, apiClient);
+                CreateClientResponse response = await client.CreateClientAsync(organisation, createClientDTO);
                 Password = response.Password;
-                return RedirectToPage("./PreviewNew", new {organisation, clientId = response.Id});
+                return RedirectToPage("./PreviewNew", new {organisation, client = response.Client.Id});
             }
             catch (ApiException e)
             {

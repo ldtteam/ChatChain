@@ -5,6 +5,10 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="Autofac" Version="4.9.4" />
+        <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="4.4.0" />
+        <PackageReference Include="AutoMapper" Version="9.0.0" />
+        <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="7.0.0" />
         <PackageReference Include="IdentityServer4" Version="2.5.3" />
         <PackageReference Include="IdentityServer4.AccessTokenValidation" Version="2.5.3" />
         <PackageReference Include="Microsoft.AspNetCore" Version="2.2.0" />
@@ -29,77 +33,33 @@
       <Compile Include="..\ChatChainCommon\Config\MongoOptions.cs">
         <Link>Config\MongoOptions.cs</Link>
       </Compile>
-      <Compile Include="..\ChatChainCommon\DatabaseModels\Client.cs">
-        <Link>DatabaseModels\Client.cs</Link>
-      </Compile>
-      <Compile Include="..\ChatChainCommon\DatabaseModels\ClientConfig.cs">
-        <Link>DatabaseModels\ClientConfig.cs</Link>
-      </Compile>
-      <Compile Include="..\ChatChainCommon\DatabaseModels\Group.cs">
-        <Link>DatabaseModels\Group.cs</Link>
-      </Compile>
-      <Compile Include="..\ChatChainCommon\DatabaseModels\Organisation.cs">
-        <Link>DatabaseModels\Organisation.cs</Link>
-      </Compile>
-      <Compile Include="..\ChatChainCommon\DatabaseModels\OrganisationInvite.cs">
-        <Link>DatabaseModels\OrganisationInvite.cs</Link>
-      </Compile>
-      <Compile Include="..\ChatChainCommon\DatabaseModels\OrganisationPermissions.cs">
-        <Link>DatabaseModels\OrganisationPermissions.cs</Link>
-      </Compile>
-      <Compile Include="..\ChatChainCommon\DatabaseModels\OrganisationUser.cs">
-        <Link>DatabaseModels\OrganisationUser.cs</Link>
-      </Compile>
-      <Compile Include="..\ChatChainCommon\DatabaseServices\ClientConfigService.cs">
-        <Link>DatabaseServices\ClientConfigService.cs</Link>
-      </Compile>
-      <Compile Include="..\ChatChainCommon\DatabaseServices\ClientService.cs">
-        <Link>DatabaseServices\ClientService.cs</Link>
-      </Compile>
-      <Compile Include="..\ChatChainCommon\DatabaseServices\GroupService.cs">
-        <Link>DatabaseServices\GroupService.cs</Link>
-      </Compile>
-      <Compile Include="..\ChatChainCommon\DatabaseServices\IClientConfigService.cs">
-        <Link>DatabaseServices\IClientConfigService.cs</Link>
-      </Compile>
-      <Compile Include="..\ChatChainCommon\DatabaseServices\IClientService.cs">
-        <Link>DatabaseServices\IClientService.cs</Link>
-      </Compile>
-      <Compile Include="..\ChatChainCommon\DatabaseServices\IGroupService.cs">
-        <Link>DatabaseServices\IGroupService.cs</Link>
-      </Compile>
-      <Compile Include="..\ChatChainCommon\DatabaseServices\IOrganisationService.cs">
-        <Link>DatabaseServices\IOrganisationService.cs</Link>
-      </Compile>
-      <Compile Include="..\ChatChainCommon\DatabaseServices\OrganisationService.cs">
-        <Link>DatabaseServices\OrganisationService.cs</Link>
-      </Compile>
-      <Compile Include="..\ChatChainCommon\IdentityServerRepository\IRepository.cs">
-        <Link>IdentityServerRepository\IRepository.cs</Link>
-      </Compile>
-      <Compile Include="..\ChatChainCommon\IdentityServerRepository\MongoRepository.cs">
-        <Link>IdentityServerRepository\MongoRepository.cs</Link>
-      </Compile>
-      <Compile Include="..\ChatChainCommon\IdentityServerStore\CustomClientStore.cs">
-        <Link>IdentityServerStore\CustomClientStore.cs</Link>
-      </Compile>
-      <Compile Include="..\ChatChainCommon\IdentityServerStore\CustomPersistedGrantStore.cs">
-        <Link>IdentityServerStore\CustomPersistedGrantStore.cs</Link>
-      </Compile>
-      <Compile Include="..\ChatChainCommon\IdentityServerStore\CustomResourceStore.cs">
-        <Link>IdentityServerStore\CustomResourceStore.cs</Link>
-      </Compile>
-      <Compile Include="..\ChatChainCommon\RandomGenerator\PasswordGenerator.cs">
-        <Link>RandomGenerator\PasswordGenerator.cs</Link>
-      </Compile>
-    </ItemGroup>
-
-    <ItemGroup>
-      <EmbeddedResource Remove="Config\IdentityServer\**" />
     </ItemGroup>
 
     <ItemGroup>
       <Folder Include="Api" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Api.Core\Api.Core.csproj" />
+      <ProjectReference Include="..\Api.Infrastructure\Api.Infrastructure.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Reference Include="System.Net.Http.Formatting, Version=5.2.6.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35">
+        <HintPath>..\..\..\..\..\usr\local\share\dotnet\sdk\NuGetFallbackFolder\microsoft.aspnet.webapi.client\5.2.6\lib\netstandard2.0\System.Net.Http.Formatting.dll</HintPath>
+      </Reference>
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Remove="DatabaseServices\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="DatabaseServices\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Content Remove="DatabaseServices\**" />
     </ItemGroup>
 
 </Project>

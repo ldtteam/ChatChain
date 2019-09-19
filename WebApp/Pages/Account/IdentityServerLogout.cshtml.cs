@@ -6,6 +6,7 @@ namespace WebApp.Pages.Account
 {
     public class IdentityServerLogout : PageModel
     {
+        // ReSharper disable once UnusedMember.Global
         public IActionResult OnGet()
         {
             HttpContext.SignOutAsync();

@@ -1,18 +1,14 @@
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
+using Api.Core.DTO.UseCaseRequests.Client;
+using Api.Core.DTO.UseCaseResponses.Client;
+using Api.Core.Interfaces.UseCases.Client;
 using Api.Extensions;
-using Api.Models;
-using Api.Services;
-using ChatChainCommon.DatabaseModels;
-using ChatChainCommon.DatabaseServices;
-using ChatChainCommon.IdentityServerStore;
-using ChatChainCommon.RandomGenerator;
-using IdentityServer4.Models;
+using Api.Models.Request.Client;
+using Api.Presenters;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Client = ChatChainCommon.DatabaseModels.Client;
 
 namespace Api.Controllers
 {
@@ -22,130 +18,91 @@ namespace Api.Controllers
     [ApiController]
     public class ClientsController : Controller
     {
-        private readonly ClientService _clientService;
-        private readonly CustomClientStore _is4ClientService;
-        private readonly ClientConfigService _clientConfigService;
-        private readonly VerificationService _verificationService;
+        private readonly DefaultPresenter _defaultPresenter;
+        private readonly IGetClientsUseCase _getClientsUseCase;
+        private readonly ICreateClientUseCase _createClientUseCase;
+        private readonly IGetClientUseCase _getClientUseCase;
+        private readonly IUpdateClientUseCase _updateClientUseCase;
+        private readonly IDeleteClientUseCase _deleteClientUseCase;
 
-        public ClientsController(ClientService clientService, CustomClientStore is4ClientService, ClientConfigService clientConfigService, VerificationService verificationService)
+        public ClientsController(DefaultPresenter defaultPresenter, IGetClientsUseCase getClientsUseCase, ICreateClientUseCase createClientUseCase, IGetClientUseCase getClientUseCase, IUpdateClientUseCase updateClientUseCase, IDeleteClientUseCase deleteClientUseCase)
         {
-            _clientService = clientService;
-            _is4ClientService = is4ClientService;
-            _clientConfigService = clientConfigService;
-            _verificationService = verificationService;
+            _defaultPresenter = defaultPresenter;
+            _getClientsUseCase = getClientsUseCase;
+            _createClientUseCase = createClientUseCase;
+            _getClientUseCase = getClientUseCase;
+            _updateClientUseCase = updateClientUseCase;
+            _deleteClientUseCase = deleteClientUseCase;
         }
         
         [HttpGet("", Name = "GetClients")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        public async Task<ActionResult<IEnumerable<Client>>> GetClientsAsync(Guid organisation)
+        public async Task<ActionResult<GetClientsResponse>> GetClientsAsync(Guid organisation)
         {
-            Organisation org = await _verificationService.VerifyOrganisation(organisation);
-            ActionResult<bool> result = User.CanGetClients(org);
-            return !result.Value ? result.Result : Ok(await _clientService.GetFromOwnerIdAsync(org.Id));
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            
+            await _getClientsUseCase.HandleAsync(new GetClientsRequest(User.GetId(), organisation), _defaultPresenter);
+
+            return _defaultPresenter.ContentResult;
+        }
+
+        [HttpPost("", Name = "CreateClient")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        public async Task<ActionResult<CreateClientResponse>> CreateClientAsync(Guid organisation, CreateClientDTO createClientDTO)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            
+            await _createClientUseCase.HandleAsync(new CreateClientRequest(User.GetId(), organisation, createClientDTO.Name, createClientDTO.Description), _defaultPresenter);
+
+            return _defaultPresenter.ContentResult;
         }
         
         [HttpGet("{client}", Name = "GetClient")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        public async Task<ActionResult<Client>> GetClientAsync(Guid organisation, Guid client)
+        public async Task<ActionResult<GetClientResponse>> GetClientAsync(Guid organisation, Guid client)
         {
-            Organisation org = await _verificationService.VerifyOrganisation(organisation);
-            Client apiClient = await _verificationService.VerifyClient(client);
-            ActionResult<bool> result = User.CanGetClient(org, apiClient);
-            return !result.Value ? result.Result : Ok(apiClient);
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            
+            await _getClientUseCase.HandleAsync(new GetClientRequest(User.GetId(), organisation, client), _defaultPresenter);
+
+            return _defaultPresenter.ContentResult;
         }
-        
-        [HttpPost("", Name = "CreateClient")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        public async Task<ActionResult<CreateClientResponse>> CreateClientAsync(Guid organisation, Client client)
-        {
-            Organisation org = await _verificationService.VerifyOrganisation(organisation);
-            ActionResult<bool> result = User.CanCreateClient(org);
-            if (!result.Value)
-                return result.Result;
 
-            client.Id = Guid.NewGuid(); //Makes certain that the api client can't set a specific ID in the database (would cause possible issues)
-            client.OwnerId = org.Id;
-
-            string password = PasswordGenerator.Generate();
-            
-            IdentityServer4.Models.Client is4Client = new IdentityServer4.Models.Client
-            {
-                ClientId = client.Id.ToString(),
-                AllowedGrantTypes = GrantTypes.ClientCredentials,
-
-                //Client secrets
-                ClientSecrets =
-                {
-                    new Secret(password.Sha256())
-                },
-                
-                AllowedScopes =
-                {
-                    "ChatChain"
-                },
-                
-                AllowOfflineAccess = true
-            };
-            _is4ClientService.AddClient(is4Client);
-            await _clientService.CreateAsync(client);
-            
-            await _clientConfigService.CreateAsync(new ClientConfig
-            {
-                Id = client.Id,
-                OwnerId = org.Id
-            });
-            
-            CreateClientResponse response = new CreateClientResponse
-            {
-                Password = password,
-                Id = client.Id
-            };
-
-            return !result.Value ? result.Result : Ok(response);
-        }
-        
         [HttpPost("{client}", Name = "UpdateClient")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        public async Task<ActionResult> UpdateClientAsync(Guid organisation, Guid client, Client updateClient)
+        public async Task<ActionResult<UpdateClientResponse>> UpdateClientAsync(Guid organisation, Guid client, UpdateClientDTO updateClientDTO)
         {
-            Organisation org = await _verificationService.VerifyOrganisation(organisation);
-            Client apiClient = await _verificationService.VerifyClient(client);
-            ActionResult<bool> result = User.CanUpdateClient(org, apiClient);
-            if (!result.Value)
-                return result.Result;
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            
+            await _updateClientUseCase.HandleAsync(new UpdateClientRequest(User.GetId(), organisation, client, updateClientDTO.Name, updateClientDTO.Description), _defaultPresenter);
 
-            updateClient.Id = apiClient.Id;
-            updateClient.OwnerId = apiClient.OwnerId;
-            await _clientService.UpdateAsync(apiClient.Id, updateClient);
-
-            return !result.Value ? result.Result : Ok();
+            return _defaultPresenter.ContentResult;
         }
         
         [HttpDelete("{client}", Name = "DeleteClient")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        public async Task<ActionResult> DeleteClientAsync(Guid organisation, Guid client)
+        public async Task<ActionResult<DeleteClientResponse>> DeleteClientAsync(Guid organisation, Guid client)
         {
-            Organisation org = await _verificationService.VerifyOrganisation(organisation);
-            Client apiClient = await _verificationService.VerifyClient(client);
-            ActionResult<bool> result = User.CanDeleteClient(org, apiClient);
-            if (!result.Value)
-                return result.Result;
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
             
-            _is4ClientService.RemoveClient(apiClient.Id.ToString());
-            await _clientService.RemoveAsync(apiClient.Id);
-            await _clientConfigService.RemoveAsync(apiClient.Id);
+            await _deleteClientUseCase.HandleAsync(new DeleteClientRequest(User.GetId(), organisation, client), _defaultPresenter);
 
-            return !result.Value ? result.Result : Ok();
+            return _defaultPresenter.ContentResult;
         }
     }
 }

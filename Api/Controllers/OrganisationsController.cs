@@ -1,10 +1,14 @@
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
+using Api.Core.DTO.UseCaseRequests.Organisation;
+using Api.Core.DTO.UseCaseRequests.OrganisationUser;
+using Api.Core.DTO.UseCaseResponses.Organisation;
+using Api.Core.DTO.UseCaseResponses.OrganisationUser;
+using Api.Core.Interfaces.UseCases.Organisation;
+using Api.Core.Interfaces.UseCases.OrganisationUser;
 using Api.Extensions;
-using Api.Services;
-using ChatChainCommon.DatabaseModels;
-using ChatChainCommon.DatabaseServices;
+using Api.Models.Request.Organisation;
+using Api.Presenters;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -17,110 +21,122 @@ namespace Api.Controllers
     [ApiController]
     public class OrganisationsController : Controller
     {
-        private readonly OrganisationService _organisationService;
-        private readonly VerificationService _verificationService;
+        private readonly DefaultPresenter _defaultPresenter;
+        private readonly GetOrganisationPresenter _getOrganisationPresenter;
+        private readonly IGetOrganisationsUseCase _getOrganisationsUseCase;
+        private readonly ICreateOrganisationUseCase _createOrganisationUseCase;
+        private readonly IGetOrganisationUseCase _getOrganisationUseCase;
+        private readonly IUpdateOrganisationUseCase _updateOrganisationUseCase;
+        private readonly IDeleteOrganisationUseCase _deleteOrganisationUseCase;
+        private readonly IDeleteOrganisationUserUseCase _deleteOrganisationUserUseCase;
 
-        public OrganisationsController(OrganisationService organisationService, VerificationService verificationService)
+        public OrganisationsController(DefaultPresenter defaultPresenter, GetOrganisationPresenter getOrganisationPresenter, IGetOrganisationsUseCase getOrganisationsUseCase, ICreateOrganisationUseCase createOrganisationUseCase, IGetOrganisationUseCase getOrganisationUseCase, IUpdateOrganisationUseCase updateOrganisationUseCase, IDeleteOrganisationUseCase deleteOrganisationUseCase, IDeleteOrganisationUserUseCase deleteOrganisationUserUseCase)
         {
-            _organisationService = organisationService;
-            _verificationService = verificationService;
+            _defaultPresenter = defaultPresenter;
+            _getOrganisationPresenter = getOrganisationPresenter;
+            _getOrganisationsUseCase = getOrganisationsUseCase;
+            _createOrganisationUseCase = createOrganisationUseCase;
+            _getOrganisationUseCase = getOrganisationUseCase;
+            _updateOrganisationUseCase = updateOrganisationUseCase;
+            _deleteOrganisationUseCase = deleteOrganisationUseCase;
+            _deleteOrganisationUserUseCase = deleteOrganisationUserUseCase;
         }
 
         [HttpGet("organisations", Name = "GetOrganisations")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<IEnumerable<Organisation>>> GetOrganisationsAsync()
+        public async Task<ActionResult<GetOrganisationsResponse>> GetOrganisationsAsync()
         {
-            return Ok(await _organisationService.GetForUserAsync(User.GetId()));
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            
+            await _getOrganisationsUseCase.HandleAsync(new GetOrganisationsRequest(User.GetId()), _defaultPresenter);
+
+            return _defaultPresenter.ContentResult;
         }
         
         [HttpPost("organisations", Name = "CreateOrganisation")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<string>> CreateOrganisationAsync(Organisation org)
+        public async Task<ActionResult<CreateOrganisationResponse>> CreateOrganisationAsync(CreateOrganisationDTO orgDTO)
         {
-            org.Users = new Dictionary<string, OrganisationUser>
-            {
-                {
-                    User.GetId(),
-                    new OrganisationUser
-                    {
-                        Permissions = new List<OrganisationPermissions> { OrganisationPermissions.All }
-                    }
-                }
-            };
-            org.Owner = User.GetId();
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            
+            await _createOrganisationUseCase.HandleAsync(new CreateOrganisationRequest(User.GetId(), orgDTO.Name), _defaultPresenter);
 
-            org.Id = Guid.NewGuid();
-            await _organisationService.CreateAsync(org);
-            return Ok(org.Id);
+            return _defaultPresenter.ContentResult;
         }
-
+        
         [HttpGet("{organisation}", Name = "GetOrganisation")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        public async Task<ActionResult<Organisation>> GetOrganisationAsync(Guid organisation)
+        public async Task<ActionResult<GetOrganisationResponse>> GetOrganisationAsync(Guid organisation)
         {
-            Organisation org = await _verificationService.VerifyOrganisation(organisation);
-            ActionResult<bool> result = User.CanGetOrganisation(org);
-            return !result.Value ? result.Result : Ok(org);
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            
+            //We don't provide the user ID because it:
+            //Allows us to get the name and ID of an organisation without being a part of it. 
+            //Used for displaying what organisation an invite belongs to usually.
+            await _getOrganisationUseCase.HandleAsync(new GetOrganisationRequest(organisation), _getOrganisationPresenter);
+
+            return _getOrganisationPresenter.ContentResult;
+        }
+
+        [HttpGet("{organisation}/details", Name = "GetOrganisationDetails")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        public async Task<ActionResult<GetOrganisationResponse>> GetOrganisationDetailsAsync(Guid organisation)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            
+            await _getOrganisationUseCase.HandleAsync(new GetOrganisationRequest(User.GetId(), organisation), _defaultPresenter);
+
+            return _defaultPresenter.ContentResult;
         }
 
         [HttpPost("{organisation}", Name = "UpdateOrganisation")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        public async Task<ActionResult> UpdateOrganisationAsync(Guid organisation, Organisation org)
+        public async Task<ActionResult<UpdateOrganisationResponse>> UpdateOrganisationAsync(Guid organisation, UpdateOrganisationDTO updateOrganisationDTO)
         {
-            Organisation dbOrg =
-                await _verificationService.VerifyOrganisation(organisation);
-            ActionResult<bool> result = User.CanUpdateOrganisation(dbOrg);
-            if (!result.Value)
-                return result.Result;
-
-            // Checks that can only be added in the actual Post.
-            if (dbOrg.Users != org.Users)
-                return StatusCode(403, "Organisation user cannot be updated via this method");
-
-            if (dbOrg.Owner != org.Owner)
-                return StatusCode(403, "Organisation owner cannot be updated via this method");
-
-            org.Id = dbOrg.Id;
-            await _organisationService.UpdateAsync(dbOrg.Id, org);
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
             
-            return Ok();
+            await _updateOrganisationUseCase.HandleAsync(new UpdateOrganisationRequest(User.GetId(), organisation, updateOrganisationDTO.Name), _defaultPresenter);
+
+            return _defaultPresenter.ContentResult;
         }
 
         [HttpDelete("{organisation}", Name = "DeleteOrganisation")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        public async Task<ActionResult> DeleteOrganisationAsync(Guid organisation)
+        public async Task<ActionResult<DeleteOrganisationResponse>> DeleteOrganisationAsync(Guid organisation)
         {
-            Organisation org = await _verificationService.VerifyOrganisation(organisation);
-            ActionResult<bool> result = User.CanDeleteOrganisation(org);
-            if (!result.Value)
-                return result.Result;
-
-            await _organisationService.RemoveAsync(org.Id);
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
             
-            return Ok();
+            await _deleteOrganisationUseCase.HandleAsync(new DeleteOrganisationRequest(User.GetId(), organisation), _defaultPresenter);
+
+            return _defaultPresenter.ContentResult;
         }
 
-        [HttpGet("{organisation}/leave", Name = "LeaveOrganisation")]
+        [HttpPost("{organisation}/leave", Name = "LeaveOrganisation")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        public async Task<ActionResult> LeaveOrganisationAsync(Guid organisation)
+        public async Task<ActionResult<DeleteOrganisationUserResponse>> LeaveOrganisationAsync(Guid organisation)
         {
-            Organisation org = await _verificationService.VerifyOrganisation(organisation);
-            ActionResult<bool> result = User.CanLeaveOrganisation(org);
-            if (!result.Value)
-                return result.Result;
-
-            org.Users.Remove(User.GetId());
-            await _organisationService.UpdateAsync(org.Id, org);
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
             
-            return Ok();
+            await _deleteOrganisationUserUseCase.HandleAsync(new DeleteOrganisationUserRequest(User.GetId(), organisation, User.GetId()), _defaultPresenter);
+
+            return _defaultPresenter.ContentResult;
         }
     }
 }

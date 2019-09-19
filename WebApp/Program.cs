@@ -12,13 +12,9 @@ namespace WebApp
         public static void Main(string[] args)
         {
             if (args.ElementAtOrDefault(0) == "generate")
-            {
                 GenerateClientStuffAsync(args.ElementAtOrDefault(1));
-            }
             else
-            {
                 CreateWebHostBuilder(args).Build().Run();
-            }
         }
 
         private static void GenerateClientStuffAsync(string swaggerJson)
@@ -43,9 +39,11 @@ namespace WebApp
                 outputFile.Write(code);
             }
         }
-        
-        public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
-            WebHost.CreateDefaultBuilder(args)
+
+        private static IWebHostBuilder CreateWebHostBuilder(string[] args)
+        {
+            return WebHost.CreateDefaultBuilder(args)
                 .UseStartup<Startup>();
+        }
     }
 }

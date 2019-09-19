@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using WebApp.Api;
+using WebApp.Extensions;
 using WebApp.Services;
 
 namespace WebApp.Pages.Groups
@@ -20,11 +21,13 @@ namespace WebApp.Pages.Groups
             _apiService = apiService;
         }
 
-        [BindProperty] public Group Group { get; set; }
+        public Group Group { get; set; }
 
+        // ReSharper disable once MemberCanBePrivate.Global
         public Organisation Organisation { get; set; }
 
-        public async Task<IActionResult> OnGetAsync(Guid organisation, Guid group, bool? saveChangesError = false)
+        // ReSharper disable once MemberCanBePrivate.Global
+        public async Task<IActionResult> OnGetAsync(Guid organisation, Guid group)
         {
             if (!await _apiService.VerifyTokensAsync(HttpContext))
                 return SignOut(new AuthenticationProperties {RedirectUri = HttpContext.Request.GetDisplayUrl()},
@@ -33,9 +36,11 @@ namespace WebApp.Pages.Groups
 
             try
             {
-                await client.CanDeleteGroupAsync(false, organisation, group);
-                Organisation = await client.GetOrganisationAsync(organisation);
-                Group = await client.GetGroupAsync(organisation, group);
+                GetGroupResponse response = await client.GetGroupAsync(organisation, group);
+                Organisation = response.Organisation;
+                Group = response.Group;
+                if (!Organisation.UserHasPermission(response.User, Permissions.DeleteGroups))
+                    return StatusCode(403);
             }
             catch (ApiException e)
             {
@@ -45,6 +50,7 @@ namespace WebApp.Pages.Groups
             return Page();
         }
 
+        // ReSharper disable once UnusedMember.Global
         public async Task<IActionResult> OnPost(Guid organisation, Guid group)
         {
             if (!await _apiService.VerifyTokensAsync(HttpContext))

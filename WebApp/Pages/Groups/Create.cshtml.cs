@@ -7,9 +7,8 @@ using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using WebApp.Api;
+using WebApp.Extensions;
 using WebApp.Services;
-using Group = WebApp.Api.Group;
-using Organisation = WebApp.Api.Organisation;
 
 namespace WebApp.Pages.Groups
 {
@@ -25,7 +24,7 @@ namespace WebApp.Pages.Groups
 
         [BindProperty] public InputModel Input { get; set; }
 
-        public Organisation Organisation { get; set; }
+        public OrganisationDetails Organisation { get; private set; }
 
         public class InputModel
         {
@@ -40,6 +39,7 @@ namespace WebApp.Pages.Groups
             public string GroupDescription { get; set; }
         }
 
+        // ReSharper disable once MemberCanBePrivate.Global
         public async Task<IActionResult> OnGetAsync(Guid organisation)
         {
             if (!await _apiService.VerifyTokensAsync(HttpContext))
@@ -49,8 +49,10 @@ namespace WebApp.Pages.Groups
 
             try
             {
-                await client.CanCreateGroupAsync(false, organisation);
-                Organisation = await client.GetOrganisationAsync(organisation);
+                GetOrganisationResponse response = await client.GetOrganisationDetailsAsync(organisation);
+                Organisation = response.Organisation;
+                if (!Organisation.UserHasPermission(response.User, Permissions.CreateGroups))
+                    return StatusCode(403);
             }
             catch (ApiException e)
             {
@@ -60,6 +62,7 @@ namespace WebApp.Pages.Groups
             return Page();
         }
 
+        // ReSharper disable once UnusedMember.Global
         public async Task<IActionResult> OnPostAsync(Guid organisation)
         {
             if (!ModelState.IsValid) return await OnGetAsync(organisation);
@@ -69,15 +72,15 @@ namespace WebApp.Pages.Groups
                     "Cookies");
             ApiClient client = await _apiService.GetApiClientAsync(HttpContext);
 
-            Group group = new Group
+            CreateGroupDTO createGroupDTO = new CreateGroupDTO
             {
-                GroupName = Input.GroupName,
-                GroupDescription = Input.GroupDescription
+                Name = Input.GroupName,
+                Description = Input.GroupDescription
             };
 
             try
             {
-                await client.CreateGroupAsync(organisation, group);
+                await client.CreateGroupAsync(organisation, createGroupDTO);
             }
             catch (ApiException e)
             {

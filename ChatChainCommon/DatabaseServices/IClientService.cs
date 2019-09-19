@@ -12,6 +12,7 @@ namespace ChatChainCommon.DatabaseServices
         Task<Client> GetAsync(Guid clientId);
         Task UpdateAsync(Guid clientId, Client clientIn);
         Task RemoveAsync(Guid clientId);
+        Task RemoveForOwnerIdAsync(Guid orgId);
         Task CreateAsync(Client client);
     }
 }

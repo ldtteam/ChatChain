@@ -31,7 +31,7 @@ namespace ChatChainCommon.DatabaseServices
             IAsyncCursor<Client> cursor = await _clients.FindAsync(client => client.OwnerId == ownerId);
             return await cursor.ToListAsync();
         }
-        
+
         public async Task<Client> GetAsync(Guid clientId)
         {
             IAsyncCursor<Client> cursor = await _clients.FindAsync(client => client.Id == clientId);
@@ -46,6 +46,11 @@ namespace ChatChainCommon.DatabaseServices
         public async Task RemoveAsync(Guid clientId)
         {
             await _clients.DeleteOneAsync(client => client.Id == clientId);
+        }
+
+        public async Task RemoveForOwnerIdAsync(Guid orgId)
+        {
+            await _clients.DeleteManyAsync(client => client.OwnerId == orgId);
         }
         
         public async Task CreateAsync(Client client)

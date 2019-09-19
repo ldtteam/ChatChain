@@ -1,5 +1,6 @@
 @page "/Organisations/{organisation}/Users"
 @using WebApp.Api
+@using WebApp.Extensions
 @model WebApp.Pages.Organisations.Users.Index
 @{
     ViewData["Title"] = "Users";
@@ -14,7 +15,7 @@
             <tr>
                 <th>Display Name</th>
                 <th>
-                    @if (await Model.Client.CanCreateInviteAsync(true, Model.Organisation.Id))
+                    @if (Model.Organisation.UserHasPermission(Model.OrganisationUser, Api.Permissions.CreateOrgUsers))
                     {
                         <a class="btn btn-success btn-sm" asp-page="../Invite/Create" asp-route-organisation="@Model.Organisation.Id">Invite User</a>
                     }
@@ -22,21 +23,21 @@
             </tr>
             </thead>
             <tbody>
-            @foreach ((string key, ResponseUser value) in Model.Users)
+            @foreach (OrganisationUser user in Model.Users)
             {
                 <tr>
                     <td>
-                        @value.DisplayName (@value.EmailAddress)
+                        @user.Id
                     </td>
                     <td>
                         <div class="btn-group">
-                            @if (await Model.Client.CanUpdateUserAsync(true, Model.Organisation.Id, key))
+                            @if (Model.Organisation.UserHasPermission(Model.OrganisationUser, Api.Permissions.EditOrgUsers) && !Model.Organisation.UserIsOwner(user) && user.Id != Model.OrganisationUser.Id)
                             {
-                                <a class="btn btn-primary btn-sm" asp-page="./Permissions" asp-route-organisation="@Model.Organisation.Id" asp-route-id="@key">Permissions</a>
+                                <a class="btn btn-primary btn-sm" asp-page="./Permissions" asp-route-organisation="@Model.Organisation.Id" asp-route-id="@user.Id">Permissions</a>
                             }
-                            @if (await Model.Client.CanDeleteUserAsync(true, Model.Organisation.Id, key))
+                            @if (Model.Organisation.UserHasPermission(Model.OrganisationUser, Api.Permissions.DeleteOrgUsers) && !Model.Organisation.UserIsOwner(user) && user.Id != Model.OrganisationUser.Id)
                             {
-                                <a class="btn btn-danger btn-sm" asp-page="./Remove" asp-route-organisation="@Model.Organisation.Id" asp-route-id="@key">Remove</a>
+                                <a class="btn btn-danger btn-sm" asp-page="./Remove" asp-route-organisation="@Model.Organisation.Id" asp-route-id="@user.Id">Remove</a>
                             }
                         </div>
                     </td>

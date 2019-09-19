@@ -7,7 +7,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using WebApp.Api;
 using WebApp.Services;
-using Organisation = WebApp.Api.Organisation;
+
+// ReSharper disable UnusedMember.Global
 
 namespace WebApp.Pages.Organisations
 {
@@ -21,21 +22,20 @@ namespace WebApp.Pages.Organisations
             _apiService = apiService;
         }
 
-        public IList<Organisation> Organisations { get; private set; }
+        public IEnumerable<OrganisationDetails> Organisations { get; private set; }
+        public IDictionary<string, OrganisationUser> OrganisationUsers { get; private set; }
 
-        public ApiClient Client { get; set; }
-
-        public async Task<ActionResult> OnGet()
+        public async Task<ActionResult> OnGetAsync()
         {
             if (!await _apiService.VerifyTokensAsync(HttpContext))
                 return SignOut(new AuthenticationProperties {RedirectUri = HttpContext.Request.GetDisplayUrl()},
                     "Cookies");
-            Client = await _apiService.GetApiClientAsync(HttpContext);
+            ApiClient apiClient = await _apiService.GetApiClientAsync(HttpContext);
 
-            ICollection<Organisation> organisations = await Client.GetOrganisationsAsync();
-            Organisations = new List<Organisation>();
+            GetOrganisationsResponse response = await apiClient.GetOrganisationsAsync();
+            Organisations = response.Organisations;
+            OrganisationUsers = response.Users;
 
-            foreach (Organisation organisation in organisations) Organisations.Add(organisation);
             return Page();
         }
     }

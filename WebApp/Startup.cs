@@ -25,8 +25,8 @@ namespace WebApp
         {
             IConfigurationBuilder builder = new ConfigurationBuilder()
                 .SetBasePath(env.ContentRootPath)
-                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-                .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true);
+                .AddJsonFile("appsettings.json", true, true)
+                .AddJsonFile($"appsettings.{env.EnvironmentName}.json", true);
 
             builder.AddEnvironmentVariables(options => { options.Prefix = "ChatChain_WebApp_"; });
             _configuration = builder.Build();
@@ -38,16 +38,16 @@ namespace WebApp
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddSingleton(_configuration);
-         
+
             ApiConnection apiConnection = new ApiConnection();
             _configuration.GetSection("ApiConnection").Bind(apiConnection);
             services.AddSingleton(apiConnection);
-            
+
             services.Configure<ForwardedHeadersOptions>(options =>
             {
                 options.ForwardedHeaders = ForwardedHeaders.XForwardedProto;
             });
-            
+
             string redisConnectionVariable = _configuration.GetValue<string>("RedisConnection");
             ConnectionMultiplexer redis = ConnectionMultiplexer.Connect(redisConnectionVariable);
             services.AddSingleton<IConnectionMultiplexer>(redis);
@@ -63,7 +63,7 @@ namespace WebApp
             });
 
             JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
-            
+
             IdentityServerConnection identityServerConnection = new IdentityServerConnection();
             _configuration.GetSection("IdentityServerConnection").Bind(identityServerConnection);
             services.AddSingleton(identityServerConnection);
@@ -77,17 +77,17 @@ namespace WebApp
                 .AddOpenIdConnect("oidc", options =>
                 {
                     options.SignInScheme = "Cookies";
-                    
+
                     options.Authority = identityServerConnection.ServerUrl;
                     options.RequireHttpsMetadata = false;
 
                     options.ClientId = identityServerConnection.ClientId;
                     options.ClientSecret = identityServerConnection.ClientSecret;
                     options.ResponseType = "code id_token";
-                    
+
                     options.SaveTokens = true;
                     options.GetClaimsFromUserInfoEndpoint = true;
-                    
+
                     options.Scope.Add("ChatChainAPI");
                     options.Scope.Add("offline_access");
                     options.ClaimActions.MapJsonKey("DisplayName", "DisplayName");
@@ -99,7 +99,7 @@ namespace WebApp
             {
                 options.Cookie.HttpOnly = true;
                 options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
-                
+
                 options.LoginPath = "/Account/Login";
                 //options.AccessDeniedPath = "/Identity/Account/AccessDenied";
             });
@@ -124,7 +124,7 @@ namespace WebApp
                     ForwardedHeaders = ForwardedHeaders.XForwardedProto
                 });
             //UpdateDatabase(app);
-            
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -138,11 +138,8 @@ namespace WebApp
 
             bool useHttps = _configuration.GetValue<bool>("UseHttps");
 
-            if (useHttps)
-            {
-                app.UseHttpsRedirection();
-            }
-            
+            if (useHttps) app.UseHttpsRedirection();
+
             app.UseStaticFiles();
             app.UseCookiePolicy();
 
@@ -151,7 +148,7 @@ namespace WebApp
             app.UseMvc();
 
             ConfigureMongoDriver2IgnoreExtraElements();
-            
+
             //InitializeDatabase(app);
         }
 

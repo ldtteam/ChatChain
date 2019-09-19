@@ -7,9 +7,8 @@ using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using WebApp.Api;
+using WebApp.Extensions;
 using WebApp.Services;
-using Group = WebApp.Api.Group;
-using Organisation = WebApp.Api.Organisation;
 
 namespace WebApp.Pages.Groups
 {
@@ -26,7 +25,8 @@ namespace WebApp.Pages.Groups
         public Group Group { get; set; }
         [BindProperty] public InputModel Input { get; set; } = new InputModel();
 
-        public Organisation Organisation { get; set; }
+        // ReSharper disable once MemberCanBePrivate.Global
+        public Organisation Organisation { get; private set; }
 
         public class InputModel
         {
@@ -40,6 +40,7 @@ namespace WebApp.Pages.Groups
             public string GroupDescription { get; set; }
         }
 
+        // ReSharper disable once MemberCanBePrivate.Global
         public async Task<IActionResult> OnGetAsync(Guid organisation, Guid group)
         {
             if (!await _apiService.VerifyTokensAsync(HttpContext))
@@ -49,9 +50,11 @@ namespace WebApp.Pages.Groups
 
             try
             {
-                await client.CanUpdateGroupAsync(false, organisation, group);
-                Organisation = await client.GetOrganisationAsync(organisation);
-                Group = await client.GetGroupAsync(organisation, group);
+                GetGroupResponse response = await client.GetGroupAsync(organisation, group);
+                Organisation = response.Organisation;
+                Group = response.Group;
+                if (!Organisation.UserHasPermission(response.User, Permissions.EditGroups))
+                    return StatusCode(403);
             }
             catch (ApiException e)
             {
@@ -61,6 +64,7 @@ namespace WebApp.Pages.Groups
             return Page();
         }
 
+        // ReSharper disable once UnusedMember.Global
         public async Task<IActionResult> OnPostAsync(Guid organisation, Guid group)
         {
             if (!ModelState.IsValid) return await OnGetAsync(organisation, group);
@@ -70,20 +74,15 @@ namespace WebApp.Pages.Groups
                     "Cookies");
             ApiClient client = await _apiService.GetApiClientAsync(HttpContext);
 
-            try
+            UpdateGroupDTO updateGroupDTO = new UpdateGroupDTO
             {
-                Group = await client.GetGroupAsync(organisation, group);
-                Group.GroupName = Input.GroupName;
-                Group.GroupDescription = Input.GroupDescription;
-            }
-            catch (ApiException e)
-            {
-                return StatusCode(e.StatusCode, e.Response);
-            }
+                Name = Input.GroupName,
+                Description = Input.GroupDescription
+            };
 
             try
             {
-                await client.UpdateGroupAsync(organisation, group, Group);
+                await client.UpdateGroupAsync(organisation, group, updateGroupDTO);
             }
             catch (ApiException e)
             {

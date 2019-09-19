@@ -27,7 +27,8 @@ namespace WebApp.Services
         public async Task<ApiClient> GetApiClientAsync(HttpContext httpContext)
         {
             HttpClient httpClient = new HttpClient();
-            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", await httpContext.GetTokenAsync("access_token"));
+            httpClient.DefaultRequestHeaders.Authorization =
+                new AuthenticationHeaderValue("Bearer", await httpContext.GetTokenAsync("access_token"));
             return new ApiClient(_apiConnection.ServerUrl, httpClient);
         }
 
@@ -38,44 +39,37 @@ namespace WebApp.Services
 
             TimeSpan timeRemaining = jwtSecurityToken.ValidTo.Subtract(now);
 
-            if (TimeSpan.Zero >= timeRemaining)
+            if (TimeSpan.Zero < timeRemaining) return true;
+
+            TokenResponse response = await new HttpClient().RequestRefreshTokenAsync(
+                new RefreshTokenRequest
+                {
+                    Address = $"{_identityServerConnection.ServerUrl}/connect/token",
+                    ClientId = _identityServerConnection.ClientId,
+                    ClientSecret = _identityServerConnection.ClientSecret,
+                    RefreshToken = await httpContext.GetTokenAsync("refresh_token")
+                });
+
+            if (response.IsError) return !response.IsError;
+
+            AuthenticateResult auth = await httpContext.AuthenticateAsync("Cookies");
+            auth.Properties.StoreTokens(new List<AuthenticationToken>
             {
-                TokenResponse response = await new HttpClient().RequestRefreshTokenAsync(
-                    new RefreshTokenRequest
-                    {
-                        Address = $"{_identityServerConnection.ServerUrl}/connect/token",
-                        ClientId = _identityServerConnection.ClientId,
-                        ClientSecret = _identityServerConnection.ClientSecret,
-                        RefreshToken = await httpContext.GetTokenAsync("refresh_token")
-                    });
-                
-                if (!response.IsError)
+                new AuthenticationToken
                 {
-                    AuthenticateResult auth = await httpContext.AuthenticateAsync("Cookies");
-                    auth.Properties.StoreTokens(new List<AuthenticationToken>
-                    {
-                        new AuthenticationToken
-                        {
-                            Name = OpenIdConnectParameterNames.AccessToken,
-                            Value = response.AccessToken
-                        },
-                        new AuthenticationToken
-                        {
-                            Name = OpenIdConnectParameterNames.RefreshToken,
-                            Value = response.RefreshToken
-                        }
-                    });
-
-                    await httpContext.SignInAsync(auth.Principal, auth.Properties);
-                }
-
-                if (response.IsError)
+                    Name = OpenIdConnectParameterNames.AccessToken,
+                    Value = response.AccessToken
+                },
+                new AuthenticationToken
                 {
-                    return false;
+                    Name = OpenIdConnectParameterNames.RefreshToken,
+                    Value = response.RefreshToken
                 }
-            }
+            });
 
-            return true;
+            await httpContext.SignInAsync(auth.Principal, auth.Properties);
+
+            return !response.IsError;
         }
     }
 }

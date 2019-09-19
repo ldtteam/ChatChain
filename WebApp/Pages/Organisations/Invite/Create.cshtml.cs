@@ -7,8 +7,8 @@ using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using WebApp.Api;
+using WebApp.Extensions;
 using WebApp.Services;
-using Organisation = WebApp.Api.Organisation;
 
 namespace WebApp.Pages.Organisations.Invite
 {
@@ -26,6 +26,7 @@ namespace WebApp.Pages.Organisations.Invite
 
         [TempData]
         // ReSharper disable once MemberCanBePrivate.Global
+        // ReSharper disable once UnusedAutoPropertyAccessor.Global
         public string Token { get; set; }
 
         // ReSharper disable once ClassNeverInstantiated.Global
@@ -38,8 +39,9 @@ namespace WebApp.Pages.Organisations.Invite
         }
 
         // ReSharper disable once MemberCanBePrivate.Global
-        public Organisation Organisation { get; private set; }
+        public OrganisationDetails Organisation { get; private set; }
 
+        // ReSharper disable once MemberCanBePrivate.Global
         public async Task<IActionResult> OnGetAsync(Guid organisation)
         {
             if (!await _apiService.VerifyTokensAsync(HttpContext))
@@ -49,8 +51,10 @@ namespace WebApp.Pages.Organisations.Invite
 
             try
             {
-                await client.CanCreateInviteAsync(false, organisation);
-                Organisation = await client.GetOrganisationAsync(organisation);
+                GetOrganisationResponse response = await client.GetOrganisationAsync(organisation);
+                Organisation = response.Organisation;
+                if (!Organisation.UserHasPermission(response.User, Permissions.CreateOrgUsers))
+                    return StatusCode(403);
             }
             catch (ApiException e)
             {
@@ -61,6 +65,7 @@ namespace WebApp.Pages.Organisations.Invite
             return Page();
         }
 
+        // ReSharper disable once UnusedMember.Global
         public async Task<IActionResult> OnPostAsync(Guid organisation)
         {
             if (!ModelState.IsValid) return await OnGetAsync(organisation);
@@ -72,7 +77,12 @@ namespace WebApp.Pages.Organisations.Invite
 
             try
             {
-                Token = await client.CreateInviteAsync(organisation, Input.UserEmail);
+                CreateInviteDTO inviteDTO = new CreateInviteDTO
+                {
+                    EmailAddress = Input.UserEmail
+                };
+                CreateInviteResponse response = await client.CreateInviteAsync(organisation, inviteDTO);
+                Token = response.Invite.Token;
             }
             catch (ApiException e)
             {

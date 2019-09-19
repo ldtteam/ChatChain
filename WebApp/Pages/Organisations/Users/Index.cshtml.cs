@@ -21,23 +21,26 @@ namespace WebApp.Pages.Organisations.Users
             _apiService = apiService;
         }
 
-        public IDictionary<string, ResponseUser> Users { get; private set; }
-
-        public ApiClient Client;
+        public IEnumerable<OrganisationUser> Users { get; private set; }
 
         public Organisation Organisation { get; private set; }
 
-        public async Task<IActionResult> OnGet(Guid organisation)
+        public OrganisationUser OrganisationUser { get; private set; }
+
+        // ReSharper disable once UnusedMember.Global
+        public async Task<IActionResult> OnGetAsync(Guid organisation)
         {
             if (!await _apiService.VerifyTokensAsync(HttpContext))
                 return SignOut(new AuthenticationProperties {RedirectUri = HttpContext.Request.GetDisplayUrl()},
                     "Cookies");
-            Client = await _apiService.GetApiClientAsync(HttpContext);
+            ApiClient apiClient = await _apiService.GetApiClientAsync(HttpContext);
 
             try
             {
-                Organisation = await Client.GetOrganisationAsync(organisation);
-                Users = await Client.GetUsersAsync(organisation);
+                GetOrganisationUsersResponse response = await apiClient.GetUsersAsync(organisation);
+                Organisation = response.Organisation;
+                OrganisationUser = response.User;
+                Users = response.RequestedUsers;
             }
             catch (ApiException e)
             {

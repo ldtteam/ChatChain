@@ -132,6 +132,9 @@
       <Compile Include="..\ChatChainCommon\IdentityServerStore\CustomResourceStore.cs">
         <Link>IdentityServerStore\CustomResourceStore.cs</Link>
       </Compile>
+      <Compile Include="..\ChatChainCommon\IdentityServerStore\ICustomClientStore.cs">
+        <Link>IdentityServerStore\ICustomClientStore.cs</Link>
+      </Compile>
     </ItemGroup>
 
 </Project>

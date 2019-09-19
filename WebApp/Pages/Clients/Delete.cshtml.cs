@@ -6,9 +6,8 @@ using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using WebApp.Api;
+using WebApp.Extensions;
 using WebApp.Services;
-using Client = WebApp.Api.Client;
-using Organisation = WebApp.Api.Organisation;
 
 namespace WebApp.Pages.Clients
 {
@@ -24,11 +23,9 @@ namespace WebApp.Pages.Clients
 
         [BindProperty] public Client Client { get; set; }
 
-        // ReSharper disable once UnusedAutoPropertyAccessor.Global
-        public string ErrorMessage { get; set; }
+        public Organisation Organisation { get; private set; }
 
-        public Organisation Organisation { get; set; }
-
+        // ReSharper disable once MemberCanBePrivate.Global
         public async Task<IActionResult> OnGetAsync(Guid organisation, Guid client)
         {
             if (!await _apiService.VerifyTokensAsync(HttpContext))
@@ -38,9 +35,11 @@ namespace WebApp.Pages.Clients
 
             try
             {
-                await apiClient.CanDeleteClientAsync(false, organisation, client);
-                Organisation = await apiClient.GetOrganisationAsync(organisation);
-                Client = await apiClient.GetClientAsync(organisation, client);
+                GetClientResponse response = await apiClient.GetClientAsync(organisation, client);
+                Organisation = response.Organisation;
+                Client = response.Client;
+                if (!Organisation.UserHasPermission(response.User, Permissions.DeleteClients))
+                    return StatusCode(403);
             }
             catch (ApiException e)
             {
@@ -50,6 +49,7 @@ namespace WebApp.Pages.Clients
             return Page();
         }
 
+        // ReSharper disable once UnusedMember.Global
         public async Task<IActionResult> OnPostAsync(Guid organisation, Guid client)
         {
             if (!await _apiService.VerifyTokensAsync(HttpContext))
@@ -65,7 +65,6 @@ namespace WebApp.Pages.Clients
             {
                 // Relays the status code and response from the API
                 if (e.StatusCode != 403) return StatusCode(e.StatusCode, e.Response);
-
                 ModelState.AddModelError(string.Empty, e.Response);
                 return await OnGetAsync(organisation, client);
             }

@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using WebApp.Api;
+using WebApp.Extensions;
 using WebApp.Services;
 
 namespace WebApp.Pages.Organisations
@@ -23,7 +24,7 @@ namespace WebApp.Pages.Organisations
 
         [BindProperty] public InputModel Input { get; set; }
 
-        public Organisation Organisation { get; set; }
+        public OrganisationDetails Organisation { get; set; }
 
         // ReSharper disable once ClassNeverInstantiated.Global
         public class InputModel
@@ -34,6 +35,7 @@ namespace WebApp.Pages.Organisations
             public string Name { get; set; }
         }
 
+        // ReSharper disable once MemberCanBePrivate.Global
         public async Task<IActionResult> OnGetAsync(Guid organisation)
         {
             if (!await _apiService.VerifyTokensAsync(HttpContext))
@@ -43,8 +45,10 @@ namespace WebApp.Pages.Organisations
 
             try
             {
-                await client.CanUpdateOrganisationAsync(false, organisation);
-                Organisation = await client.GetOrganisationAsync(organisation);
+                GetOrganisationResponse response = await client.GetOrganisationAsync(organisation);
+                Organisation = response.Organisation;
+                if (!Organisation.UserHasPermission(response.User, Permissions.EditOrg))
+                    return StatusCode(403);
             }
             catch (ApiException e)
             {
@@ -55,6 +59,7 @@ namespace WebApp.Pages.Organisations
             return Page();
         }
 
+        // ReSharper disable once UnusedMember.Global
         public async Task<IActionResult> OnPostAsync(Guid organisation)
         {
             if (!ModelState.IsValid) return await OnGetAsync(organisation);
@@ -66,24 +71,11 @@ namespace WebApp.Pages.Organisations
 
             try
             {
-                Organisation = await client.GetOrganisationAsync(organisation);
-            }
-            catch (ApiException e2)
-            {
-                return StatusCode(e2.StatusCode, e2.Response);
-            }
-
-            if (Organisation.Name == Input.Name)
-            {
-                ModelState.AddModelError(string.Empty, "No Changes Made");
-                return Page();
-            }
-
-            Organisation.Name = Input.Name;
-
-            try
-            {
-                await client.DeleteOrganisationAsync(organisation);
+                UpdateOrganisationDTO updateDTO = new UpdateOrganisationDTO
+                {
+                    Name = Input.Name
+                };
+                await client.UpdateOrganisationAsync(organisation, updateDTO);
             }
             catch (ApiException e)
             {
