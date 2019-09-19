@@ -1,10 +1,11 @@
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
+using Api.Core.DTO.UseCaseRequests.Group;
+using Api.Core.DTO.UseCaseResponses.Group;
+using Api.Core.Interfaces.UseCases.Group;
 using Api.Extensions;
-using Api.Services;
-using ChatChainCommon.DatabaseModels;
-using ChatChainCommon.DatabaseServices;
+using Api.Models.Request.Group;
+using Api.Presenters;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -17,104 +18,91 @@ namespace Api.Controllers
     [ApiController]
     public class GroupsController : Controller
     {
-        
-        private readonly GroupService _groupService;
-        private readonly VerificationService _verificationService;
+        private readonly DefaultPresenter _defaultPresenter;
+        private readonly IGetGroupsUseCase _getGroupsUseCase;
+        private readonly ICreateGroupUseCase _createGroupUseCase;
+        private readonly IGetGroupUseCase _getGroupUseCase;
+        private readonly IUpdateGroupUseCase _updateGroupUseCase;
+        private readonly IDeleteGroupUseCase _deleteGroupUseCase;
 
-        public GroupsController(GroupService groupService, VerificationService verificationService)
+        public GroupsController(DefaultPresenter defaultPresenter, IGetGroupsUseCase getGroupsUseCase, ICreateGroupUseCase createGroupUseCase, IGetGroupUseCase getGroupUseCase, IUpdateGroupUseCase updateGroupUseCase, IDeleteGroupUseCase deleteGroupUseCase)
         {
-            _groupService = groupService;
-            _verificationService = verificationService;
+            _defaultPresenter = defaultPresenter;
+            _getGroupsUseCase = getGroupsUseCase;
+            _createGroupUseCase = createGroupUseCase;
+            _getGroupUseCase = getGroupUseCase;
+            _updateGroupUseCase = updateGroupUseCase;
+            _deleteGroupUseCase = deleteGroupUseCase;
         }
         
         [HttpGet("", Name = "GetGroups")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        public async Task<ActionResult<IEnumerable<Group>>> GetGroupsAsync(Guid organisation)
+        public async Task<ActionResult<GetGroupsResponse>> GetGroupsAsync(Guid organisation)
         {
-            Organisation org = await _verificationService.VerifyOrganisation(organisation);
-            ActionResult<bool> result = User.CanGetGroups(org);
-            return !result.Value ? result.Result : Ok(await _groupService.GetFromOwnerIdAsync(org.Id));
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            
+            await _getGroupsUseCase.HandleAsync(new GetGroupsRequest(User.GetId(), organisation), _defaultPresenter);
+
+            return _defaultPresenter.ContentResult;
         }
-        
+
         [HttpPost("", Name = "CreateGroup")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        public async Task<ActionResult<Guid>> CreateGroupAsync(Guid organisation, Group group)
+        public async Task<ActionResult<CreateGroupResponse>> CreateGroupAsync(Guid organisation, CreateGroupDTO createGroupDTO)
         {
-            Organisation org = await _verificationService.VerifyOrganisation(organisation);
-            ActionResult<bool> result = User.CanCreateGroup(org);
-            if (!result.Value)
-                return result.Result;
-
-            group.Id = Guid.NewGuid();
-            group.OwnerId = org.Id;
-            group.ClientIds = new List<Guid>();
-            await _groupService.CreateAsync(group);
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
             
-            return Ok(group.Id);
-        }
-        
-        [HttpGet("for-client/{client}", Name = "GetGroupsForClient")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        public async Task<ActionResult<IEnumerable<Group>>> GetGroupsAsync(Guid organisation, Guid client)
-        {
-            Organisation org = await _verificationService.VerifyOrganisation(organisation);
-            Client apiClient = await _verificationService.VerifyClient(client);
-            ActionResult<bool> result = User.CanGetGroups(org);
-            return !result.Value ? result.Result : Ok(await _groupService.GetFromClientIdAsync(apiClient.Id));
+            await _createGroupUseCase.HandleAsync(new CreateGroupRequest(User.GetId(), organisation, createGroupDTO.Name, createGroupDTO.Description, createGroupDTO.ClientIds), _defaultPresenter);
+
+            return _defaultPresenter.ContentResult;
         }
         
         [HttpGet("{group}", Name = "GetGroup")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        public async Task<ActionResult<Group>> GetGroupAsync(Guid organisation, Guid group)
+        public async Task<ActionResult<GetGroupResponse>> GetGroupAsync(Guid organisation, Guid group)
         {
-            Organisation org = await _verificationService.VerifyOrganisation(organisation);
-            Group apiGroup = await _verificationService.VerifyGroup(group);
-            ActionResult<bool> result = User.CanGetGroup(org, apiGroup);
-            return !result.Value ? result.Result : Ok(apiGroup);
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            
+            await _getGroupUseCase.HandleAsync(new GetGroupRequest(User.GetId(), organisation, group), _defaultPresenter);
+
+            return _defaultPresenter.ContentResult;
         }
-        
+
         [HttpPost("{group}", Name = "UpdateGroup")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        public async Task<ActionResult> CreateGroupAsync(Guid organisation, Guid group, Group updateGroup)
+        public async Task<ActionResult<UpdateGroupResponse>> UpdateGroupAsync(Guid organisation, Guid group, UpdateGroupDTO updateGroupDTO)
         {
-            Organisation org = await _verificationService.VerifyOrganisation(organisation);
-            Group apiGroup = await _verificationService.VerifyGroup(group);
-            ActionResult<bool> result = User.CanUpdateGroup(org, apiGroup);
-            if (!result.Value)
-                return result.Result;
-
-            updateGroup.Id = apiGroup.Id;
-            updateGroup.OwnerId = org.Id;
-            await _groupService.UpdateAsync(group, updateGroup);
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
             
-            return Ok();
+            await _updateGroupUseCase.HandleAsync(new UpdateGroupRequest(User.GetId(), organisation, group, updateGroupDTO.Name, updateGroupDTO.Description, updateGroupDTO.ClientIds), _defaultPresenter);
+
+            return _defaultPresenter.ContentResult;
         }
         
         [HttpDelete("{group}", Name = "DeleteGroup")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        public async Task<ActionResult> CreateGroupAsync(Guid organisation, Guid group)
+        public async Task<ActionResult<DeleteGroupResponse>> DeleteGroupAsync(Guid organisation, Guid group)
         {
-            Organisation org = await _verificationService.VerifyOrganisation(organisation);
-            Group apiGroup = await _verificationService.VerifyGroup(group);
-            ActionResult<bool> result = User.CanDeleteGroup(org, apiGroup);
-            if (!result.Value)
-                return result.Result;
-
-            await _groupService.RemoveAsync(apiGroup.Id);
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
             
-            return Ok();
+            await _deleteGroupUseCase.HandleAsync(new DeleteGroupRequest(User.GetId(), organisation, group), _defaultPresenter);
+
+            return _defaultPresenter.ContentResult;
         }
     }
 }

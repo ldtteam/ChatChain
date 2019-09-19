@@ -1,4 +1,4 @@
-@page "/{organisation}/Clients/PreviewNew/{clientId}"
+@page "/{organisation}/Clients/PreviewNew/{client}"
 @model WebApp.Pages.Clients.PreviewNew
 @{
     ViewData["Title"] = "PreviewNew";
@@ -13,16 +13,16 @@
             <p class="text-danger">Your new Client, Please save this password somewhere secure, you will not be able to view it again!</p>
             <dl class="dl-horizontal">
                 <dt>
-                    @Html.DisplayNameFor(m => m.ApiClient.ClientName)
+                    @Html.DisplayNameFor(m => m.Client.Name)
                 </dt>
                 <dd>
-                    @Html.DisplayFor(m => m.ApiClient.ClientName)
+                    @Html.DisplayFor(m => m.Client.Name)
                 </dd>
                 <dt>
-                    @Html.DisplayNameFor(m => m.ApiClient.Id)
+                    @Html.DisplayNameFor(m => m.Client.Id)
                 </dt>
                 <dd>
-                    @Html.DisplayFor(m => m.ApiClient.Id)
+                    @Html.DisplayFor(m => m.Client.Id)
                 </dd>
                 <dt>
                     @Html.DisplayNameFor(m => m.Password)

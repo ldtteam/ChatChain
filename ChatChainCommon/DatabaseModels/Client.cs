@@ -1,6 +1,7 @@
 using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
 
 namespace ChatChainCommon.DatabaseModels
 {
@@ -14,9 +15,11 @@ namespace ChatChainCommon.DatabaseModels
     public class Client
     {
         [Required]
+        [BsonRepresentation(BsonType.String)]
         public Guid Id { get; set; }
         
         [Required]
+        [BsonRepresentation(BsonType.String)]
         public Guid OwnerId { get; set; }
 
         public string ClientName { get; set; }

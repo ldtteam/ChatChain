@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using WebApp.Api;
+using WebApp.Extensions;
 using WebApp.Services;
 
 namespace WebApp.Pages.Organisations
@@ -20,8 +21,9 @@ namespace WebApp.Pages.Organisations
             _apiService = apiService;
         }
 
-        public Organisation Organisation { get; set; }
+        public OrganisationDetails Organisation { get; set; }
 
+        // ReSharper disable once MemberCanBePrivate.Global
         public async Task<IActionResult> OnGetAsync(Guid organisation)
         {
             if (!await _apiService.VerifyTokensAsync(HttpContext))
@@ -31,8 +33,10 @@ namespace WebApp.Pages.Organisations
 
             try
             {
-                await client.CanDeleteOrganisationAsync(false, organisation);
-                Organisation = await client.GetOrganisationAsync(organisation);
+                GetOrganisationResponse response = await client.GetOrganisationDetailsAsync(organisation);
+                Organisation = response.Organisation;
+                if (!Organisation.UserIsOwner(response.User))
+                    return StatusCode(403);
             }
             catch (ApiException e)
             {
@@ -43,7 +47,8 @@ namespace WebApp.Pages.Organisations
             return Page();
         }
 
-        public async Task<IActionResult> OnPost(Guid organisation)
+        // ReSharper disable once UnusedMember.Global
+        public async Task<IActionResult> OnPostAsync(Guid organisation)
         {
             if (!ModelState.IsValid) return await OnGetAsync(organisation);
 

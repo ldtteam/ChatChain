@@ -1,10 +1,11 @@
 using System;
 using System.Threading.Tasks;
+using Api.Core.DTO.UseCaseRequests.Invite;
+using Api.Core.DTO.UseCaseResponses.Invite;
+using Api.Core.Interfaces.UseCases.Invite;
 using Api.Extensions;
-using Api.Services;
-using ChatChainCommon.DatabaseModels;
-using ChatChainCommon.DatabaseServices;
-using ChatChainCommon.RandomGenerator;
+using Api.Models.Request.Invite;
+using Api.Presenters;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -17,70 +18,43 @@ namespace Api.Controllers
     [ApiController]
     public class InvitesController : Controller
     {
-        private readonly OrganisationService _organisationService;
-        private readonly VerificationService _verificationService;
+        private readonly DefaultPresenter _defaultPresenter;
+        private readonly ICreateInviteUseCase _createInviteUseCase;
+        private readonly IUseInviteUseCase _useInviteUseCase;
 
-        public InvitesController(OrganisationService organisationService, VerificationService verificationService)
+        public InvitesController(DefaultPresenter defaultPresenter, ICreateInviteUseCase createInviteUseCase, IUseInviteUseCase useInviteUseCase)
         {
-            _organisationService = organisationService;
-            _verificationService = verificationService;
+            _defaultPresenter = defaultPresenter;
+            _createInviteUseCase = createInviteUseCase;
+            _useInviteUseCase = useInviteUseCase;
         }
         
         [HttpPost("", Name = "CreateInvite")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        public async Task<ActionResult<string>> CreateInviteAsync(Guid organisation, string emailAddress)
+        public async Task<ActionResult<CreateInviteResponse>> CreateInviteAsync(Guid organisation, CreateInviteDTO createDTO)
         {
-            Organisation org = await _verificationService.VerifyOrganisation(organisation);
-            ActionResult<bool> result = User.CanCreateInvite(org);
-
-            if (!result.Value)
-                return result.Result;
-
-            string token = PasswordGenerator.Generate();
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
             
-            OrganisationInvite invite = new OrganisationInvite
-            {
-                Email = emailAddress,
-                OrganisationId = org.Id,
-                Token = token
-            };
+            await _createInviteUseCase.HandleAsync(new CreateInviteRequest(User.GetId(), organisation, createDTO.EmailAddress), _defaultPresenter);
 
-            await _organisationService.CreateInviteAsync(invite);
-            
-            return Ok(token);
+            return _defaultPresenter.ContentResult;
         }
 
         [HttpPost("{token}", Name = "UseInvite")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        public async Task<ActionResult<string>> UseInviteAsync(Guid organisation, string token)
+        public async Task<ActionResult> UseInviteAsync(Guid organisation, string token)
         {
-            Organisation org = await _verificationService.VerifyOrganisation(organisation);
-            OrganisationInvite invite = await _organisationService.GetInviteAsync(org.Id, token);
-            ActionResult<bool> result = User.CanUseInvite(org, invite);
-            if (!result.Value)
-                return result.Result;
-
-            org.Users.Add(User.GetId(), new OrganisationUser());
-            await _organisationService.UpdateAsync(org.Id, org);
-            await _organisationService.RemoveInviteAsync(org.Id, invite.Token);
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
             
-            return Ok();
-        }
-        
-        [HttpGet("{token}/organisation", Name = "GetOrganisationWithInvite")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        public async Task<ActionResult<Organisation>> GetOrganisationWithInviteAsync(Guid organisation, string token)
-        {
-            Organisation org = await _verificationService.VerifyOrganisation(organisation);
-            OrganisationInvite invite = await _organisationService.GetInviteAsync(org.Id, token);
-            ActionResult<bool> result = User.CanUseInvite(org, invite);
-            return !result.Value ? result.Result : Ok(org);
+            await _useInviteUseCase.HandleAsync(new UseInviteRequest(User.GetId(),  organisation, User.GetClaim("EmailAddress"), token), _defaultPresenter);
+
+            return _defaultPresenter.ContentResult;
         }
     }
 }

@@ -1,14 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
-using System.IO;
 using System.Reflection;
-using Api.Extensions;
-using Api.Services;
+using Api.Core;
+using Api.Infrastructure;
+using Api.Infrastructure.Data.Mapping;
+using Api.Infrastructure.Data.MongoDB;
+using Autofac;
+using Autofac.Extensions.DependencyInjection;
+using AutoMapper;
 using ChatChainCommon.Config;
-using ChatChainCommon.DatabaseServices;
-using ChatChainCommon.IdentityServerRepository;
-using ChatChainCommon.IdentityServerStore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -28,17 +29,17 @@ namespace Api
         {
             IConfigurationBuilder builder = new ConfigurationBuilder()
                 .SetBasePath(env.ContentRootPath)
-                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-                .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true);
+                .AddJsonFile("appsettings.json", true, true)
+                .AddJsonFile($"appsettings.{env.EnvironmentName}.json", true);
 
             builder.AddEnvironmentVariables(options => { options.Prefix = "ChatChain_Api_"; });
             _configuration = builder.Build();
         }
 
-        public IConfigurationRoot _configuration;
+        private readonly IConfigurationRoot _configuration;
 
         // This method gets called by the runtime. Use this method to add services to the container.
-        public void ConfigureServices(IServiceCollection services)
+        public IServiceProvider ConfigureServices(IServiceCollection services)
         {
             string redisConnectionVariable = _configuration.GetValue<string>("RedisConnection");
             ConnectionMultiplexer redis = ConnectionMultiplexer.Connect(redisConnectionVariable);
@@ -49,7 +50,6 @@ namespace Api
                 .AddJsonOptions(options =>
                 {
                     options.SerializerSettings.Converters.Add(new StringEnumConverter());
-                    //options.SerializerSettings.Converters.Add(new BsonObjectIdConverter());
                     options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
                 })
                 .AddControllersAsServices();
@@ -92,8 +92,23 @@ namespace Api
                 options.AddSecurityRequirement(security);
             });
 
-            services.AddMongodb(options => _configuration.GetSection("MongoConnections").Bind(options));
-            services.AddScoped<VerificationService>();
+            services.AddAutoMapper(typeof(DataProfile));
+
+            MongoConnectionOptions mongoConnectionOptions = new MongoConnectionOptions();
+            _configuration.GetSection(nameof(MongoConnectionOptions)).Bind(mongoConnectionOptions);
+            services.AddSingleton(mongoConnectionOptions);
+
+            ContainerBuilder builder = new ContainerBuilder();
+            builder.RegisterModule(new CoreModule());
+            builder.RegisterModule(new InfrastructureModule());
+
+            builder.RegisterAssemblyTypes(Assembly.GetExecutingAssembly()).Where(t => t.Name.EndsWith("Presenter"))
+                .SingleInstance();
+            
+            builder.Populate(services);
+            
+            IContainer container = builder.Build();
+            return new AutofacServiceProvider(container);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -105,7 +120,6 @@ namespace Api
             }
             else
             {
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
 

@@ -7,8 +7,6 @@
 <div class="container">
     <h2>Delete</h2>
 
-    <p class="text-danger">@Model.ErrorMessage</p>
-
     <h3>Are you sure you want to delete this?</h3>
     <div>
         <h4>Client</h4>
@@ -21,16 +19,16 @@
                 @Html.DisplayFor(m => m.Client.Id)
             </dd>
             <dt>
-                @Html.DisplayNameFor(m => m.Client.ClientName)
+                @Html.DisplayNameFor(m => m.Client.Name)
             </dt>
             <dd>
-                @Html.DisplayFor(m => m.Client.ClientName)
+                @Html.DisplayFor(m => m.Client.Name)
             </dd>
             <dt>
-                @Html.DisplayNameFor(m => m.Client.ClientDescription)
+                @Html.DisplayNameFor(m => m.Client.Description)
             </dt>
             <dd>
-                @Html.DisplayFor(m => m.Client.ClientDescription)
+                @Html.DisplayFor(m => m.Client.Description)
             </dd>
         </dl>
 

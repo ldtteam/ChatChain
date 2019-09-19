@@ -54,6 +54,11 @@ namespace ChatChainCommon.DatabaseServices
             await _groups.DeleteOneAsync(group => group.Id == groupId);
         }
         
+        public async Task RemoveForOwnerIdAsync(Guid orgId)
+        {
+            await _groups.DeleteManyAsync(group => group.OwnerId == orgId);
+        }
+        
         public async Task CreateAsync(Group group)
         {
             await _groups.InsertOneAsync(group);

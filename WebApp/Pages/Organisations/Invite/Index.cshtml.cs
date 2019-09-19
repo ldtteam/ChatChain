@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using WebApp.Api;
 using WebApp.Services;
-using Organisation = WebApp.Api.Organisation;
 
 namespace WebApp.Pages.Organisations.Invite
 {
@@ -21,10 +20,14 @@ namespace WebApp.Pages.Organisations.Invite
             _apiService = apiService;
         }
 
-        public Organisation Organisation { get; private set; }
+        public OrganisationDetails Organisation { get; private set; }
 
+        // ReSharper disable once MemberCanBePrivate.Global
         public async Task<IActionResult> OnGetAsync(Guid organisation, string invite)
         {
+            if (invite == null)
+                return StatusCode(403);
+            
             if (!await _apiService.VerifyTokensAsync(HttpContext))
                 return SignOut(new AuthenticationProperties {RedirectUri = HttpContext.Request.GetDisplayUrl()},
                     "Cookies");
@@ -32,7 +35,8 @@ namespace WebApp.Pages.Organisations.Invite
 
             try
             {
-                Organisation = await client.GetOrganisationWithInviteAsync(organisation, invite);
+                GetOrganisationResponse response = await client.GetOrganisationAsync(organisation);
+                Organisation = response.Organisation;
             }
             catch (ApiException e)
             {
@@ -43,6 +47,7 @@ namespace WebApp.Pages.Organisations.Invite
             return Page();
         }
 
+        // ReSharper disable once UnusedMember.Global
         public async Task<IActionResult> OnPostAsync(Guid organisation, string invite)
         {
             if (!ModelState.IsValid) return await OnGetAsync(organisation, invite);

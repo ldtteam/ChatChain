@@ -30,11 +30,12 @@ namespace WebApp.Pages.Organisations
             public string Name { get; set; }
         }
 
+        // ReSharper disable once UnusedMember.Global
         public async Task<IActionResult> OnPostAsync()
         {
             if (!ModelState.IsValid) return Page();
 
-            Organisation organisation = new Organisation
+            CreateOrganisationDTO organisation = new CreateOrganisationDTO
             {
                 Name = Input.Name
             };

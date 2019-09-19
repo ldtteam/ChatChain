@@ -1,3 +1,4 @@
+// ReSharper disable UnusedAutoPropertyAccessor.Global
 namespace ChatChainCommon.Config
 {
     public class MongoConnections

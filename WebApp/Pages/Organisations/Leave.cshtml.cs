@@ -6,7 +6,11 @@ using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using WebApp.Api;
+using WebApp.Extensions;
 using WebApp.Services;
+
+// ReSharper disable UnusedMember.Global
+// ReSharper disable MemberCanBePrivate.Global
 
 namespace WebApp.Pages.Organisations
 {
@@ -20,7 +24,7 @@ namespace WebApp.Pages.Organisations
             _apiService = apiService;
         }
 
-        public Organisation Organisation { get; set; }
+        public OrganisationDetails Organisation { get; set; }
 
         public async Task<IActionResult> OnGetAsync(Guid organisation)
         {
@@ -31,8 +35,10 @@ namespace WebApp.Pages.Organisations
 
             try
             {
-                await client.CanLeaveOrganisationAsync(false, organisation);
-                Organisation = await client.GetOrganisationAsync(organisation);
+                GetOrganisationResponse response = await client.GetOrganisationAsync(organisation);
+                Organisation = response.Organisation;
+                if (Organisation.UserIsOwner(response.User))
+                    return StatusCode(403);
             }
             catch (ApiException e)
             {
@@ -43,7 +49,7 @@ namespace WebApp.Pages.Organisations
             return Page();
         }
 
-        public async Task<IActionResult> OnPost(Guid organisation)
+        public async Task<IActionResult> OnPostAsync(Guid organisation)
         {
             if (!await _apiService.VerifyTokensAsync(HttpContext))
                 return SignOut(new AuthenticationProperties {RedirectUri = HttpContext.Request.GetDisplayUrl()},

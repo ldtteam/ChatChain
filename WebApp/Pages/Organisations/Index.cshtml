@@ -1,5 +1,6 @@
 @page
 @using WebApp.Api
+@using WebApp.Extensions
 @model WebApp.Pages.Organisations.Index
 
 @{
@@ -22,34 +23,34 @@
             </tr>
             </thead>
             <tbody>
-            @foreach (Organisation org in Model.Organisations)
+            @foreach (OrganisationDetails orgDetails in Model.Organisations)
             {
                 <tr>
                     <td>
-                        @Html.DisplayTextFor(m => org.Name)
+                        @Html.DisplayTextFor(m => orgDetails.Name)
                     </td>
                     <td>
                         <div class="btn-group">
-                            <a class="btn btn-primary btn-sm" asp-page="/Clients/Index" asp-route-organisation="@org.Id">Clients</a>
-                            <a class="btn btn-primary btn-sm" asp-page="/Groups/Index" asp-route-organisation="@org.Id">Groups</a>
+                            <a class="btn btn-primary btn-sm" asp-page="/Clients/Index" asp-route-organisation="@orgDetails.Id">Clients</a>
+                            <a class="btn btn-primary btn-sm" asp-page="/Groups/Index" asp-route-organisation="@orgDetails.Id">Groups</a>
                         </div>
                     </td>
                     <td>
-                        <a class="btn btn-primary btn-sm" asp-page="Users/Index" asp-route-organisation="@org.Id">Users</a>
+                        <a class="btn btn-primary btn-sm" asp-page="Users/Index" asp-route-organisation="@orgDetails.Id">Users</a>
                     </td>
                     <td>
                         <div class="btn-group">
-                            @if (await Model.Client.CanUpdateOrganisationAsync(true, org.Id))
+                            @if (orgDetails.Id != null && orgDetails.UserHasPermission(Model.OrganisationUsers[orgDetails.Id.Value.ToString()], Permissions.EditOrg))
                             {
-                                <a class="btn btn-primary btn-sm" asp-page="./Edit" asp-route-organisation="@org.Id">Edit</a>
+                                <a class="btn btn-primary btn-sm" asp-page="./Edit" asp-route-organisation="@orgDetails.Id">Edit</a>
                             }
-                            @if (await Model.Client.CanDeleteOrganisationAsync(true, org.Id))
+                            @if (orgDetails.Id != null && orgDetails.UserIsOwner(Model.OrganisationUsers[orgDetails.Id.Value.ToString()]))
                             {
-                                <a class="btn btn-danger btn-sm" asp-page="./Delete" asp-route-organisation="@org.Id">Delete</a>
+                                <a class="btn btn-danger btn-sm" asp-page="./Delete" asp-route-organisation="@orgDetails.Id">Delete</a>
                             }
-                            @if (await Model.Client.CanLeaveOrganisationAsync(true, org.Id))
+                            @if (orgDetails.Id != null && !orgDetails.UserIsOwner(Model.OrganisationUsers[orgDetails.Id.Value.ToString()]))
                             {
-                                <a class="btn btn-danger btn-sm" asp-page="./Leave" asp-route-organisation="@org.Id">Leave</a>
+                                <a class="btn btn-danger btn-sm" asp-page="./Leave" asp-route-organisation="@orgDetails.Id">Leave</a>
                             }
                         </div>
                     </td>

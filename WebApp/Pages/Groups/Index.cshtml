@@ -1,5 +1,6 @@
 ﻿@page "/{organisation}/Groups"
 @using WebApp.Api
+@using WebApp.Extensions
 @model IndexModel
 @{
     ViewData["Title"] = "Groups";
@@ -17,7 +18,7 @@
                 <th>Group Name</th>
                 <th>Group Description</th>
                 <th>
-                    @if (await Model.Client.CanCreateGroupAsync(true, Model.Organisation.Id))
+                    @if (Model.Organisation.UserHasPermission(Model.OrganisationUser, Permissions.CreateGroups))
                     {
                         <a class="btn btn-success btn-sm" asp-page="./Create" asp-route-organisation="@Model.Organisation.Id">Create New</a>
                     }
@@ -32,19 +33,19 @@
                         @Html.DisplayTextFor(m => group.Id)
                     </td>
                     <td>
-                        @Html.DisplayFor(m => group.GroupName)
+                        @Html.DisplayFor(m => group.Name)
                     </td>
                     <td>
-                        @Html.DisplayFor(m => group.GroupDescription)
+                        @Html.DisplayFor(m => group.Description)
                     </td>
                     <td>
                         <div class="btn-group">
-                            @if (await Model.Client.CanUpdateGroupAsync(true, Model.Organisation.Id, group.Id))
+                            @if (Model.Organisation.UserHasPermission(Model.OrganisationUser, Permissions.EditGroups))
                             {
                                 <a class="btn btn-primary btn-sm" asp-page="./EditClients" asp-route-organisation="@Model.Organisation.Id" asp-route-group="@group.Id">Edit Clients</a>
                                 <a class="btn btn-primary btn-sm" asp-page="./Edit" asp-route-organisation="@Model.Organisation.Id" asp-route-group="@group.Id">Edit</a>
                             }
-                            @if (await Model.Client.CanDeleteGroupAsync(true, Model.Organisation.Id, group.Id))
+                            @if (Model.Organisation.UserHasPermission(Model.OrganisationUser, Permissions.DeleteGroups))
                             {
                                 <a class="btn btn-danger  btn-sm" asp-page="./Delete" asp-route-organisation="@Model.Organisation.Id" asp-route-group="@group.Id">Delete</a>
                             }

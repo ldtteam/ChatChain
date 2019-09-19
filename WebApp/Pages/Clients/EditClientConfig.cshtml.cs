@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using WebApp.Api;
+using WebApp.Extensions;
 using WebApp.Services;
 
 namespace WebApp.Pages.Clients
@@ -28,8 +29,9 @@ namespace WebApp.Pages.Clients
         [BindProperty] public Guid[] SelectedUserEventGroups { get; set; }
         public SelectList GroupOptions { get; set; }
 
-        public Organisation Organisation { get; set; }
+        public Organisation Organisation { get; private set; }
 
+        // ReSharper disable once MemberCanBePrivate.Global
         public async Task<IActionResult> OnGetAsync(Guid organisation, Guid client)
         {
             if (!await _apiService.VerifyTokensAsync(HttpContext))
@@ -39,15 +41,21 @@ namespace WebApp.Pages.Clients
 
             try
             {
-                await apiClient.CanUpdateClientConfigAsync(false, organisation, client);
-                Organisation = await apiClient.GetOrganisationAsync(organisation);
-                Client = await apiClient.GetClientAsync(organisation, client);
-                ClientConfig clientConfig = await apiClient.GetClientConfigAsync(organisation, Client.Id);
-                ICollection<Group> clientGroups = await apiClient.GetGroupsForClientAsync(organisation, Client.Id);
+                GetClientResponse response = await apiClient.GetClientAsync(organisation, client);
+                Organisation = response.Organisation;
+                Client = response.Client;
+                if (!Organisation.UserHasPermission(response.User, Permissions.EditClients))
+                    return StatusCode(403);
 
-                GroupOptions = new SelectList(clientGroups, nameof(Group.Id), nameof(Group.GroupName));
-                SelectedClientEventGroups = clientConfig.ClientEventGroups.ToArray();
-                SelectedUserEventGroups = clientConfig.UserEventGroups.ToArray();
+                GetClientConfigResponse getClientConfigResponse =
+                    await apiClient.GetClientConfigAsync(organisation, client);
+                GetGroupsResponse getGroupsResponse = await apiClient.GetGroupsAsync(organisation);
+                IEnumerable<Group> clientGroups =
+                    getGroupsResponse.Groups.Where(group => group.ClientIds.Contains(client));
+
+                GroupOptions = new SelectList(clientGroups, nameof(Group.Id), nameof(Group.Name));
+                SelectedClientEventGroups = getClientConfigResponse.ClientConfig.ClientEventGroups.ToArray();
+                SelectedUserEventGroups = getClientConfigResponse.ClientConfig.UserEventGroups.ToArray();
 
                 return Page();
             }
@@ -57,6 +65,7 @@ namespace WebApp.Pages.Clients
             }
         }
 
+        // ReSharper disable once UnusedMember.Global
         public async Task<IActionResult> OnPostAsync(Guid organisation, Guid client)
         {
             if (!ModelState.IsValid) return await OnGetAsync(organisation, client);
@@ -68,21 +77,12 @@ namespace WebApp.Pages.Clients
 
             try
             {
-                Client = await apiClient.GetClientAsync(organisation, client);
-            }
-            catch (ApiException e)
-            {
-                return StatusCode(e.StatusCode, e.Response);
-            }
-
-            try
-            {
-                ClientConfig clientConfig = new ClientConfig
+                UpdateClientConfigDTO clientConfig = new UpdateClientConfigDTO
                 {
                     ClientEventGroups = SelectedClientEventGroups.ToList(),
                     UserEventGroups = SelectedUserEventGroups.ToList()
                 };
-                await apiClient.UpdateClientConfigAsync(organisation, Client.Id, clientConfig);
+                await apiClient.UpdateClientConfigAsync(organisation, client, clientConfig);
             }
             catch (ApiException e)
             {

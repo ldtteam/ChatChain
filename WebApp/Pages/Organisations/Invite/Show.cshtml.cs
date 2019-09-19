@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using WebApp.Api;
+using WebApp.Extensions;
 using WebApp.Services;
 
 namespace WebApp.Pages.Organisations.Invite
@@ -24,8 +25,9 @@ namespace WebApp.Pages.Organisations.Invite
         // ReSharper disable once UnusedAutoPropertyAccessor.Global
         public string Token { get; set; }
 
-        public Organisation Organisation { get; private set; }
+        public OrganisationDetails Organisation { get; private set; }
 
+        // ReSharper disable once UnusedMember.Global
         public async Task<IActionResult> OnGetAsync(Guid organisation)
         {
             if (Token == null) return RedirectToPage("../Users/Index");
@@ -37,8 +39,10 @@ namespace WebApp.Pages.Organisations.Invite
 
             try
             {
-                await client.CanCreateInviteAsync(false, organisation);
-                Organisation = await client.GetOrganisationAsync(organisation);
+                GetOrganisationResponse response = await client.GetOrganisationAsync(organisation);
+                Organisation = response.Organisation;
+                if (!Organisation.UserHasPermission(response.User, Permissions.CreateOrgUsers))
+                    return StatusCode(403);
             }
             catch (ApiException e)
             {

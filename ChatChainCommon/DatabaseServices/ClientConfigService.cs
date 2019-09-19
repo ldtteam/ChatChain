@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 using ChatChainCommon.Config;
@@ -25,6 +26,12 @@ namespace ChatChainCommon.DatabaseServices
             return await cursor.FirstOrDefaultAsync();
         }
 
+        public async Task<IEnumerable<ClientConfig>> GetFromOwnerIdAsync(Guid ownerId)
+        {
+            IAsyncCursor<ClientConfig> cursor = await _clientConfigs.FindAsync(config => config.OwnerId == ownerId);
+            return await cursor.ToListAsync();
+        }
+
         public async Task CreateAsync(ClientConfig clientConfig)
         {
             await _clientConfigs.InsertOneAsync(clientConfig);
@@ -33,6 +40,11 @@ namespace ChatChainCommon.DatabaseServices
         public async Task RemoveAsync(Guid id)
         {
             await _clientConfigs.DeleteOneAsync(config => config.Id == id);
+        }
+        
+        public async Task RemoveForOwnerIdAsync(Guid orgId)
+        {
+            await _clientConfigs.DeleteManyAsync(config => config.OwnerId == orgId);
         }
         
         public async Task UpdateAsync(Guid id, ClientConfig clientConfig)
