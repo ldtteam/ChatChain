@@ -40,8 +40,8 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Api.Core\Api.Core.csproj" />
-      <ProjectReference Include="..\Api.Infrastructure\Api.Infrastructure.csproj" />
+      <ProjectReference Include="..\Core.Core\Core.Core.csproj" />
+      <ProjectReference Include="..\Core.Infrastructure\Core.Infrastructure.csproj" />
     </ItemGroup>
 
     <ItemGroup>
