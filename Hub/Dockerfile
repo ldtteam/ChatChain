@@ -1,9 +1,25 @@
 FROM microsoft/dotnet:sdk AS build-env
-WORKDIR /ChatChain/ChatChainCommon
 
+#Setup required components of Hub
+WORKDIR /ChatChain/ChatChainCommon
 COPY ./ChatChainCommon/*.csproj ./
 RUN dotnet restore
 COPY ./ChatChainCommon ./
+
+WORKDIR /ChatChain/Core.Core
+COPY ./Core.Core/*.csproj ./
+RUN dotnet restore
+COPY ./Core.Core ./
+
+WORKDIR /ChatChain/Core.Infrastructure
+COPY ./Core.Infrastructure/*.csproj ./
+RUN dotnet restore
+COPY ./Core.Infrastructure ./
+
+WORKDIR /ChatChain/Hub.Core
+COPY ./Hub.Core/*.csproj ./
+RUN dotnet restore
+COPY ./Hub.Core ./
 
 WORKDIR /ChatChain/Hub
 
