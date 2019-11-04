@@ -15,11 +15,11 @@ namespace Hub.Core.DTO.ResponseMessages
         
         public Group Group { get; }
         
-        public IList<Group> Groups { get; }
+        public IList<Group> Groups { get; } = new List<Group>();
         
         public string Event { get; }
         
-        public Dictionary<string, string> EventData { get; }
+        public Dictionary<string, string> EventData { get; } = new Dictionary<string, string>();
 
         public ClientEventMessage(IEnumerable<Error> errors, bool success = false) : base(errors, success)
         {
