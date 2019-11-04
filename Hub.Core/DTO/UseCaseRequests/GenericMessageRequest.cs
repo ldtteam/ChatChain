@@ -6,11 +6,11 @@ namespace Hub.Core.DTO.UseCaseRequests
 {
     public class GenericMessageRequest : DefaultUseCaseRequest
     {
-        public Guid GroupId { get; }
+        public Guid GroupId { get; set; }
         
-        public ClientUser ClientUser { get; }
+        public ClientUser ClientUser { get; set; }
         
-        public string Message { get; }
+        public string Message { get; set; }
 
         public GenericMessageRequest(Guid groupId, ClientUser clientUser, string message, Guid clientId, bool sendToSelf = false) : base(clientId, sendToSelf)
         {
