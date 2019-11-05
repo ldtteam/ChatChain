@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Api.Core.DTO;
 using Api.Core.DTO.GatewayResponses.Repositories.Organisation;
 using Api.Core.DTO.UseCaseRequests.Organisation;
@@ -17,7 +18,7 @@ namespace Api.Tests.UseCases.OrganisationTests
     public class UpdateTests
     {
         [Fact]
-        public async void UpdateOrganisation_True()
+        public async Task UpdateOrganisation_True()
         {
             // Arrange \\
 
@@ -82,7 +83,7 @@ namespace Api.Tests.UseCases.OrganisationTests
         }
 
         [Fact]
-        public async void UpdateOrganisation_NonExistent_False()
+        public async Task UpdateOrganisation_NonExistent_False()
         {
             // Arrange \\
 
@@ -138,7 +139,7 @@ namespace Api.Tests.UseCases.OrganisationTests
         }
 
         [Fact]
-        public async void UpdateOrganisation_RepoUpdateErrors_False()
+        public async Task UpdateOrganisation_RepoUpdateErrors_False()
         {
             // Arrange \\
 

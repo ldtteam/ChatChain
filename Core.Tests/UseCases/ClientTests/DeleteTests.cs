@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 using Api.Core.DTO;
 using Api.Core.DTO.GatewayResponses;
 using Api.Core.DTO.GatewayResponses.Repositories.Client;
@@ -19,7 +20,7 @@ namespace Api.Tests.UseCases.ClientTests
     public class DeleteTests
     {
         [Fact]
-        public async void DeleteClient_True()
+        public async Task DeleteClient_True()
         {
             // Arrange \\
 
@@ -111,7 +112,7 @@ namespace Api.Tests.UseCases.ClientTests
         }
 
         [Fact]
-        public async void DeleteClient_OrganisationNonExistent_False()
+        public async Task DeleteClient_OrganisationNonExistent_False()
         {
             // Arrange \\
 
@@ -190,7 +191,7 @@ namespace Api.Tests.UseCases.ClientTests
         }
 
         [Fact]
-        public async void DeleteClient_NonExistent_False()
+        public async Task DeleteClient_NonExistent_False()
         {
             // Arrange \\
 
@@ -268,7 +269,7 @@ namespace Api.Tests.UseCases.ClientTests
         }
 
         [Fact]
-        public async void DeleteClient_NotInOrganisation_False()
+        public async Task DeleteClient_NotInOrganisation_False()
         {
             // Arrange \\
 
@@ -348,7 +349,7 @@ namespace Api.Tests.UseCases.ClientTests
         }
         
         [Fact]
-        public async void DeleteClient_IS4ClientRepoDeleteErrors_False()
+        public async Task DeleteClient_IS4ClientRepoDeleteErrors_False()
         {
             // Arrange \\
 
@@ -428,7 +429,7 @@ namespace Api.Tests.UseCases.ClientTests
         }
 
         [Fact]
-        public async void DeleteClient_ClientRepoDeleteErrors_False()
+        public async Task DeleteClient_ClientRepoDeleteErrors_False()
         {
             // Arrange \\
 
@@ -508,7 +509,7 @@ namespace Api.Tests.UseCases.ClientTests
         }
 
         [Fact]
-        public async void DeleteClient_ClientConfigRepoDeleteErrors_False()
+        public async Task DeleteClient_ClientConfigRepoDeleteErrors_False()
         {
             // Arrange \\
 

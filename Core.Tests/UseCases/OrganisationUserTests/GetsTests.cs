@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 using Api.Core.DTO;
 using Api.Core.DTO.GatewayResponses.Repositories.Organisation;
 using Api.Core.DTO.UseCaseRequests.OrganisationUser;
@@ -16,7 +17,7 @@ namespace Api.Tests.UseCases.OrganisationUserTests
     public class GetsTests
     {
         [Fact]
-        public async void GetOrganisationUsers_True()
+        public async Task GetOrganisationUsers_True()
         {
             // Arrange \\
 
@@ -66,7 +67,7 @@ namespace Api.Tests.UseCases.OrganisationUserTests
         }
 
         [Fact]
-        public async void GetOrganisationUsers_OrganisationNonExistent_False()
+        public async Task GetOrganisationUsers_OrganisationNonExistent_False()
         {
             // Arrange \\
 

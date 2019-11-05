@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Api.Core.DTO.GatewayResponses;
 using Api.Core.DTO.GatewayResponses.Repositories.Organisation;
 using Api.Core.DTO.UseCaseRequests.Organisation;
@@ -17,7 +18,7 @@ namespace Api.Tests.Permissions.OrganisationTests
     public class DeleteTests
     {
         [Fact]
-        public async void DeleteOrganisation_NonOrgUser_False()
+        public async Task DeleteOrganisation_NonOrgUser_False()
         {
             // Arrange \\
 
@@ -116,7 +117,7 @@ namespace Api.Tests.Permissions.OrganisationTests
         [InlineData(OrganisationPermissions.DeleteClients)]
         [InlineData(OrganisationPermissions.DeleteOrgUsers)]
         [InlineData(OrganisationPermissions.All)]
-        public async void DeleteOrganisation_WrongPermission_False(OrganisationPermissions permission)
+        public async Task DeleteOrganisation_WrongPermission_False(OrganisationPermissions permission)
         {
             // Arrange
 
@@ -213,7 +214,7 @@ namespace Api.Tests.Permissions.OrganisationTests
         }
 
         [Fact]
-        public async void DeleteOrganisation_OrgOwner_True()
+        public async Task DeleteOrganisation_OrgOwner_True()
         {
             // Arrange
 

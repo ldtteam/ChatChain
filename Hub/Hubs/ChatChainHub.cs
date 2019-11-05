@@ -53,7 +53,7 @@ namespace Hub.Hubs
             if (!_hasSentLeaveMessage)
             {
                 ClientEventRequest request = new ClientEventRequest("STOP", null, new Guid(Context.UserIdentifier));
-                await SendClientEventMessage(request);
+                await SendClientEventMessage(request).ConfigureAwait(false);
                 _logger.LogInformation("Sent Client Event STOP message");
             }
 

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Api.Core.DTO.GatewayResponses.Repositories.Invite;
 using Api.Core.DTO.GatewayResponses.Repositories.Organisation;
 using Api.Core.DTO.UseCaseRequests.Invite;
@@ -18,7 +19,7 @@ namespace Api.Tests.Permissions.InviteTests
     public class CreateTests
     {
         [Fact]
-        public async void CreateInvite_NonOrgUser_False()
+        public async Task CreateInvite_NonOrgUser_False()
         {
             // Arrange \\
 
@@ -93,7 +94,7 @@ namespace Api.Tests.Permissions.InviteTests
         [InlineData(OrganisationPermissions.DeleteClients)]
         [InlineData(OrganisationPermissions.DeleteGroups)]
         [InlineData(OrganisationPermissions.DeleteOrgUsers)]
-        public async void CreateInvite_WrongPermission_False(OrganisationPermissions permission)
+        public async Task CreateInvite_WrongPermission_False(OrganisationPermissions permission)
         {
             // Arrange \\
 
@@ -173,7 +174,7 @@ namespace Api.Tests.Permissions.InviteTests
         [Theory]
         [InlineData(OrganisationPermissions.CreateOrgUsers)]
         [InlineData(OrganisationPermissions.All)]
-        public async void CreateInvite_CorrectPermission_True(OrganisationPermissions permission)
+        public async Task CreateInvite_CorrectPermission_True(OrganisationPermissions permission)
         {
             // Arrange \\
 
@@ -250,7 +251,7 @@ namespace Api.Tests.Permissions.InviteTests
         }
 
         [Fact]
-        public async void CreateInvite_OrgOwner_True()
+        public async Task CreateInvite_OrgOwner_True()
         {
             // Arrange \\
 

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Api.Core.DTO.GatewayResponses.Repositories.Client;
 using Api.Core.DTO.GatewayResponses.Repositories.Organisation;
 using Api.Core.DTO.UseCaseRequests.Client;
@@ -17,7 +18,7 @@ namespace Api.Tests.Permissions.ClientTests
     public class UpdateTests
     {
         [Fact]
-        public async void UpdateClient_NonOrgUser_False()
+        public async Task UpdateClient_NonOrgUser_False()
         {
             // Arrange \\
 
@@ -88,7 +89,7 @@ namespace Api.Tests.Permissions.ClientTests
         [InlineData(OrganisationPermissions.DeleteClients)]
         [InlineData(OrganisationPermissions.DeleteGroups)]
         [InlineData(OrganisationPermissions.DeleteOrgUsers)]
-        public async void UpdateClient_WrongPermission_False(OrganisationPermissions permission)
+        public async Task UpdateClient_WrongPermission_False(OrganisationPermissions permission)
         {
             // Arrange
 
@@ -163,7 +164,7 @@ namespace Api.Tests.Permissions.ClientTests
         [Theory]
         [InlineData(OrganisationPermissions.EditClients)]
         [InlineData(OrganisationPermissions.All)]
-        public async void UpdateClient_CorrectPermission_True(OrganisationPermissions permission)
+        public async Task UpdateClient_CorrectPermission_True(OrganisationPermissions permission)
         {
             // Arrange
 
@@ -234,7 +235,7 @@ namespace Api.Tests.Permissions.ClientTests
         }
 
         [Fact]
-        public async void UpdateClient_OrgOwner_True()
+        public async Task UpdateClient_OrgOwner_True()
         {
             // Arrange
 

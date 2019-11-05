@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Api.Core.DTO.GatewayResponses;
 using Api.Core.DTO.GatewayResponses.Repositories.Client;
 using Api.Core.DTO.GatewayResponses.Repositories.ClientConfig;
@@ -19,7 +20,7 @@ namespace Api.Tests.Permissions.ClientTests
     public class DeleteTests
     {
         [Fact]
-        public async void DeleteClient_NonOrgUser_False()
+        public async Task DeleteClient_NonOrgUser_False()
         {
             // Arrange \\
 
@@ -117,7 +118,7 @@ namespace Api.Tests.Permissions.ClientTests
         [InlineData(OrganisationPermissions.CreateOrgUsers)]
         [InlineData(OrganisationPermissions.DeleteGroups)]
         [InlineData(OrganisationPermissions.DeleteOrgUsers)]
-        public async void DeleteClient_WrongPermission_False(OrganisationPermissions permission)
+        public async Task DeleteClient_WrongPermission_False(OrganisationPermissions permission)
         {
             // Arrange
 
@@ -219,7 +220,7 @@ namespace Api.Tests.Permissions.ClientTests
         [Theory]
         [InlineData(OrganisationPermissions.DeleteClients)]
         [InlineData(OrganisationPermissions.All)]
-        public async void DeleteClient_CorrectPermission_True(OrganisationPermissions permission)
+        public async Task DeleteClient_CorrectPermission_True(OrganisationPermissions permission)
         {
             // Arrange
 
@@ -318,7 +319,7 @@ namespace Api.Tests.Permissions.ClientTests
         }
 
         [Fact]
-        public async void DeleteClient_OrgOwner_True()
+        public async Task DeleteClient_OrgOwner_True()
         {
             // Arrange
 

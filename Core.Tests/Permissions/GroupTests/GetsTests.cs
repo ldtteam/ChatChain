@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Api.Core.DTO.GatewayResponses.Repositories.Group;
 using Api.Core.DTO.GatewayResponses.Repositories.Organisation;
 using Api.Core.DTO.UseCaseRequests.Group;
@@ -17,7 +18,7 @@ namespace Api.Tests.Permissions.GroupTests
     public class GetsTests
     {
         [Fact]
-        public async void GetGroups_NonOrgUser_False()
+        public async Task GetGroups_NonOrgUser_False()
         {
             // Arrange \\
 
@@ -73,7 +74,7 @@ namespace Api.Tests.Permissions.GroupTests
         }
 
         [Fact]
-        public async void GetGroups_OrgUser_True()
+        public async Task GetGroups_OrgUser_True()
         {
             // Arrange \\
 

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Api.Core.DTO.GatewayResponses.Repositories.Organisation;
 using Api.Core.DTO.UseCaseRequests.Organisation;
 using Api.Core.DTO.UseCaseResponses.Organisation;
@@ -16,7 +17,7 @@ namespace Api.Tests.Permissions.OrganisationTests
     public class GetTests
     {
         [Fact]
-        public async void GetOrganisation_NonOrgUser_False()
+        public async Task GetOrganisation_NonOrgUser_False()
         {
             // Arrange \\
 
@@ -55,7 +56,7 @@ namespace Api.Tests.Permissions.OrganisationTests
         }
 
         [Fact]
-        public async void GetOrganisation_OrgUser_True()
+        public async Task GetOrganisation_OrgUser_True()
         {
             // Arrange \\
 
@@ -102,7 +103,7 @@ namespace Api.Tests.Permissions.OrganisationTests
         }
 
         [Fact]
-        public async void GetOrganisation_OrgOwner_True()
+        public async Task GetOrganisation_OrgOwner_True()
         {
             // Arrange \\
 

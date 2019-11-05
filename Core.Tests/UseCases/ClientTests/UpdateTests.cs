@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 using Api.Core.DTO;
 using Api.Core.DTO.GatewayResponses.Repositories.Client;
 using Api.Core.DTO.GatewayResponses.Repositories.Organisation;
@@ -17,7 +18,7 @@ namespace Api.Tests.UseCases.ClientTests
     public class UpdateTests
     {
         [Fact]
-        public async void UpdateClient_True()
+        public async Task UpdateClient_True()
         {
             // Arrange \\
 
@@ -87,7 +88,7 @@ namespace Api.Tests.UseCases.ClientTests
         }
 
         [Fact]
-        public async void UpdateClient_OrganisationNonExistent_False()
+        public async Task UpdateClient_OrganisationNonExistent_False()
         {
             // Arrange \\
 
@@ -141,7 +142,7 @@ namespace Api.Tests.UseCases.ClientTests
         }
 
         [Fact]
-        public async void UpdateClient_NonExistent_False()
+        public async Task UpdateClient_NonExistent_False()
         {
             // Arrange \\
 
@@ -196,7 +197,7 @@ namespace Api.Tests.UseCases.ClientTests
         }
 
         [Fact]
-        public async void UpdateClient_NotInOrganisation_False()
+        public async Task UpdateClient_NotInOrganisation_False()
         {
             // Arrange \\
 
@@ -251,7 +252,7 @@ namespace Api.Tests.UseCases.ClientTests
         }
 
         [Fact]
-        public async void UpdateClient_RepoUpdateErrors_False()
+        public async Task UpdateClient_RepoUpdateErrors_False()
         {
             // Arrange \\
 

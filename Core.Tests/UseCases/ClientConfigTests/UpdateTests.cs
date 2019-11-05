@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Api.Core.DTO;
 using Api.Core.DTO.GatewayResponses.Repositories.ClientConfig;
 using Api.Core.DTO.GatewayResponses.Repositories.Organisation;
@@ -18,7 +19,7 @@ namespace Api.Tests.UseCases.ClientConfigTests
     public class UpdateTests
     {
         [Fact]
-        public async void UpdateClientConfig_True()
+        public async Task UpdateClientConfig_True()
         {
             // Arrange \\
 
@@ -91,7 +92,7 @@ namespace Api.Tests.UseCases.ClientConfigTests
         }
 
         [Fact]
-        public async void UpdateClientConfig_OrganisationNonExistent_False()
+        public async Task UpdateClientConfig_OrganisationNonExistent_False()
         {
             // Arrange \\
 
@@ -147,7 +148,7 @@ namespace Api.Tests.UseCases.ClientConfigTests
         }
 
         [Fact]
-        public async void UpdateClientConfig_NonExistent_False()
+        public async Task UpdateClientConfig_NonExistent_False()
         {
             // Arrange \\
 
@@ -205,7 +206,7 @@ namespace Api.Tests.UseCases.ClientConfigTests
         }
 
         [Fact]
-        public async void UpdateClientConfig_NotInOrganisation_False()
+        public async Task UpdateClientConfig_NotInOrganisation_False()
         {
             // Arrange \\
 
@@ -262,7 +263,7 @@ namespace Api.Tests.UseCases.ClientConfigTests
         }
 
         [Fact]
-        public async void UpdateClientConfig_RepoUpdateErrors_False()
+        public async Task UpdateClientConfig_RepoUpdateErrors_False()
         {
             // Arrange \\
 

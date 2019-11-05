@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Api.Core.DTO;
 using Api.Core.DTO.GatewayResponses.Repositories.Organisation;
 using Api.Core.DTO.UseCaseRequests.OrganisationUser;
@@ -17,7 +18,7 @@ namespace Api.Tests.UseCases.OrganisationUserTests
     public class GetTests
     {
         [Fact]
-        public async void GetOrganisationUser_True()
+        public async Task GetOrganisationUser_True()
         {
             Guid requestedUserId = Guid.NewGuid();
 
@@ -71,7 +72,7 @@ namespace Api.Tests.UseCases.OrganisationUserTests
         }
 
         [Fact]
-        public async void GetOrganisationUser_NonExistentOrganisation_False()
+        public async Task GetOrganisationUser_NonExistentOrganisation_False()
         {
             Guid requestedUserId = Guid.NewGuid();
 
@@ -105,7 +106,7 @@ namespace Api.Tests.UseCases.OrganisationUserTests
         }
 
         [Fact]
-        public async void GetOrganisationUser_NonExistent_False()
+        public async Task GetOrganisationUser_NonExistent_False()
         {
             Guid requestedUserId = Guid.NewGuid();
 

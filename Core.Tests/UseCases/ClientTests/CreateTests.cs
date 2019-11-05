@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Api.Core.DTO;
 using Api.Core.DTO.GatewayResponses.Repositories.Client;
 using Api.Core.DTO.GatewayResponses.Repositories.ClientConfig;
@@ -21,7 +22,7 @@ namespace Api.Tests.UseCases.ClientTests
     public class CreateTests
     {
         [Fact]
-        public async void CreateClient_True()
+        public async Task CreateClient_True()
         {
             // Arrange \\
 
@@ -126,7 +127,7 @@ namespace Api.Tests.UseCases.ClientTests
         }
 
         [Fact]
-        public async void CreateClient_OrganisationNonExistent_False()
+        public async Task CreateClient_OrganisationNonExistent_False()
         {
             // Arrange \\
 
@@ -206,7 +207,7 @@ namespace Api.Tests.UseCases.ClientTests
         }
         
         [Fact]
-        public async void CreateClient_IS4ClientRepoCreateErrors_False()
+        public async Task CreateClient_IS4ClientRepoCreateErrors_False()
         {
             // Arrange \\
 
@@ -287,7 +288,7 @@ namespace Api.Tests.UseCases.ClientTests
         }
 
         [Fact]
-        public async void CreateClient_ClientRepoCreateErrors_False()
+        public async Task CreateClient_ClientRepoCreateErrors_False()
         {
             // Arrange \\
 
@@ -361,7 +362,7 @@ namespace Api.Tests.UseCases.ClientTests
         }
 
         [Fact]
-        public async void CreateClient_ClientConfigRepoCreateErrors_False()
+        public async Task CreateClient_ClientConfigRepoCreateErrors_False()
         {
             // Arrange \\
 

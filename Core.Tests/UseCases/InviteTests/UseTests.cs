@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 using Api.Core.DTO;
 using Api.Core.DTO.GatewayResponses;
 using Api.Core.DTO.GatewayResponses.Repositories.Invite;
@@ -18,7 +19,7 @@ namespace Api.Tests.UseCases.InviteTests
     public class UseTests
     {
         [Fact]
-        public async void UseInvite_True()
+        public async Task UseInvite_True()
         {
             // Arrange \\
 
@@ -91,7 +92,7 @@ namespace Api.Tests.UseCases.InviteTests
         }
 
         [Fact]
-        public async void UseInvite_OrganisationNonExistent_False()
+        public async Task UseInvite_OrganisationNonExistent_False()
         {
             // Arrange \\
 
@@ -160,7 +161,7 @@ namespace Api.Tests.UseCases.InviteTests
         }
 
         [Fact]
-        public async void UseInvite_NonExistent_False()
+        public async Task UseInvite_NonExistent_False()
         {
             // Arrange \\
 
@@ -222,7 +223,7 @@ namespace Api.Tests.UseCases.InviteTests
         }
 
         [Fact]
-        public async void UseInvite_InviteRepDeleteErrors_False()
+        public async Task UseInvite_InviteRepDeleteErrors_False()
         {
             // Arrange \\
 
@@ -290,7 +291,7 @@ namespace Api.Tests.UseCases.InviteTests
         }
 
         [Fact]
-        public async void UseInvite_OrgRepUpdateErrors_False()
+        public async Task UseInvite_OrgRepUpdateErrors_False()
         {
             // Arrange \\
 
