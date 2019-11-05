@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Api.Core.DTO;
 using Api.Core.DTO.GatewayResponses.Repositories.Organisation;
 using Api.Core.DTO.UseCaseRequests.Organisation;
@@ -17,7 +18,7 @@ namespace Api.Tests.UseCases.OrganisationTests
     public class CreateTests
     {
         [Fact]
-        public async void CreateOrganisation_True()
+        public async Task CreateOrganisation_True()
         {
             // Arrange \\
 
@@ -84,7 +85,7 @@ namespace Api.Tests.UseCases.OrganisationTests
         }
 
         [Fact]
-        public async void CreateOrganisation_RepoCreateErrors_False()
+        public async Task CreateOrganisation_RepoCreateErrors_False()
         {
             // Arrange \\
 

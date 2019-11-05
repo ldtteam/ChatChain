@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Api.Core.DTO;
 using Api.Core.DTO.GatewayResponses;
 using Api.Core.DTO.GatewayResponses.Repositories.Organisation;
@@ -18,7 +19,7 @@ namespace Api.Tests.UseCases.OrganisationTests
     public class DeleteTests
     {
         [Fact]
-        public async void DeleteOrganisation_True()
+        public async Task DeleteOrganisation_True()
         {
             // Arrange \\
 
@@ -104,7 +105,7 @@ namespace Api.Tests.UseCases.OrganisationTests
         }
 
         [Fact]
-        public async void DeleteOrganisation_NonExistent_False()
+        public async Task DeleteOrganisation_NonExistent_False()
         {
             // Arrange \\
 
@@ -176,7 +177,7 @@ namespace Api.Tests.UseCases.OrganisationTests
         }
 
         [Fact]
-        public async void DeleteOrganisation_OrganisationRepoDeleteErrors_False()
+        public async Task DeleteOrganisation_OrganisationRepoDeleteErrors_False()
         {
             // Arrange \\
 
@@ -262,7 +263,7 @@ namespace Api.Tests.UseCases.OrganisationTests
         }
 
         [Fact]
-        public async void DeleteOrganisation_ClientConfigRepoDeleteErrors_False()
+        public async Task DeleteOrganisation_ClientConfigRepoDeleteErrors_False()
         {
             // Arrange \\
 
@@ -348,7 +349,7 @@ namespace Api.Tests.UseCases.OrganisationTests
         }
         
         [Fact]
-        public async void DeleteOrganisation_IS4ClientRepoDeleteErrors_False()
+        public async Task DeleteOrganisation_IS4ClientRepoDeleteErrors_False()
         {
             // Arrange \\
 
@@ -434,7 +435,7 @@ namespace Api.Tests.UseCases.OrganisationTests
         }
 
         [Fact]
-        public async void DeleteOrganisation_ClientRepoDeleteErrors_False()
+        public async Task DeleteOrganisation_ClientRepoDeleteErrors_False()
         {
             // Arrange \\
 
@@ -520,7 +521,7 @@ namespace Api.Tests.UseCases.OrganisationTests
         }
 
         [Fact]
-        public async void DeleteOrganisation_GroupRepoDeleteErrors_False()
+        public async Task DeleteOrganisation_GroupRepoDeleteErrors_False()
         {
             // Arrange \\
 
@@ -606,7 +607,7 @@ namespace Api.Tests.UseCases.OrganisationTests
         }
 
         [Fact]
-        public async void DeleteOrganisation_ClientConfigAndClientAndGroupReposDeleteErrors_False()
+        public async Task DeleteOrganisation_ClientConfigAndClientAndGroupReposDeleteErrors_False()
         {
             // Arrange \\
 

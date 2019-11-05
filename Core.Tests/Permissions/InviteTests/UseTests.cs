@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 using Api.Core.DTO.GatewayResponses;
 using Api.Core.DTO.GatewayResponses.Repositories.Invite;
 using Api.Core.DTO.GatewayResponses.Repositories.Organisation;
@@ -17,7 +18,7 @@ namespace Api.Tests.Permissions.InviteTests
     public class UseTests
     {
         [Fact]
-        public async void UseInvite_NonOrgUser_True()
+        public async Task UseInvite_NonOrgUser_True()
         {
             // Arrange \\
 
@@ -86,7 +87,7 @@ namespace Api.Tests.Permissions.InviteTests
         }
 
         [Fact]
-        public async void UseInvite_NotMatchingEmailAddress_False()
+        public async Task UseInvite_NotMatchingEmailAddress_False()
         {
             // Arrange \\
 

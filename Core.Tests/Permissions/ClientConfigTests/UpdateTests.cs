@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Api.Core.DTO.GatewayResponses.Repositories.ClientConfig;
 using Api.Core.DTO.GatewayResponses.Repositories.Organisation;
 using Api.Core.DTO.UseCaseRequests.ClientConfig;
@@ -17,7 +18,7 @@ namespace Api.Tests.Permissions.ClientConfigTests
     public class UpdateTests
     {
         [Fact]
-        public async void UpdateClientConfig_NonOrgUser_False()
+        public async Task UpdateClientConfig_NonOrgUser_False()
         {
             // Arrange \\
 
@@ -93,7 +94,7 @@ namespace Api.Tests.Permissions.ClientConfigTests
         [InlineData(OrganisationPermissions.DeleteClients)]
         [InlineData(OrganisationPermissions.DeleteGroups)]
         [InlineData(OrganisationPermissions.DeleteOrgUsers)]
-        public async void UpdateClientConfig_WrongPermission_False(OrganisationPermissions permission)
+        public async Task UpdateClientConfig_WrongPermission_False(OrganisationPermissions permission)
         {
             // Arrange
 
@@ -173,7 +174,7 @@ namespace Api.Tests.Permissions.ClientConfigTests
         [Theory]
         [InlineData(OrganisationPermissions.EditClients)]
         [InlineData(OrganisationPermissions.All)]
-        public async void UpdateClientConfig_CorrectPermission_True(OrganisationPermissions permission)
+        public async Task UpdateClientConfig_CorrectPermission_True(OrganisationPermissions permission)
         {
             // Arrange
 
@@ -249,7 +250,7 @@ namespace Api.Tests.Permissions.ClientConfigTests
         }
 
         [Fact]
-        public async void UpdateClientConfig_OrgOwner_True()
+        public async Task UpdateClientConfig_OrgOwner_True()
         {
             // Arrange
 

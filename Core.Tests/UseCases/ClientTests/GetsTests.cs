@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Api.Core.DTO;
 using Api.Core.DTO.GatewayResponses.Repositories.Client;
 using Api.Core.DTO.GatewayResponses.Repositories.Organisation;
@@ -18,7 +19,7 @@ namespace Api.Tests.UseCases.ClientTests
     public class GetsTests
     {
         [Fact]
-        public async void GetClients_True()
+        public async Task GetClients_True()
         {
             // Arrange \\
 
@@ -81,7 +82,7 @@ namespace Api.Tests.UseCases.ClientTests
         }
 
         [Fact]
-        public async void GetClients_OrganisationNonExistent_False()
+        public async Task GetClients_OrganisationNonExistent_False()
         {
             // Arrange \\
 
@@ -128,7 +129,7 @@ namespace Api.Tests.UseCases.ClientTests
         }
 
         [Fact]
-        public async void GetClients_RepoGetErrors_False()
+        public async Task GetClients_RepoGetErrors_False()
         {
             // Arrange \\
 

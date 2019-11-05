@@ -8,13 +8,13 @@ namespace Hub.Core.Interfaces
         
         public TMessageResponse Response { get; }
 
-        public UseCaseResponseMessage(TMessageResponse response)
+        protected UseCaseResponseMessage(TMessageResponse response)
         {
             Response = response;
             Messages = new List<TMessageResponse>();
         }
 
-        public UseCaseResponseMessage(IList<TMessageResponse> messages, TMessageResponse response)
+        protected UseCaseResponseMessage(IList<TMessageResponse> messages, TMessageResponse response)
         {
             Messages = messages;
             Response = response;

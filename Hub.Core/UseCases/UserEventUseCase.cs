@@ -16,9 +16,9 @@ namespace Hub.Core.UseCases
 {
     public class UserEventUseCase : IUserEventUseCase
     {
-        private IClientRepository _clientRepository;
-        private IClientConfigRepository _clientConfigRepository;
-        private IGroupRepository _groupRepository;
+        private readonly IClientRepository _clientRepository;
+        private readonly IClientConfigRepository _clientConfigRepository;
+        private readonly IGroupRepository _groupRepository;
 
         public UserEventUseCase(IClientRepository clientRepository, IClientConfigRepository clientConfigRepository, IGroupRepository groupRepository)
         {

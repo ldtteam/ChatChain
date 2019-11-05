@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Api.Core.DTO.GatewayResponses.Repositories.Client;
 using Api.Core.DTO.GatewayResponses.Repositories.ClientConfig;
 using Api.Core.DTO.GatewayResponses.Repositories.IS4Client;
@@ -20,7 +21,7 @@ namespace Api.Tests.Permissions.ClientTests
     public class CreateTests
     {
         [Fact]
-        public async void CreateClient_NonOrgUser_False()
+        public async Task CreateClient_NonOrgUser_False()
         {
             // Arrange \\
 
@@ -114,7 +115,7 @@ namespace Api.Tests.Permissions.ClientTests
         [InlineData(OrganisationPermissions.DeleteGroups)]
         [InlineData(OrganisationPermissions.DeleteOrgUsers)]
         [InlineData(OrganisationPermissions.EditClients)]
-        public async void CreateClient_WrongPermission_False(OrganisationPermissions permission)
+        public async Task CreateClient_WrongPermission_False(OrganisationPermissions permission)
         {
             // Arrange \\
 
@@ -212,7 +213,7 @@ namespace Api.Tests.Permissions.ClientTests
         [Theory]
         [InlineData(OrganisationPermissions.CreateClients)]
         [InlineData(OrganisationPermissions.All)]
-        public async void CreateClient_CorrectPermission_True(OrganisationPermissions permission)
+        public async Task CreateClient_CorrectPermission_True(OrganisationPermissions permission)
         {
             // Arrange \\
 
@@ -307,7 +308,7 @@ namespace Api.Tests.Permissions.ClientTests
         }
 
         [Fact]
-        public async void CreateClient_OrgOwner_True()
+        public async Task CreateClient_OrgOwner_True()
         {
             // Arrange \\
 

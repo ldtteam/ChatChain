@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 using Api.Core.DTO;
 using Api.Core.DTO.GatewayResponses;
 using Api.Core.DTO.GatewayResponses.Repositories.Group;
@@ -18,7 +19,7 @@ namespace Api.Tests.UseCases.GroupTests
     public class DeleteTests
     {
         [Fact]
-        public async void DeleteGroup_True()
+        public async Task DeleteGroup_True()
         {
             // Arrange \\
 
@@ -85,7 +86,7 @@ namespace Api.Tests.UseCases.GroupTests
         }
 
         [Fact]
-        public async void DeleteGroup_OrganisationNonExistent_False()
+        public async Task DeleteGroup_OrganisationNonExistent_False()
         {
             // Arrange \\
 
@@ -140,7 +141,7 @@ namespace Api.Tests.UseCases.GroupTests
         }
 
         [Fact]
-        public async void DeleteGroup_NonExistent_False()
+        public async Task DeleteGroup_NonExistent_False()
         {
             // Arrange \\
 
@@ -193,7 +194,7 @@ namespace Api.Tests.UseCases.GroupTests
         }
 
         [Fact]
-        public async void DeleteGroup_NotInOrganisation_False()
+        public async Task DeleteGroup_NotInOrganisation_False()
         {
             // Arrange \\
 
@@ -248,7 +249,7 @@ namespace Api.Tests.UseCases.GroupTests
         }
 
         [Fact]
-        public async void DeleteGroup_RepoDeleteErrors_False()
+        public async Task DeleteGroup_RepoDeleteErrors_False()
         {
             // Arrange \\
 

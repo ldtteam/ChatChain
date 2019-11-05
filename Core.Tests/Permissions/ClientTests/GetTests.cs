@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Api.Core.DTO.GatewayResponses.Repositories.Client;
 using Api.Core.DTO.GatewayResponses.Repositories.Organisation;
 using Api.Core.DTO.UseCaseRequests.Client;
@@ -17,7 +18,7 @@ namespace Api.Tests.Permissions.ClientTests
     public class GetTests
     {
         [Fact]
-        public async void GetClient_NonOrgUser_False()
+        public async Task GetClient_NonOrgUser_False()
         {
             // Arrange \\
 
@@ -73,7 +74,7 @@ namespace Api.Tests.Permissions.ClientTests
         }
 
         [Fact]
-        public async void GetClient_OrgUser_True()
+        public async Task GetClient_OrgUser_True()
         {
             // Arrange \\
 
@@ -139,7 +140,7 @@ namespace Api.Tests.Permissions.ClientTests
         }
 
         [Fact]
-        public async void GetClient_OrgOwner_True()
+        public async Task GetClient_OrgOwner_True()
         {
             // Arrange \\
 

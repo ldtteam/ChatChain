@@ -44,7 +44,6 @@ namespace Hub
                 options.ForwardedHeaders = 
                     ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
             });
-            //services.AddMvc();
 
             IdentityServerConnection identityServerConnection = new IdentityServerConnection();
             _configuration.GetSection("IdentityServerConnection").Bind(identityServerConnection);
