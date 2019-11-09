@@ -5,7 +5,7 @@ using Microsoft.Extensions.Primitives;
 
 namespace Hub.Utils
 {
-    public class CustomTokenRetriever
+    public static class CustomTokenRetriever
     {
         private const string TokenItemsKey = "idsrv4:tokenvalidation:token";
         // custom token key change it to the one you use for sending the access_token to the server
