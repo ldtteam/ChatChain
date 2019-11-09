@@ -3,10 +3,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using ChatChainCommon.IdentityServerRepository;
 using IdentityServer4.Models;
+using IdentityServer4.Stores;
 
 namespace ChatChainCommon.IdentityServerStore
 {
-    public class CustomClientStore : IdentityServer4.Stores.IClientStore
+    public class CustomClientStore : ICustomClientStore, IClientStore
     {
         private readonly IRepository _dbRepository;
         private readonly IEnumerable<Client> _clients;
@@ -28,27 +29,15 @@ namespace ChatChainCommon.IdentityServerStore
 
             return Task.FromResult(client);
         }
-        
-        public Task<List<Client>> AllClients()
-        {
-            List<Client> clients = _dbRepository.All<Client>().ToList();
 
-            return Task.FromResult(clients);
-        }
-
-        public void RemoveClient(Client client)
+        public void RemoveClient(string clientId)
         {
-            _dbRepository.Delete<Client>(c => c.ClientId == client.ClientId);
+            _dbRepository.Delete<Client>(c => c.ClientId == clientId);
         }
 
         public void AddClient(Client client)
         {
             _dbRepository.Add(client);
-        }
-
-        public void UpdateClient(Client client)
-        {
-            _dbRepository.Update(c => c.ClientId == client.ClientId, client);
         }
     }
 }

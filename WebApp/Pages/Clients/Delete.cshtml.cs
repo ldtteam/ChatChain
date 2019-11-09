@@ -1,91 +1,75 @@
 using System;
 using System.Threading.Tasks;
-using ChatChainCommon.DatabaseModels;
-using ChatChainCommon.DatabaseServices;
-using ChatChainCommon.IdentityServerStore;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using MongoDB.Bson;
-using WebApp.Utilities;
+using WebApp.Api;
+using WebApp.Extensions;
+using WebApp.Services;
 
 namespace WebApp.Pages.Clients
 {
     [Authorize]
     public class DeleteModel : PageModel
     {
-        private readonly CustomClientStore _is4ClientStore;
-        private readonly ClientService _clientsContext;
-        private readonly OrganisationService _organisationsContext;
+        private readonly ApiService _apiService;
 
-        public DeleteModel(CustomClientStore is4ClientStore, ClientService clientsContext, OrganisationService organisationsContext)
+        public DeleteModel(ApiService apiService)
         {
-            _is4ClientStore = is4ClientStore;
-            _clientsContext = clientsContext;
-            _organisationsContext = organisationsContext;
+            _apiService = apiService;
         }
-        
-        [BindProperty]
-        public Client Client { get; set; }
-        // ReSharper disable once UnusedAutoPropertyAccessor.Global
-        public string ErrorMessage { get; set; }
-        
-        public Organisation Organisation { get; set; }
-        
-        public async Task<IActionResult> OnGetAsync(string organisation, string client)
-        {
-            if (client == null)
-            {
-                return RedirectToPage("./Index", new { organisation = Organisation.Id });
-            }
-            
-            (bool result, Organisation org) = await this.VerifyUserPermissions(organisation, _organisationsContext, OrganisationPermissions.DeleteClients);
-            Organisation = org;
-            if (!result) return NotFound();
 
-            Client = await _clientsContext.GetAsync(new ObjectId(client));
-            
-            if (Client == null || Client.OwnerId != Organisation.Id.ToString())
+        [BindProperty] public Client Client { get; set; }
+
+        public Organisation Organisation { get; private set; }
+
+        // ReSharper disable once MemberCanBePrivate.Global
+        public async Task<IActionResult> OnGetAsync(Guid organisation, Guid client)
+        {
+            if (!await _apiService.VerifyTokensAsync(HttpContext))
+                return SignOut(new AuthenticationProperties {RedirectUri = HttpContext.Request.GetDisplayUrl()},
+                    "Cookies");
+            ApiClient apiClient = await _apiService.GetApiClientAsync(HttpContext);
+
+            try
             {
-                return RedirectToPage("./Index", new { organisation = Organisation.Id });
+                GetClientResponse response = await apiClient.GetClientAsync(organisation, client);
+                Organisation = response.Organisation;
+                Client = response.Client;
+                if (!Organisation.UserHasPermission(response.User, Permissions.DeleteClients))
+                    return StatusCode(403);
+            }
+            catch (ApiException e)
+            {
+                return StatusCode(e.StatusCode, e.Response);
             }
 
             return Page();
         }
-        
-        public async Task<IActionResult> OnPostAsync(string organisation, string client)
+
+        // ReSharper disable once UnusedMember.Global
+        public async Task<IActionResult> OnPostAsync(Guid organisation, Guid client)
         {
-            if (client == null)
-            {
-                return NotFound();
-            }
-            
-            (bool result, Organisation org) = await this.VerifyUserPermissions(organisation, _organisationsContext, OrganisationPermissions.DeleteClients);
-            Organisation = org;
-            if (!result) return NotFound();
+            if (!await _apiService.VerifyTokensAsync(HttpContext))
+                return SignOut(new AuthenticationProperties {RedirectUri = HttpContext.Request.GetDisplayUrl()},
+                    "Cookies");
+            ApiClient apiClient = await _apiService.GetApiClientAsync(HttpContext);
 
-            Client groupClient = await _clientsContext.GetAsync(new ObjectId(client));
-
-            if (groupClient == null)
+            try
             {
-                return NotFound();
+                await apiClient.DeleteClientAsync(organisation, client);
             }
-            
-            if (groupClient.OwnerId != Organisation.Id.ToString())
+            catch (ApiException e)
             {
-                return RedirectToPage("./Index", new { organisation = Organisation.Id });
+                // Relays the status code and response from the API
+                if (e.StatusCode != 403) return StatusCode(e.StatusCode, e.Response);
+                ModelState.AddModelError(string.Empty, e.Response);
+                return await OnGetAsync(organisation, client);
             }
 
-            IdentityServer4.Models.Client is4Client = await _is4ClientStore.FindClientByIdAsync(groupClient.ClientId);
-            
-            if (is4Client == null)
-            {
-                return NotFound();
-            }
-
-            _is4ClientStore.RemoveClient(is4Client);
-            await _clientsContext.RemoveAsync(groupClient.Id);
-            return RedirectToPage("./Index", new { organisation = Organisation.Id });
+            return RedirectToPage("./Index");
         }
     }
 }

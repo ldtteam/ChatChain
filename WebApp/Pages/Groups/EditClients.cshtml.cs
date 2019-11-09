@@ -1,105 +1,93 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using ChatChainCommon.DatabaseModels;
-using ChatChainCommon.DatabaseServices;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using MongoDB.Bson;
-using WebApp.Utilities;
+using WebApp.Api;
+using WebApp.Extensions;
+using WebApp.Services;
 
 namespace WebApp.Pages.Groups
 {
     [Authorize]
     public class EditClientsModel : PageModel
     {
-        private readonly GroupService _groupsContext;
-        private readonly ClientService _clientsContext;
-        private readonly OrganisationService _organisationsContext;
+        private readonly ApiService _apiService;
 
-        public EditClientsModel(GroupService groupsContext, ClientService clientsContext, OrganisationService organisationsContext)
+        public EditClientsModel(ApiService apiService)
         {
-            _groupsContext = groupsContext;
-            _clientsContext = clientsContext;
-            _organisationsContext = organisationsContext;
+            _apiService = apiService;
         }
 
         public Group Group { get; set; }
-        [BindProperty]
-        public string[] SelectedClients { get; set; }
+        [BindProperty] public Guid[] SelectedClients { get; set; }
         public SelectList ClientOptions { get; set; }
-        
-        public Organisation Organisation { get; set; }
 
-        public async Task<IActionResult> OnGetAsync(string organisation, string group)
+        public Organisation Organisation { get; private set; }
+
+        // ReSharper disable once MemberCanBePrivate.Global
+        public async Task<IActionResult> OnGetAsync(Guid organisation, Guid group)
         {
-            if (group == null)
+            if (!await _apiService.VerifyTokensAsync(HttpContext))
+                return SignOut(new AuthenticationProperties {RedirectUri = HttpContext.Request.GetDisplayUrl()},
+                    "Cookies");
+            ApiClient apiClient = await _apiService.GetApiClientAsync(HttpContext);
+
+            try
             {
-                return RedirectToPage("./Index", new { organisation = Organisation.Id });
+                GetGroupResponse getGroupResponse = await apiClient.GetGroupAsync(organisation, group);
+                Organisation = getGroupResponse.Organisation;
+                Group = getGroupResponse.Group;
+                if (!Organisation.UserHasPermission(getGroupResponse.User, Permissions.EditClients))
+                    return StatusCode(403);
+
+                GetClientsResponse clientsResponse = await apiClient.GetClientsAsync(organisation);
+                ClientOptions = new SelectList(clientsResponse.Clients, nameof(Client.Id),
+                    nameof(Client.Name));
             }
-            
-            (bool result, Organisation org) = await this.VerifyUserPermissions(organisation, _organisationsContext, OrganisationPermissions.EditGroups);
-            Organisation = org;
-            if (!result) return NotFound();
-
-            Group = await _groupsContext.GetAsync(new ObjectId(group));
-
-            if (Group == null || Group.OwnerId != Organisation.Id.ToString())
+            catch (ApiException e)
             {
-                return RedirectToPage("./Index", new { organisation = Organisation.Id });
+                return StatusCode(e.StatusCode, e.Response);
             }
 
-            ClientOptions = new SelectList(await _clientsContext.GetFromOwnerIdAsync(Group.OwnerId), nameof(Client.Id), nameof(Client.ClientName));
-
-            SelectedClients = (from client in await _groupsContext.GetClientsAsync(Group.Id) select client.Id.ToString()).ToArray();
+            SelectedClients = Group.ClientIds.ToArray();
 
             return Page();
         }
-        
-        public async Task<IActionResult> OnPostAsync(string organisation, string group)
+
+        // ReSharper disable once UnusedMember.Global
+        public async Task<IActionResult> OnPostAsync(Guid organisation, Guid group)
         {
-            (bool result, Organisation org) = await this.VerifyUserPermissions(organisation, _organisationsContext, OrganisationPermissions.EditGroups);
-            Organisation = org;
-            if (!result) return NotFound();
+            if (!ModelState.IsValid) return await OnGetAsync(organisation, group);
 
-            if (!ModelState.IsValid)
+            if (!await _apiService.VerifyTokensAsync(HttpContext))
+                return SignOut(new AuthenticationProperties {RedirectUri = HttpContext.Request.GetDisplayUrl()},
+                    "Cookies");
+            ApiClient apiClient = await _apiService.GetApiClientAsync(HttpContext);
+
+            UpdateGroupDTO updateGroupDTO = new UpdateGroupDTO
             {
-                return Page();
+                ClientIds = SelectedClients
+            };
+
+            try
+            {
+                await apiClient.UpdateGroupAsync(organisation, group, updateGroupDTO);
+            }
+            catch (ApiException e)
+            {
+                // Relays the status code and response from the API
+                if (e.StatusCode != 403) return StatusCode(e.StatusCode, e.Response);
+
+                ModelState.AddModelError(string.Empty, e.Response);
+                return await OnGetAsync(organisation, group);
             }
 
-            Group = await _groupsContext.GetAsync(new ObjectId(group));
-
-            if (Group == null || Group.OwnerId != Organisation.Id.ToString())
-            {
-                return RedirectToPage("./Index", new { organisation = Organisation.Id });
-            }
-            
-            List<ObjectId> selectedClientsIds = SelectedClients.Select(client => new ObjectId(client)).ToList();
-
-            List<ObjectId> currentClients = Group.ClientIds;
-
-            foreach (ObjectId clientId in currentClients)
-            {
-                if (!selectedClientsIds.Contains(clientId))
-                {
-                    await _groupsContext.RemoveClientAsync(Group.Id, clientId);
-                }
-            }
-
-            foreach (ObjectId selectedClientId in selectedClientsIds)
-            {
-                if (!currentClients.Contains(selectedClientId))
-                {
-
-                    await _groupsContext.AddClientAsync(Group.Id, selectedClientId);
-                }
-            }
-            
-            return RedirectToPage("./Clients", new { organisation = Organisation.Id, group = Group.Id} );
-
+            return RedirectToPage("./Index");
         }
     }
 }

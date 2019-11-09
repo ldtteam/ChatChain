@@ -1,5 +1,6 @@
 @page
-@using ChatChainCommon.DatabaseModels
+@using WebApp.Api
+@using WebApp.Extensions
 @model WebApp.Pages.Organisations.Index
 
 @{
@@ -16,39 +17,40 @@
                 <th>Organisation Name</th>
                 <th>Clients & Groups</th>
                 <th>Users</th>
-                <th><a class="btn btn-success btn-sm" asp-page="./Create">Create New</a></th>
+                <th>
+                    <a class="btn btn-success btn-sm" asp-page="./Create">Create New</a>
+                </th>
             </tr>
             </thead>
             <tbody>
-            @foreach (Organisation org in Model.Organisations)
+            @foreach (OrganisationDetails orgDetails in Model.Organisations)
             {
                 <tr>
                     <td>
-                        @Html.DisplayTextFor(m => org.Name)
+                        @Html.DisplayTextFor(m => orgDetails.Name)
                     </td>
                     <td>
                         <div class="btn-group">
-                            <a class="btn btn-primary btn-sm" asp-page="/Clients/Index" asp-route-organisation="@org.Id">Clients</a>
-                            <a class="btn btn-primary btn-sm" asp-page="/Groups/Index" asp-route-organisation="@org.Id">Groups</a>
+                            <a class="btn btn-primary btn-sm" asp-page="/Clients/Index" asp-route-organisation="@orgDetails.Id">Clients</a>
+                            <a class="btn btn-primary btn-sm" asp-page="/Groups/Index" asp-route-organisation="@orgDetails.Id">Groups</a>
                         </div>
                     </td>
                     <td>
-                        <a class="btn btn-primary btn-sm" asp-page="Users/Index" asp-route-organisation="@org.Id">Users</a>
+                        <a class="btn btn-primary btn-sm" asp-page="Users/Index" asp-route-organisation="@orgDetails.Id">Users</a>
                     </td>
                     <td>
                         <div class="btn-group">
-                            @if (org.Users[User.Claims.First(claim => claim.Type.Equals("sub")).Value].Permissions.Contains(OrganisationPermissions.EditOrg) 
-                                 || org.Users[User.Claims.First(claim => claim.Type.Equals("sub")).Value].Permissions.Contains(OrganisationPermissions.All))
+                            @if (orgDetails.Id != null && orgDetails.UserHasPermission(Model.OrganisationUsers[orgDetails.Id.Value.ToString()], Permissions.EditOrg))
                             {
-                                <a class="btn btn-primary btn-sm" asp-page="./Edit" asp-route-organisation="@org.Id">Edit</a>
+                                <a class="btn btn-primary btn-sm" asp-page="./Edit" asp-route-organisation="@orgDetails.Id">Edit</a>
                             }
-                            @if (org.Owner == User.Claims.First(claim => claim.Type.Equals("sub")).Value)
+                            @if (orgDetails.Id != null && orgDetails.UserIsOwner(Model.OrganisationUsers[orgDetails.Id.Value.ToString()]))
                             {
-                                <a class="btn btn-danger btn-sm" asp-page="./Delete" asp-route-organisation="@org.Id">Delete</a>
+                                <a class="btn btn-danger btn-sm" asp-page="./Delete" asp-route-organisation="@orgDetails.Id">Delete</a>
                             }
-                            @if (org.Owner != User.Claims.First(claim => claim.Type.Equals("sub")).Value)
+                            @if (orgDetails.Id != null && !orgDetails.UserIsOwner(Model.OrganisationUsers[orgDetails.Id.Value.ToString()]))
                             {
-                                <a class="btn btn-danger btn-sm" asp-page="./Leave" asp-route-organisation="@org.Id">Leave</a>
+                                <a class="btn btn-danger btn-sm" asp-page="./Leave" asp-route-organisation="@orgDetails.Id">Leave</a>
                             }
                         </div>
                     </td>
@@ -58,3 +60,7 @@
         </table>
     </div>
 </div>
+
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+}

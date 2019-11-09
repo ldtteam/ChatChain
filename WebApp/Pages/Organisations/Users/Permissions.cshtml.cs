@@ -1,101 +1,94 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Threading.Tasks;
-using ChatChainCommon.Config;
-using ChatChainCommon.DatabaseModels;
-using ChatChainCommon.DatabaseServices;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Newtonsoft.Json;
-using WebApp.Utilities;
+using WebApp.Api;
+using WebApp.Extensions;
+using WebApp.Services;
+using AuthenticationProperties = Microsoft.AspNetCore.Authentication.AuthenticationProperties;
 
 namespace WebApp.Pages.Organisations.Users
 {
+    [Authorize]
     public class Permissions : PageModel
     {
-        
-        private readonly OrganisationService _organisationsContext;
-        private readonly IdentityServerConnection _identityConfiguration;
-        
-        public Permissions(OrganisationService organisationsContext, IdentityServerConnection identityConfiguration)
+        private readonly ApiService _apiService;
+
+        public Permissions(ApiService apiService)
         {
-            _organisationsContext = organisationsContext;
-            _identityConfiguration = identityConfiguration;
-        }
-        
-        public Organisation Organisation { get; set; }
-        
-        public ResponseUser RUser { get; set; }
-        
-        [BindProperty]
-        public OrganisationPermissions[] SelectedPermissions { get; set; }
-        
-        public SelectList PermissionOptions { get; set; }
-            
-        public class ResponseUser
-        {
-            public string DisplayName { get; set; }
-            public string EmailAddress { get; set; }
-            public string Id { get; set; }
+            _apiService = apiService;
         }
 
-        
-        public async Task<IActionResult> OnGet(string organisation, string id)
+        public Organisation Organisation { get; private set; }
+
+        public OrganisationUser EditingUser { get; set; }
+
+        [BindProperty] public ICollection<Api.Permissions> SelectedPermissions { get; set; }
+
+
+        // ReSharper disable once MemberCanBePrivate.Global
+        public async Task<IActionResult> OnGetAsync(Guid organisation, string id)
         {
-            // Verify user isn't editing themselves
-            if (User.Claims.First(claim => claim.Type.Equals("sub")).Value.Equals(id, StringComparison.OrdinalIgnoreCase))
-                return StatusCode(403);
-            
-            (bool result, Organisation org) = await this.VerifyUserPermissions(organisation, _organisationsContext, OrganisationPermissions.EditOrgUsers);
-            Organisation = org;
-            if (!result) return NotFound();
-
-            // Verify user isn't owner
-            if (string.Equals(Organisation.Owner, id, StringComparison.OrdinalIgnoreCase))
-                return StatusCode(403);
-
-            using (HttpClient client = new HttpClient())
+            if (!await _apiService.VerifyTokensAsync(HttpContext))
+                return SignOut(new AuthenticationProperties {RedirectUri = HttpContext.Request.GetDisplayUrl()},
+                    "Cookies");
+            ApiClient client = await _apiService.GetApiClientAsync(HttpContext);
+            try
             {
-                client.BaseAddress = new Uri(_identityConfiguration.ServerUrl);
-                MediaTypeWithQualityHeaderValue contentType = new MediaTypeWithQualityHeaderValue("application/json");
-                client.DefaultRequestHeaders.Accept.Add(contentType);
-
-                string usersJson = JsonConvert.SerializeObject(new List<string>{id});
-                StringContent contentData = new StringContent(usersJson, System.Text.Encoding.UTF8, "application/json");
-                HttpResponseMessage response = await client.PostAsync("/api/Users", contentData);
-                string stringData = await response.Content.ReadAsStringAsync();
-                RUser = JsonConvert.DeserializeObject<IEnumerable<ResponseUser>>(stringData).FirstOrDefault();
+                GetOrganisationUserResponse response = await client.GetUserAsync(organisation, id);
+                Organisation = response.Organisation;
+                EditingUser = response.RequestedUser;
+                if (!Organisation.UserHasPermission(response.User, Api.Permissions.EditOrgUsers) &&
+                    Organisation.UserIsOwner(EditingUser) ||
+                    id == response.User.Id)
+                    return StatusCode(403);
             }
-            
-            PermissionOptions = new SelectList(Enum.GetValues(typeof(OrganisationPermissions)), nameof(OrganisationPermissions), nameof(OrganisationPermissions));
+            catch (ApiException e)
+            {
+                // Relays the status code and response from the API
+                return StatusCode(e.StatusCode, e.Response);
+            }
 
-            SelectedPermissions = Organisation.Users[id].Permissions.ToArray();
+            SelectedPermissions = EditingUser.Permissions;
 
             return Page();
         }
-        
-        public async Task<IActionResult> OnPostAsync(string organisation, string id)
+
+        // ReSharper disable once UnusedMember.Global
+        public async Task<IActionResult> OnPostAsync(Guid organisation, string id)
         {
-            // Verify user isn't editing themselves
-            if (User.Claims.First(claim => claim.Type.Equals("sub")).Value.Equals(id, StringComparison.OrdinalIgnoreCase))
-                return StatusCode(403);
-            
-            (bool result, Organisation org) = await this.VerifyUserPermissions(organisation, _organisationsContext, OrganisationPermissions.EditOrgUsers);
-            Organisation = org;
-            if (!result) return NotFound();
+            if (!ModelState.IsValid) return await OnGetAsync(organisation, id);
 
-            // Verify user isn't owner
-            if (string.Equals(Organisation.Owner, id, StringComparison.OrdinalIgnoreCase))
-                return StatusCode(403);
+            if (!await _apiService.VerifyTokensAsync(HttpContext))
+                return SignOut(new AuthenticationProperties {RedirectUri = HttpContext.Request.GetDisplayUrl()},
+                    "Cookies");
+            ApiClient client = await _apiService.GetApiClientAsync(HttpContext);
 
-            Organisation.Users[id].Permissions = SelectedPermissions.ToList();
-            await _organisationsContext.UpdateAsync(Organisation.Id, Organisation);
-            
-            return RedirectToPage("./Index", new { organisation = Organisation.Id } );
+            try
+            {
+                UpdateOrganisationUserDTO updateDTO = new UpdateOrganisationUserDTO
+                {
+                    //These types are identical, however NSwag/Swagger is a little dumb on the generation, and creates a duplicate.
+                    //so we case the normal permission enum to the one that's wanted. This is easier than fixing the apiClient code
+                    //because it will persist if the code is regenerated.
+                    Permissions = SelectedPermissions.Select(perm => (Permissions2) perm).ToList()
+                };
+                await client.UpdateUserAsync(organisation, id, updateDTO);
+            }
+            catch (ApiException e)
+            {
+                // Relays the status code and response from the API
+                if (e.StatusCode != 403) return StatusCode(e.StatusCode, e.Response);
+
+                ModelState.AddModelError(string.Empty, e.Response);
+                return await OnGetAsync(organisation, id);
+            }
+
+            return RedirectToPage("./Index");
         }
     }
 }

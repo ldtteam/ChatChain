@@ -1,33 +1,42 @@
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using ChatChainCommon.DatabaseModels;
-using ChatChainCommon.DatabaseServices;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.Extensions;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using WebApp.Api;
+using WebApp.Services;
+
+// ReSharper disable UnusedMember.Global
 
 namespace WebApp.Pages.Organisations
 {
     [Authorize]
     public class Index : PageModel
     {
-        private readonly OrganisationService _organisationsContext;
+        private readonly ApiService _apiService;
 
-        public Index(OrganisationService organisationsContext)
+        public Index(ApiService apiService)
         {
-            _organisationsContext = organisationsContext;
+            _apiService = apiService;
         }
-        
-        public IList<Organisation> Organisations { get; private set; }
 
-        public async Task OnGet()
+        public IEnumerable<OrganisationDetails> Organisations { get; private set; }
+        public IDictionary<string, OrganisationUser> OrganisationUsers { get; private set; }
+
+        public async Task<ActionResult> OnGetAsync()
         {
-            Organisations = new List<Organisation>();
+            if (!await _apiService.VerifyTokensAsync(HttpContext))
+                return SignOut(new AuthenticationProperties {RedirectUri = HttpContext.Request.GetDisplayUrl()},
+                    "Cookies");
+            ApiClient apiClient = await _apiService.GetApiClientAsync(HttpContext);
 
-            foreach (Organisation organisation in await _organisationsContext.GetForUserAsync(User.Claims.First(claim => claim.Type.Equals("sub")).Value))
-            {
-                Organisations.Add(organisation);
-            }
+            GetOrganisationsResponse response = await apiClient.GetOrganisationsAsync();
+            Organisations = response.Organisations;
+            OrganisationUsers = response.Users;
+
+            return Page();
         }
     }
 }

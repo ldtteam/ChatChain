@@ -1,36 +1,31 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
-using ChatChainCommon.DatabaseModels;
-using ChatChainCommon.DatabaseServices;
-using ChatChainCommon.IdentityServerStore;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using MongoDB.Bson;
-using WebApp.Utilities;
+using WebApp.Api;
+using WebApp.Extensions;
+using WebApp.Services;
 
 namespace WebApp.Pages.Clients
 {
     [Authorize]
     public class EditModel : PageModel
     {
-        private readonly CustomClientStore _is4ClientStore;
-        private readonly ClientService _clientsContext;
-        private readonly OrganisationService _organisationsContext;
+        private readonly ApiService _apiService;
 
-        public EditModel(CustomClientStore is4ClientStore, ClientService clientsContext, OrganisationService organisationsContext)
+        public EditModel(ApiService apiService)
         {
-            _is4ClientStore = is4ClientStore;
-            _clientsContext = clientsContext;
-            _organisationsContext = organisationsContext;
+            _apiService = apiService;
         }
-        
-        public Client Client { get; set; }
-        [BindProperty]
-        public InputModel Input { get; set; }
 
-        public Organisation Organisation { get; set; }
+        public Client Client { get; set; }
+        [BindProperty] public InputModel Input { get; set; } = new InputModel();
+
+        public Organisation Organisation { get; private set; }
 
         public class InputModel
         {
@@ -38,73 +33,67 @@ namespace WebApp.Pages.Clients
             [DataType(DataType.Text)]
             [Display(Name = "Client Name")]
             public string ClientName { get; set; }
-            
+
             [Required]
             [DataType(DataType.MultilineText)]
             [Display(Name = "Client Description")]
             public string ClientDescription { get; set; }
         }
-        
-        public async Task<IActionResult> OnGetAsync(string organisation, string client)
-        {
-            if (client == null)
-            {
-                return NotFound();
-            }
-            
-            (bool result, Organisation org) = await this.VerifyUserPermissions(organisation, _organisationsContext, OrganisationPermissions.EditClients);
-            Organisation = org;
-            if (!result) return NotFound();
 
-            Client = await _clientsContext.GetAsync(new ObjectId(client));
-           
-            if (Client == null || Client.OwnerId != Organisation.Id.ToString())
+        // ReSharper disable once MemberCanBePrivate.Global
+        public async Task<IActionResult> OnGetAsync(Guid organisation, Guid client)
+        {
+            if (!await _apiService.VerifyTokensAsync(HttpContext))
+                return SignOut(new AuthenticationProperties {RedirectUri = HttpContext.Request.GetDisplayUrl()},
+                    "Cookies");
+            ApiClient apiClient = await _apiService.GetApiClientAsync(HttpContext);
+
+            try
             {
-                return RedirectToPage("./Index", new { organisation = Organisation.Id });
+                GetClientResponse response = await apiClient.GetClientAsync(organisation, client);
+                Organisation = response.Organisation;
+                Client = response.Client;
+                if (!Organisation.UserHasPermission(response.User, Permissions.EditClients))
+                    return StatusCode(403);
             }
-            
-            Input = new InputModel
+            catch (ApiException e)
             {
-                ClientName = Client.ClientName,
-                ClientDescription = Client.ClientDescription
-            };
+                return StatusCode(e.StatusCode, e.Response);
+            }
 
             return Page();
         }
-        
-        public async Task<IActionResult> OnPostAsync(string organisation, string client)
+
+        // ReSharper disable once UnusedMember.Global
+        public async Task<IActionResult> OnPostAsync(Guid organisation, Guid client)
         {
-            (bool result, Organisation org) = await this.VerifyUserPermissions(organisation, _organisationsContext, OrganisationPermissions.EditClients);
-            Organisation = org;
-            if (!result) return NotFound();
-            
-            if (client == null)
+            if (!ModelState.IsValid) return await OnGetAsync(organisation, client);
+
+            if (!await _apiService.VerifyTokensAsync(HttpContext))
+                return SignOut(new AuthenticationProperties {RedirectUri = HttpContext.Request.GetDisplayUrl()},
+                    "Cookies");
+            ApiClient apiClient = await _apiService.GetApiClientAsync(HttpContext);
+
+            UpdateClientDTO updateClientDTO = new UpdateClientDTO
             {
-                return NotFound();
-            }
-            
-            if (!ModelState.IsValid)
+                Name = Input.ClientName,
+                Description = Input.ClientDescription
+            };
+
+            try
             {
-                return Page();
+                await apiClient.UpdateClientAsync(organisation, client, updateClientDTO);
             }
-
-            Client groupsClient = await _clientsContext.GetAsync(new ObjectId(client));
-
-            if (groupsClient.OwnerId != Organisation.Id.ToString())
+            catch (ApiException e)
             {
-                return RedirectToPage("./Index", new { organisation = Organisation.Id });
+                // Relays the status code and response from the API
+                if (e.StatusCode != 403) return StatusCode(e.StatusCode, e.Response);
+
+                ModelState.AddModelError(string.Empty, e.Response);
+                return await OnGetAsync(organisation, client);
             }
 
-            IdentityServer4.Models.Client clientToUpdate = await _is4ClientStore.FindClientByIdAsync(groupsClient.ClientId);
-
-            clientToUpdate.ClientName = Input.ClientName;
-            _is4ClientStore.UpdateClient(clientToUpdate);
-            
-            groupsClient.ClientName = Input.ClientName;
-            groupsClient.ClientDescription = Input.ClientDescription;
-            await _clientsContext.UpdateAsync(groupsClient.Id, groupsClient);
-
-            return RedirectToPage("./Index", new { organisation = Organisation.Id });
-        } 
+            return RedirectToPage("./Index");
+        }
     }
 }

@@ -1,130 +1,101 @@
 using System;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
 using System.Threading.Tasks;
-using ChatChainCommon.DatabaseModels;
-using ChatChainCommon.DatabaseServices;
-using ChatChainCommon.IdentityServerStore;
-using ChatChainCommon.RandomGenerator;
-using IdentityServer4.Models;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using WebApp.Utilities;
-using Client = IdentityServer4.Models.Client;
-using Secret = IdentityServer4.Models.Secret;
+using WebApp.Api;
+using WebApp.Extensions;
+using WebApp.Services;
 
 namespace WebApp.Pages.Clients
 {
     [Authorize]
     public class CreateModel : PageModel
     {
-        private readonly CustomClientStore _clientStore;
-        private readonly ClientService _clientsContext;
-        private readonly OrganisationService _organisationsContext;
+        private readonly ApiService _apiService;
 
-        public CreateModel(CustomClientStore clientStore, ClientService clientsContext, OrganisationService organisationsContext)
+        public CreateModel(ApiService apiService)
         {
-            _clientStore = clientStore;
-            _clientsContext = clientsContext;
-            _organisationsContext = organisationsContext;
+            _apiService = apiService;
         }
-        
-        public Organisation Organisation { get; set; }
-        
-        [BindProperty]
-        public InputModel Input { get; set; }
-        
-        [TempData]
-        public string StatusMessage { get; set; }
 
+        public OrganisationDetails Organisation { get; private set; }
+
+        [BindProperty] public InputModel Input { get; set; }
+
+        // ReSharper disable once MemberCanBePrivate.Global
+        // ReSharper disable once UnusedAutoPropertyAccessor.Global
+        [TempData] public string Password { get; set; }
 
         public class InputModel
         {
-            
             [Required]
             [DataType(DataType.Text)]
             [Display(Name = "Client Name")]
             public string ClientName { get; set; }
-            
+
             [Required]
             [DataType(DataType.MultilineText)]
             [Display(Name = "Client Description")]
             public string ClientDescription { get; set; }
-
-            [Required]
-            [DataType(DataType.Text)]
-            [Display(Name = "Password")]
-            public string Password { get; set; }
-
-            [DataType(DataType.Password)]
-            [Display(Name = "Confirm password")]
-            [Compare("Password", ErrorMessage = "\nThe password and confirmation password do not match.")]
-            public string ConfirmPassword { get; set; }
         }
 
-        public async Task<IActionResult> OnGetAsync(string organisation)
+        // ReSharper disable once MemberCanBePrivate.Global
+        public async Task<IActionResult> OnGetAsync(Guid organisation)
         {
-            (bool result, Organisation org) = await this.VerifyUserPermissions(organisation, _organisationsContext, OrganisationPermissions.CreateClients);
-            Organisation = org;
-            if (!result) return NotFound();
-            
-            Input = new InputModel {Password = PasswordGenerator.Generate()};
-            StatusMessage = $"Client password is: {Input.Password}\n You Will Not Receive This Again!";
-            return Page();
-        }
-        
-        public async Task<IActionResult> OnPostAsync(string organisation)
-        {
-            (bool result, Organisation org) = await this.VerifyUserPermissions(organisation, _organisationsContext, OrganisationPermissions.CreateClients);
-            Organisation = org;
-            if (!result) return NotFound();
-            
-            if (!ModelState.IsValid)
+            if (!await _apiService.VerifyTokensAsync(HttpContext))
+                return SignOut(new AuthenticationProperties {RedirectUri = HttpContext.Request.GetDisplayUrl()},
+                    "Cookies");
+            ApiClient client = await _apiService.GetApiClientAsync(HttpContext);
+
+            try
             {
-                return Page();
+                GetOrganisationResponse response = await client.GetOrganisationDetailsAsync(organisation);
+                Organisation = response.Organisation;
+                if (!Organisation.UserHasPermission(response.User, Permissions.CreateClients))
+                    return StatusCode(403);
+            }
+            catch (ApiException e)
+            {
+                return StatusCode(e.StatusCode, e.Response);
             }
 
-            string clientId = Guid.NewGuid().ToString();
-
-            Client client = new Client
-            {
-                ClientId = clientId,
-                ClientName = Input.ClientName,
-                AllowedGrantTypes = GrantTypes.ClientCredentials,
-
-                //Client secrets
-                ClientSecrets =
-                {
-                    new Secret(Input.Password.Sha256())
-                },
-                
-                AllowedScopes =
-                {
-                    "ChatChain"
-                },
-                
-                AllowOfflineAccess = true
-            };
-
-            _clientStore.AddClient(client);
-            
-            Client is4Client = await _clientStore.FindClientByIdAsync(clientId);
-
-            ChatChainCommon.DatabaseModels.Client newClient = new ChatChainCommon.DatabaseModels.Client
-            {
-                //OwnerId = _userManager.GetUserAsync(User).Result.Id,
-                OwnerId = Organisation.Id.ToString(),
-                ClientId = is4Client.ClientId,
-                ClientGuid = is4Client.ClientId,
-                ClientName = is4Client.ClientName,
-                ClientDescription = Input.ClientDescription
-            };
-
-            await _clientsContext.CreateAsync(newClient);
-            
-            return RedirectToPage("./Index", new { organisation = Organisation.Id });
+            return Page();
         }
-        
+
+        // ReSharper disable once UnusedMember.Global
+        public async Task<IActionResult> OnPostAsync(Guid organisation)
+        {
+            if (!ModelState.IsValid) return await OnGetAsync(organisation);
+
+            if (!await _apiService.VerifyTokensAsync(HttpContext))
+                return SignOut(new AuthenticationProperties {RedirectUri = HttpContext.Request.GetDisplayUrl()},
+                    "Cookies");
+            ApiClient client = await _apiService.GetApiClientAsync(HttpContext);
+
+            CreateClientDTO createClientDTO = new CreateClientDTO
+            {
+                Name = Input.ClientName,
+                Description = Input.ClientDescription
+            };
+
+            try
+            {
+                CreateClientResponse response = await client.CreateClientAsync(organisation, createClientDTO);
+                Password = response.Password;
+                return RedirectToPage("./PreviewNew", new {organisation, client = response.Client.Id});
+            }
+            catch (ApiException e)
+            {
+                // Relays the status code and response from the API
+                if (e.StatusCode != 403) return StatusCode(e.StatusCode, e.Response);
+
+                ModelState.AddModelError(string.Empty, e.Response);
+                return await OnGetAsync(organisation);
+            }
+        }
     }
 }

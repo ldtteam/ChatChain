@@ -1,42 +1,50 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using ChatChainCommon.DatabaseModels;
-using ChatChainCommon.DatabaseServices;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using WebApp.Utilities;
+using WebApp.Api;
+using WebApp.Services;
 
 namespace WebApp.Pages.Clients
 {
     [Authorize]
     public class IndexModel : PageModel
     {
-        private readonly ClientService _clientsContext;
-        private readonly OrganisationService _organisationsContext;
-        
-        public IndexModel(ClientService clientsContext, OrganisationService organisationsContext)
+        private readonly ApiService _apiService;
+
+        public IndexModel(ApiService apiService)
         {
-            _clientsContext = clientsContext;
-            _organisationsContext = organisationsContext;
+            _apiService = apiService;
         }
-        
-        public Organisation Organisation { get; set; }
 
-        public IList<Client> Clients { get; private set; }
+        public Organisation Organisation { get; private set; }
 
-        public async Task<IActionResult> OnGetAsync(string organisation)
+        public OrganisationUser OrganisationUser { get; private set; }
+
+        public IEnumerable<Client> Clients { get; private set; }
+
+        // ReSharper disable once UnusedMember.Global
+        public async Task<IActionResult> OnGetAsync(Guid organisation)
         {
-            (bool result, Organisation org) = await this.VerifyIsMember(organisation, _organisationsContext);
-            Organisation = org;
-            if (!result) return NotFound();
-            
-            Clients = new List<Client>();
+            if (!await _apiService.VerifyTokensAsync(HttpContext))
+                return SignOut(new AuthenticationProperties {RedirectUri = HttpContext.Request.GetDisplayUrl()},
+                    "Cookies");
+            ApiClient apiClient = await _apiService.GetApiClientAsync(HttpContext);
 
-            foreach (Client client in await _clientsContext.GetFromOwnerIdAsync(Organisation.Id.ToString()))
+            try
             {
-                Clients.Add(client);
+                GetClientsResponse response = await apiClient.GetClientsAsync(organisation);
+                Organisation = response.Organisation;
+                OrganisationUser = response.User;
+                Clients = response.Clients;
+            }
+            catch (ApiException e)
+            {
+                return StatusCode(e.StatusCode, e.Response);
             }
 
             return Page();

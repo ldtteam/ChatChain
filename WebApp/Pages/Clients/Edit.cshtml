@@ -11,18 +11,18 @@
         <div class="col-md-4">
             <form method="post" id="edit">
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                <input type="hidden" asp-for="Client.ClientId"/>
+                <input type="hidden" asp-for="Client.Id"/>
                 <div class="form-group">
                     <label asp-for="Input.ClientName" class="control-label"></label>
                     <label>
-                        <input class="form-control" asp-for="Input.ClientName" value="@Model.Client.ClientName"/>
+                        <input class="form-control" asp-for="Input.ClientName" value="@Model.Client.Name"/>
                     </label>
                     <span asp-validation-for="Input.ClientName" class="text-danger"></span>
                 </div>
                 <div class="form-group">
                     <label asp-for="Input.ClientDescription" class="control-label"></label>
                     <label for="Input_ClientDescription">
-                        <textarea class="form-control" form="edit" id="Input_ClientDescription" name="Input.ClientDescription" cols="40" rows="5">@Model.Input.ClientDescription</textarea>
+                        <textarea class="form-control" form="edit" id="Input_ClientDescription" name="Input.ClientDescription" cols="40" rows="5">@Model.Client.Description</textarea>
                     </label>
                     <span asp-validation-for="Input.ClientDescription" class="text-danger"></span>
                 </div>

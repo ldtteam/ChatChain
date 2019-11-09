@@ -1,44 +1,74 @@
 using System;
 using System.Threading.Tasks;
-using ChatChainCommon.DatabaseModels;
-using ChatChainCommon.DatabaseServices;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using WebApp.Utilities;
+using WebApp.Api;
+using WebApp.Extensions;
+using WebApp.Services;
 
 namespace WebApp.Pages.Organisations
 {
+    [Authorize]
     public class Delete : PageModel
     {
-        private readonly OrganisationService _organisationsContext;
-        
-        public Delete(OrganisationService organisationsContext)
-        {
-            _organisationsContext = organisationsContext;
-        }
-        
-        public Organisation Organisation { get; set; }
+        private readonly ApiService _apiService;
 
-        public async Task<IActionResult> OnGet(string organisation)
+        public Delete(ApiService apiService)
         {
-            (bool result, Organisation org) = await this.VerifyIsOwner(organisation, _organisationsContext);
-            Organisation = org;
-            
-            if (result)
+            _apiService = apiService;
+        }
+
+        public OrganisationDetails Organisation { get; set; }
+
+        // ReSharper disable once MemberCanBePrivate.Global
+        public async Task<IActionResult> OnGetAsync(Guid organisation)
+        {
+            if (!await _apiService.VerifyTokensAsync(HttpContext))
+                return SignOut(new AuthenticationProperties {RedirectUri = HttpContext.Request.GetDisplayUrl()},
+                    "Cookies");
+            ApiClient client = await _apiService.GetApiClientAsync(HttpContext);
+
+            try
             {
-                return Page();
+                GetOrganisationResponse response = await client.GetOrganisationDetailsAsync(organisation);
+                Organisation = response.Organisation;
+                if (!Organisation.UserIsOwner(response.User))
+                    return StatusCode(403);
             }
-            return NotFound();
-        }
-        
-        public async Task<IActionResult> OnPost(string organisation)
-        {
-            (bool result, Organisation org) = await this.VerifyIsOwner(organisation, _organisationsContext);
-            Organisation = org;
+            catch (ApiException e)
+            {
+                // Relays the status code and response from the API
+                return StatusCode(e.StatusCode, e.Response);
+            }
 
-            if (!result) return NotFound();
-            
-            await _organisationsContext.RemoveAsync(Organisation.Id);
+            return Page();
+        }
+
+        // ReSharper disable once UnusedMember.Global
+        public async Task<IActionResult> OnPostAsync(Guid organisation)
+        {
+            if (!ModelState.IsValid) return await OnGetAsync(organisation);
+
+            if (!await _apiService.VerifyTokensAsync(HttpContext))
+                return SignOut(new AuthenticationProperties {RedirectUri = HttpContext.Request.GetDisplayUrl()},
+                    "Cookies");
+            ApiClient client = await _apiService.GetApiClientAsync(HttpContext);
+
+            try
+            {
+                await client.DeleteOrganisationAsync(organisation);
+            }
+            catch (ApiException e)
+            {
+                // Relays the status code and response from the API
+                if (e.StatusCode != 403) return StatusCode(e.StatusCode, e.Response);
+
+                ModelState.AddModelError(string.Empty, e.Response);
+                return await OnGetAsync(organisation);
+            }
 
             return RedirectToPage("./Index");
         }

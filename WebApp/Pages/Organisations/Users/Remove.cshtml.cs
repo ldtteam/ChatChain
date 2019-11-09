@@ -1,87 +1,75 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Threading.Tasks;
-using ChatChainCommon.Config;
-using ChatChainCommon.DatabaseModels;
-using ChatChainCommon.DatabaseServices;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Newtonsoft.Json;
-using WebApp.Utilities;
+using WebApp.Api;
+using WebApp.Extensions;
+using WebApp.Services;
 
 namespace WebApp.Pages.Organisations.Users
 {
+    [Authorize]
     public class Remove : PageModel
     {
-        private readonly OrganisationService _organisationsContext;
-        private readonly IdentityServerConnection _identityConfiguration;
-        
-        public Remove(OrganisationService organisationsContext, IdentityServerConnection identityConfiguration)
+        private readonly ApiService _apiService;
+
+        public Remove(ApiService apiService)
         {
-            _organisationsContext = organisationsContext;
-            _identityConfiguration = identityConfiguration;
-        }
-        
-        public Organisation Organisation { get; set; }
-        
-        public ResponseUser RemoveUser { get; set; }
-            
-        public class ResponseUser
-        {
-            public string DisplayName { get; set; }
-            public string EmailAddress { get; set; }
-            public string Id { get; set; }
+            _apiService = apiService;
         }
 
-        public async Task<IActionResult> OnGet(string organisation, string id)
+        public OrganisationUser RemoveUser { get; set; }
+
+        // ReSharper disable once MemberCanBePrivate.Global
+        public async Task<IActionResult> OnGetAsync(Guid organisation, string id)
         {
-            // Verify user isn't removing themselves (they can use the Leave page)
-            if (User.Claims.First(claim => claim.Type.Equals("sub")).Value.Equals(id, StringComparison.OrdinalIgnoreCase))
-                return StatusCode(403);
-            
-            (bool result, Organisation org) = await this.VerifyUserPermissions(organisation, _organisationsContext, OrganisationPermissions.DeleteOrgUsers);
-            Organisation = org;
-            if (!result) return NotFound();
+            if (!await _apiService.VerifyTokensAsync(HttpContext))
+                return SignOut(new AuthenticationProperties {RedirectUri = HttpContext.Request.GetDisplayUrl()},
+                    "Cookies");
+            ApiClient client = await _apiService.GetApiClientAsync(HttpContext);
 
-            // Verify user isn't owner
-            if (string.Equals(Organisation.Owner, id, StringComparison.OrdinalIgnoreCase))
-                return StatusCode(403);
-
-            using (HttpClient client = new HttpClient())
+            try
             {
-                client.BaseAddress = new Uri(_identityConfiguration.ServerUrl);
-                MediaTypeWithQualityHeaderValue contentType = new MediaTypeWithQualityHeaderValue("application/json");
-                client.DefaultRequestHeaders.Accept.Add(contentType);
-
-                string usersJson = JsonConvert.SerializeObject(new List<string>{id});
-                StringContent contentData = new StringContent(usersJson, System.Text.Encoding.UTF8, "application/json");
-                HttpResponseMessage response = await client.PostAsync("/api/Users", contentData);
-                string stringData = await response.Content.ReadAsStringAsync();
-                RemoveUser = JsonConvert.DeserializeObject<IEnumerable<ResponseUser>>(stringData).FirstOrDefault();
+                GetOrganisationUserResponse response = await client.GetUserAsync(organisation, id);
+                RemoveUser = response.User;
+                if (!response.Organisation.UserHasPermission(response.User, Api.Permissions.DeleteOrgUsers) &&
+                    response.Organisation.UserIsOwner(RemoveUser) ||
+                    id == response.User.Id)
+                    return StatusCode(403);
+            }
+            catch (ApiException e)
+            {
+                // Relays the status code and response from the API
+                return StatusCode(e.StatusCode, e.Response);
             }
 
             return Page();
         }
-        
-        public async Task<IActionResult> OnPost(string organisation, string id)
+
+        // ReSharper disable once UnusedMember.Global
+        public async Task<IActionResult> OnPostAsync(Guid organisation, string id)
         {
-            // Verify user isn't removing themselves (they can use the Leave page)
-            if (User.Claims.First(claim => claim.Type.Equals("sub")).Value.Equals(id, StringComparison.OrdinalIgnoreCase))
-                return StatusCode(403);
-            
-            (bool result, Organisation org) = await this.VerifyUserPermissions(organisation, _organisationsContext, OrganisationPermissions.DeleteOrgUsers);
-            Organisation = org;
-            if (!result) return NotFound();
+            if (!ModelState.IsValid) return await OnGetAsync(organisation, id);
 
-            // Verify user isn't owner
-            if (string.Equals(Organisation.Owner, id, StringComparison.OrdinalIgnoreCase))
-                return StatusCode(403);
+            if (!await _apiService.VerifyTokensAsync(HttpContext))
+                return SignOut(new AuthenticationProperties {RedirectUri = HttpContext.Request.GetDisplayUrl()},
+                    "Cookies");
+            ApiClient client = await _apiService.GetApiClientAsync(HttpContext);
+            try
+            {
+                await client.DeleteUserAsync(organisation, id);
+            }
+            catch (ApiException e)
+            {
+                // Relays the status code and response from the API
+                if (e.StatusCode != 403) return StatusCode(e.StatusCode, e.Response);
 
-            Organisation.Users.Remove(id);
-            await _organisationsContext.UpdateAsync(Organisation.Id, Organisation);
+                ModelState.AddModelError(string.Empty, e.Response);
+                return Page();
+            }
 
             return RedirectToPage("./Index");
         }

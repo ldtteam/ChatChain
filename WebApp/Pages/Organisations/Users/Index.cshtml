@@ -1,5 +1,6 @@
 @page "/Organisations/{organisation}/Users"
-@using ChatChainCommon.DatabaseModels
+@using WebApp.Api
+@using WebApp.Extensions
 @model WebApp.Pages.Organisations.Users.Index
 @{
     ViewData["Title"] = "Users";
@@ -14,8 +15,7 @@
             <tr>
                 <th>Display Name</th>
                 <th>
-                    @if (Model.Organisation.Users[User.Claims.First(claim => claim.Type.Equals("sub")).Value].Permissions.Contains(OrganisationPermissions.CreateOrgUsers) 
-                         || Model.Organisation.Users[User.Claims.First(claim => claim.Type.Equals("sub")).Value].Permissions.Contains(OrganisationPermissions.All))
+                    @if (Model.Organisation.UserHasPermission(Model.OrganisationUser, Api.Permissions.CreateOrgUsers))
                     {
                         <a class="btn btn-success btn-sm" asp-page="../Invite/Create" asp-route-organisation="@Model.Organisation.Id">Invite User</a>
                     }
@@ -23,27 +23,21 @@
             </tr>
             </thead>
             <tbody>
-            @foreach (Index.ResponseUser responseUser in Model.Users)
+            @foreach (OrganisationUser user in Model.Users)
             {
                 <tr>
                     <td>
-                        @responseUser.DisplayName (@responseUser.EmailAddress)
+                        @user.Id
                     </td>
                     <td>
                         <div class="btn-group">
-                            @if ((Model.Organisation.Users[User.Claims.First(claim => claim.Type.Equals("sub")).Value].Permissions.Contains(OrganisationPermissions.EditOrgUsers)
-                                  || Model.Organisation.Users[User.Claims.First(claim => claim.Type.Equals("sub")).Value].Permissions.Contains(OrganisationPermissions.All))
-                                 && Model.Organisation.Owner != responseUser.Id
-                                 && responseUser.Id != User.Claims.First(claim => claim.Type.Equals("sub")).Value)
+                            @if (Model.Organisation.UserHasPermission(Model.OrganisationUser, Api.Permissions.EditOrgUsers) && !Model.Organisation.UserIsOwner(user) && user.Id != Model.OrganisationUser.Id)
                             {
-                                <a class="btn btn-primary btn-sm" asp-page="./Permissions" asp-route-organisation="@Model.Organisation.Id" asp-route-id="@responseUser.Id">Permissions</a>
+                                <a class="btn btn-primary btn-sm" asp-page="./Permissions" asp-route-organisation="@Model.Organisation.Id" asp-route-id="@user.Id">Permissions</a>
                             }
-                            @if ((Model.Organisation.Users[User.Claims.First(claim => claim.Type.Equals("sub")).Value].Permissions.Contains(OrganisationPermissions.DeleteOrgUsers)
-                                  || Model.Organisation.Users[User.Claims.First(claim => claim.Type.Equals("sub")).Value].Permissions.Contains(OrganisationPermissions.All))
-                                 && Model.Organisation.Owner != responseUser.Id
-                                 && responseUser.Id != User.Claims.First(claim => claim.Type.Equals("sub")).Value)
+                            @if (Model.Organisation.UserHasPermission(Model.OrganisationUser, Api.Permissions.DeleteOrgUsers) && !Model.Organisation.UserIsOwner(user) && user.Id != Model.OrganisationUser.Id)
                             {
-                                <a class="btn btn-danger btn-sm" asp-page="./Remove" asp-route-organisation="@Model.Organisation.Id" asp-route-id="@responseUser.Id">Remove</a>
+                                <a class="btn btn-danger btn-sm" asp-page="./Remove" asp-route-organisation="@Model.Organisation.Id" asp-route-id="@user.Id">Remove</a>
                             }
                         </div>
                     </td>

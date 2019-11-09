@@ -1,57 +1,51 @@
 using System;
 using System.Collections.Generic;
-using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Threading.Tasks;
-using ChatChainCommon.Config;
-using ChatChainCommon.DatabaseModels;
-using ChatChainCommon.DatabaseServices;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Newtonsoft.Json;
-using WebApp.Utilities;
+using WebApp.Api;
+using WebApp.Services;
 
 namespace WebApp.Pages.Organisations.Users
 {
+    [Authorize]
     public class Index : PageModel
     {
-        private readonly OrganisationService _organisationsContext;
-        private readonly IdentityServerConnection _identityConfiguration;
-        
-        public Index(OrganisationService organisationsContext, IdentityServerConnection identityConfiguration)
+        private readonly ApiService _apiService;
+
+        public Index(ApiService apiService)
         {
-            _organisationsContext = organisationsContext;
-            _identityConfiguration = identityConfiguration;
+            _apiService = apiService;
         }
 
-        public IEnumerable<ResponseUser> Users { get; set; }
-        
-        public Organisation Organisation { get; set; }
-        
-        public class ResponseUser
-        {
-            public string DisplayName { get; set; }
-            public string EmailAddress { get; set; }
-            public string Id { get; set; }
-        }
+        public IEnumerable<OrganisationUser> Users { get; private set; }
 
-        public async Task<IActionResult> OnGet(string organisation)
-        {
-            (bool result, Organisation org) = await this.VerifyIsMember(organisation, _organisationsContext);
-            Organisation = org;
-            if (!result) return NotFound();
+        public Organisation Organisation { get; private set; }
 
-            using (HttpClient client = new HttpClient())
+        public OrganisationUser OrganisationUser { get; private set; }
+
+        // ReSharper disable once UnusedMember.Global
+        public async Task<IActionResult> OnGetAsync(Guid organisation)
+        {
+            if (!await _apiService.VerifyTokensAsync(HttpContext))
+                return SignOut(new AuthenticationProperties {RedirectUri = HttpContext.Request.GetDisplayUrl()},
+                    "Cookies");
+            ApiClient apiClient = await _apiService.GetApiClientAsync(HttpContext);
+
+            try
             {
-                client.BaseAddress = new Uri(_identityConfiguration.ServerUrl);
-                MediaTypeWithQualityHeaderValue contentType = new MediaTypeWithQualityHeaderValue("application/json");
-                client.DefaultRequestHeaders.Accept.Add(contentType);
-
-                string usersJson = JsonConvert.SerializeObject(Organisation.Users.Keys);
-                StringContent contentData = new StringContent(usersJson, System.Text.Encoding.UTF8, "application/json");
-                HttpResponseMessage response = await client.PostAsync("/api/Users", contentData);
-                string stringData = await response.Content.ReadAsStringAsync();
-                Users = JsonConvert.DeserializeObject<IEnumerable<ResponseUser>>(stringData);
+                GetOrganisationUsersResponse response = await apiClient.GetUsersAsync(organisation);
+                Organisation = response.Organisation;
+                OrganisationUser = response.User;
+                Users = response.RequestedUsers;
+            }
+            catch (ApiException e)
+            {
+                // Relays the status code and response from the API
+                return StatusCode(e.StatusCode, e.Response);
             }
 
             return Page();

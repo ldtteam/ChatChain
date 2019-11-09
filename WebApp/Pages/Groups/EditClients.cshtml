@@ -1,35 +1,36 @@
 ﻿@page "/{organisation}/Groups/{group}/EditClients"
 @model EditClientsModel
 @{
-    ViewData["Title"] = $"Add Clients | {Model.Group.GroupName}";
+    ViewData["Title"] = "Add Clients";
     Layout = "Shared/_ClientGroupsLayout";
 }
 <div class="container">
     <script src="~/js/chosen.jquery.min.js" asp-append-version="true"></script>
     <link rel="stylesheet" href="~/css/chosen.min.css">
-    
-    <h2>Edit Clients for @Model.Group.GroupName</h2>
+
+    <h2>Edit Clients for @Model.Group.Name</h2>
     <hr/>
     <div class="row">
-            <div class="col-md-4">
-                <form method="post">
-                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                    <input type="hidden" asp-for="Group.Id"/>
-                    <div class="form-group">
-                        <br/>
-                        <label>
-                            <select asp-for="SelectedClients" asp-items="Model.ClientOptions" 
-                                    class="SelectedClients" style="width: 300px"></select>
-                        </label>
-                    </div>
-                    <hr/>
-                    <div class="form-group">
-                        <input type="submit" value="Save" class="btn btn-success"/>
-                        <a asp-page="./Clients" asp-route-organisation="@Model.Organisation.Id" asp-route-id="@Model.Group.Id" class="btn btn-danger">Back to List</a>
-                    </div>
-                </form>
-            </div>
+        <div class="col-md-4">
+            <form method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <input type="hidden" asp-for="Group.Id"/>
+                <div class="form-group">
+                    <br/>
+                    <label>
+                        <select asp-for="SelectedClients" asp-items="Model.ClientOptions"
+                                class="SelectedClients" style="width: 300px">
+                        </select>
+                    </label>
+                </div>
+                <hr/>
+                <div class="form-group">
+                    <input type="submit" value="Save" class="btn btn-success"/>
+                    <a asp-page="./Index" asp-route-organisation="@Model.Organisation.Id" class="btn btn-danger">Back to List</a>
+                </div>
+            </form>
         </div>
+    </div>
     <script>
         $(".SelectedClients").chosen();
     </script>

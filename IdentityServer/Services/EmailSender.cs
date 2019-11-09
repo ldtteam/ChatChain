@@ -25,7 +25,7 @@ namespace IdentityServer.Services
         
         public Task SendEmailAsync(string email, string subject, string htmlMessage)
         {
-            var client = new SmtpClient(_host, _port) {
+            SmtpClient client = new SmtpClient(_host, _port) {
                 Credentials = new NetworkCredential(_userName, _password),
                 EnableSsl = _enableSsl
             };
@@ -39,7 +39,7 @@ namespace IdentityServer.Services
         {
             message.From.Clear();
             message.From.Add(new MailboxAddress("ChatChain No-Reply", _userName));
-            using (var client = new MailKit.Net.Smtp.SmtpClient())
+            using (MailKit.Net.Smtp.SmtpClient client = new MailKit.Net.Smtp.SmtpClient())
             {
                 await client.ConnectAsync(_host, _port);
 
