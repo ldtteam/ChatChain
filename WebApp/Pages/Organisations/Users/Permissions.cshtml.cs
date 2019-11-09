@@ -67,8 +67,6 @@ namespace WebApp.Pages.Organisations.Users
                 return SignOut(new AuthenticationProperties {RedirectUri = HttpContext.Request.GetDisplayUrl()},
                     "Cookies");
             ApiClient client = await _apiService.GetApiClientAsync(HttpContext);
-            /*EditingUser = await client.GetUserAsync(organisation, id);
-            EditingUser.OrganisationUser.Permissions = SelectedPermissions;*/
 
             try
             {

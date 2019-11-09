@@ -18,7 +18,7 @@ namespace ChatChainCommon.Config.IdentityServer
         
         public ICollection<string> AllowedCorsOrigins { get; set; }
 
-        public ICollection<string> AllowedGrantTypes { get; set; } //= GrantTypes.Implicit;
+        public ICollection<string> AllowedGrantTypes { get; set; }
         
         public ICollection<string> Secrets { get; set; } = new List<string>();
 
