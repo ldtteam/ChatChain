@@ -1,8 +1,9 @@
 using System.Collections.Generic;
 using Hub.Core.DTO.ResponseMessages;
+using Hub.Core.DTO.ResponseMessages.Events;
 using Hub.Core.Interfaces;
 
-namespace Hub.Core.DTO.UseCaseResponses
+namespace Hub.Core.DTO.UseCaseResponses.Events
 {
     public class UserEventResponse : UseCaseResponseMessage<UserEventMessage>
     {

@@ -8,11 +8,14 @@ using Api.Core.Entities;
 using Api.Core.Interfaces;
 using Api.Core.Interfaces.Gateways.Repositories;
 using Hub.Core.DTO.ResponseMessages;
+using Hub.Core.DTO.ResponseMessages.Events;
 using Hub.Core.DTO.UseCaseRequests;
+using Hub.Core.DTO.UseCaseRequests.Events;
 using Hub.Core.DTO.UseCaseResponses;
-using Hub.Core.Interfaces.UseCases;
+using Hub.Core.DTO.UseCaseResponses.Events;
+using Hub.Core.Interfaces.UseCases.Events;
 
-namespace Hub.Core.UseCases
+namespace Hub.Core.UseCases.Events
 {
     public class ClientEventUseCase : IClientEventUseCase
     {

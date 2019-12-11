@@ -16,7 +16,7 @@ namespace Api.Infrastructure.Data.Redis.Repositories
 
         public InviteRepository(IConnectionMultiplexer redisConnection)
         {
-            _redisDatabase = redisConnection.GetDatabase();
+            _redisDatabase = redisConnection.GetDatabase(1);
         }
     
         public async Task<GetInviteGatewayResponse> Get(Guid organisationId, string token)

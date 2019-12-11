@@ -5,7 +5,7 @@ using Api.Core.Entities;
 using Hub.Core.Entities;
 using Hub.Core.Interfaces;
 
-namespace Hub.Core.DTO.ResponseMessages
+namespace Hub.Core.DTO.ResponseMessages.Events
 {
     public class UserEventMessage : MessageResponse
     {

@@ -10,6 +10,8 @@ namespace Api.Core.Interfaces.Gateways.Repositories
     {
         Task<GetGroupsGatewayResponse> GetForOwner(Guid ownerId);
 
+        Task<GetGroupsGatewayResponse> GetForClient(Guid clientId);
+        
         Task<GetGroupGatewayResponse> Get(Guid id);
 
         Task<CreateGroupGatewayResponse> Create(Group group);

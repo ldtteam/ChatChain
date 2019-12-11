@@ -1,9 +1,8 @@
 using System;
 using System.Collections.Generic;
 using Hub.Core.Interfaces;
-using Hub.Core.Entities;
 
-namespace Hub.Core.DTO.UseCaseRequests
+namespace Hub.Core.DTO.UseCaseRequests.Events
 {
     public class ClientEventRequest : DefaultUseCaseRequest
     {
