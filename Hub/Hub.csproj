@@ -17,6 +17,7 @@
       <ProjectReference Include="..\Core.Core\Core.Core.csproj" />
       <ProjectReference Include="..\Core.Infrastructure\Core.Infrastructure.csproj" />
       <ProjectReference Include="..\Hub.Core\Hub.Core.csproj" />
+      <ProjectReference Include="..\Hub.Infrastructure\Hub.Infrastructure.csproj" />
     </ItemGroup>
 
     <ItemGroup>

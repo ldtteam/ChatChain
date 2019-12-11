@@ -32,7 +32,22 @@ namespace Api.Infrastructure.Data.MongoDB.Repositories
             try
             {
                 IAsyncCursor<MongoGroup>
-                    cursor = await _groups.FindAsync(org => org.OwnerId.Equals(ownerId));
+                    cursor = await _groups.FindAsync(group => group.OwnerId.Equals(ownerId));
+                return new GetGroupsGatewayResponse(_mapper.Map<List<Group>>(await cursor.ToListAsync()), true);
+            }
+            catch (MongoException e)
+            {
+                return new GetGroupsGatewayResponse(null, false,
+                    e.ErrorLabels.Select(label => new Error(e.HResult.ToString(), e.Message)));
+            }
+        }
+
+        public async Task<GetGroupsGatewayResponse> GetForClient(Guid clientId)
+        {
+            try
+            {
+                IAsyncCursor<MongoGroup>
+                    cursor = await _groups.FindAsync(group => group.ClientIds.Contains(clientId));
                 return new GetGroupsGatewayResponse(_mapper.Map<List<Group>>(await cursor.ToListAsync()), true);
             }
             catch (MongoException e)

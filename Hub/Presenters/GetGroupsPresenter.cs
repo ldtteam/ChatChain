@@ -5,7 +5,7 @@ namespace Hub.Presenters
 {
     public class GetGroupsPresenter: IOutputPort<GetGroupsResponse>
     {
-        public GetGroupsResponse Response { get; set; }
+        public GetGroupsResponse Response { get; private set; }
         
         public void Handle(GetGroupsResponse response)
         {

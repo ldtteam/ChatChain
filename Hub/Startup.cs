@@ -10,6 +10,7 @@ using AutoMapper;
 using ChatChainCommon.Config;
 using Hub.Core;
 using Hub.Hubs;
+using Hub.Infrastructure;
 using Hub.Utils;
 using IdentityServer4.Extensions;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -87,6 +88,7 @@ namespace Hub
             builder.RegisterModule(new CoreModule());
             builder.RegisterModule(new HubCoreModule());
             builder.RegisterModule(new InfrastructureModule());
+            builder.RegisterModule(new HubInfrastructureModule());
 
             builder.RegisterAssemblyTypes(Assembly.GetExecutingAssembly()).Where(t => t.Name.EndsWith("Presenter"))
                 .SingleInstance();
