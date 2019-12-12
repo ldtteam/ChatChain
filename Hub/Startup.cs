@@ -20,6 +20,7 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using StackExchange.Redis;
 
 namespace Hub
 {
@@ -66,6 +67,8 @@ namespace Hub
 
             if (redisConnectionVariable != null && !redisConnectionVariable.IsNullOrEmpty())
             {
+                ConnectionMultiplexer redis = ConnectionMultiplexer.Connect(redisConnectionVariable);
+                services.AddSingleton<IConnectionMultiplexer>(redis);
                 services.AddSignalR().AddStackExchangeRedis(redisConnectionVariable, options =>
                 {
                     options.Configuration.ChannelPrefix = "ChatChain";
