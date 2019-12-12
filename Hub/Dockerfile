@@ -21,6 +21,11 @@ COPY ./Hub.Core/*.csproj ./
 RUN dotnet restore
 COPY ./Hub.Core ./
 
+WORKDIR /ChatChain/Hub.Infrastructure
+COPY ./Hub.Infrastructure/*.csproj ./
+RUN dotnet restore
+COPY ./Hub.Infrastructure ./
+
 WORKDIR /ChatChain/Hub
 
 # Copy csproj and restore as distinct layers
