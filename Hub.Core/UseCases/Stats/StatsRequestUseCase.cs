@@ -92,6 +92,9 @@ namespace Hub.Core.UseCases.Stats
             
             foreach (Guid clientId in clientIds)
             {
+                if (clientId.Equals(message.ClientId))
+                    continue;
+
                 Guid requestId = Guid.NewGuid();
                 requestIds.Add(requestId);
                 StatsRequest statsRequest = new StatsRequest
