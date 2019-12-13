@@ -5,13 +5,13 @@ using Hub.Core.Entities;
 
 namespace Hub.Core.DTO.GatewayResponses.Repositories.Requests
 {
-    public class CreateStatsRequestGatewayResponse : BaseGatewayResponse
+    public class CreateStatsRequestsGatewayResponse : BaseGatewayResponse
     {
-        public StatsRequest StatsRequest { get; }
+        public IList<StatsRequest> StatsRequests { get; }
 
-        public CreateStatsRequestGatewayResponse(StatsRequest statsRequest, bool success = false, IEnumerable<Error> errors = null) : base(success, errors)
+        public CreateStatsRequestsGatewayResponse(IList<StatsRequest> statsRequests, bool success = false, IEnumerable<Error> errors = null) : base(success, errors)
         {
-            StatsRequest = statsRequest;
+            StatsRequests = statsRequests;
         }
     }
 }

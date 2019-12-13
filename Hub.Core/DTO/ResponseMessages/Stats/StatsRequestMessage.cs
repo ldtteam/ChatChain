@@ -11,6 +11,8 @@ namespace Hub.Core.DTO.ResponseMessages.Stats
         
         public Guid RequestId { get; }
         
+        public IList<Guid> RequestIds { get; }
+        
         public string StatsSection { get; }
 
         public StatsRequestMessage(IEnumerable<Error> errors, bool success = false) : base(errors, success)
@@ -21,6 +23,13 @@ namespace Hub.Core.DTO.ResponseMessages.Stats
         {
             ClientId = clientId;
             RequestId = requestId;
+            StatsSection = statsSection;
+        }
+
+        public StatsRequestMessage(Guid clientId, IList<Guid> requestIds, string statsSection, bool success = false) : base(success)
+        {
+            ClientId = clientId;
+            RequestIds = requestIds;
             StatsSection = statsSection;
         }
     }
