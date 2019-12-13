@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Api.Core.DTO;
 using Hub.Core.DTO.GatewayResponses.Repositories.Requests;
@@ -29,12 +30,15 @@ namespace Hub.Infrastructure.Data.Redis.Repositories
             return new GetStatsRequestGatewayResponse(null, false, new[] {new Error("404", "Stats Request Not Found"), });
         }
 
-        public async Task<CreateStatsRequestGatewayResponse> CreateStatsRequest(StatsRequest statsRequest)
+        public async Task<CreateStatsRequestsGatewayResponse> CreateStatsRequests(IList<StatsRequest> statsRequests)
         {
-            await _redisDatabase.SetAddAsync(statsRequest.RequestId.ToString(), JsonConvert.SerializeObject(statsRequest));
-            await _redisDatabase.KeyExpireAsync(statsRequest.RequestId.ToString(), DateTime.Now.AddDays(1));
+            foreach (StatsRequest request in statsRequests)
+            {
+                await _redisDatabase.SetAddAsync(request.RequestId.ToString(), JsonConvert.SerializeObject(request));
+                await _redisDatabase.KeyExpireAsync(request.RequestId.ToString(), DateTime.Now.AddDays(1));
+            }
             
-            return new CreateStatsRequestGatewayResponse(statsRequest, true);
+            return new CreateStatsRequestsGatewayResponse(statsRequests, true);
         }
     }
 }
