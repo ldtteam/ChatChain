@@ -55,9 +55,9 @@ namespace Hub.Core.UseCases.Stats
                 outputPort.Handle(new StatsResponseResponse(new StatsResponseMessage(getSendingClientResponse.Errors)));
                 return false;
             }
-            
-            StatsResponseMessage responseMessage = new StatsResponseMessage(getStatsRequestGatewayResponse.StatsRequest.SendingClient, getStatsRequestGatewayResponse.StatsRequest.RequestId, message.StatsObject);
-            StatsResponseMessage requestMessage = new StatsResponseMessage(message.ClientId, getStatsRequestGatewayResponse.StatsRequest.RequestId, message.StatsObject);
+
+            StatsResponseMessage responseMessage = new StatsResponseMessage(getSendingClientResponse.Client, getStatsRequestGatewayResponse.StatsRequest.SendingClient, getStatsRequestGatewayResponse.StatsRequest.RequestId, message.StatsObject);
+            StatsResponseMessage requestMessage = new StatsResponseMessage(getSendingClientResponse.Client, message.ClientId, getStatsRequestGatewayResponse.StatsRequest.RequestId, message.StatsObject);
             
             outputPort.Handle(new StatsResponseResponse(new[] {responseMessage}, requestMessage));
             return true;
