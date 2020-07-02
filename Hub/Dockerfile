@@ -1,4 +1,4 @@
-FROM microsoft/dotnet:sdk AS build-env
+FROM mcr.microsoft.com/dotnet/core/sdk:2.2 AS build-env
 
 #Setup required components of Hub
 WORKDIR /ChatChain/ChatChainCommon
@@ -32,7 +32,7 @@ COPY ./Hub ./
 RUN dotnet publish -c Release -o out
 
 # Build runtime image
-FROM microsoft/dotnet:aspnetcore-runtime
+FROM mcr.microsoft.com/dotnet/core/aspnet:2.2
 WORKDIR /ChatChain/Hub
 COPY --from=build-env /ChatChain/Hub/out .
 
