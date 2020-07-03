@@ -9,6 +9,8 @@ using Autofac.Extensions.DependencyInjection;
 using AutoMapper;
 using ChatChainCommon.Config;
 using Hub.Core;
+using Hub.Core.Interfaces.UseCases;
+using Hub.EventConsumers;
 using Hub.Hubs;
 using Hub.Infrastructure;
 using Hub.Utils;
@@ -95,6 +97,8 @@ namespace Hub
 
             builder.RegisterAssemblyTypes(Assembly.GetExecutingAssembly()).Where(t => t.Name.EndsWith("Presenter"))
                 .SingleInstance();
+
+            builder.RegisterType<GenericMessageEventConsumer>().SingleInstance();
             
             builder.Populate(services);
             

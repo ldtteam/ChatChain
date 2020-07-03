@@ -3,7 +3,7 @@ using Api.Core.Interfaces;
 
 namespace Hub.Core.Interfaces
 {
-    public abstract class DefaultUseCaseRequest : IUseCaseRequest
+    public abstract class DefaultUseCaseRequest : UseCaseRequest
     {
         public Guid ClientId { get; set; }
         

@@ -2,6 +2,7 @@ using Autofac;
 using Hub.Core.Interfaces.UseCases;
 using Hub.Core.Interfaces.UseCases.Events;
 using Hub.Core.Interfaces.UseCases.Stats;
+using Hub.Core.Services;
 using Hub.Core.UseCases;
 using Hub.Core.UseCases.Events;
 using Hub.Core.UseCases.Stats;
@@ -12,6 +13,8 @@ namespace Hub.Core
     {
         protected override void Load(ContainerBuilder builder)
         {
+            builder.RegisterType<EventsService>().SingleInstance();
+
             builder.RegisterType<GenericMessageUseCase>().As<IGenericMessageUseCase>().InstancePerLifetimeScope();
             builder.RegisterType<GetGroupsUseCase>().As<IGetGroupsUseCase>().InstancePerLifetimeScope();
             builder.RegisterType<GetClientUseCase>().As<IGetClientUseCase>().InstancePerLifetimeScope();

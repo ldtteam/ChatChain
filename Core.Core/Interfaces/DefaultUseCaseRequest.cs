@@ -2,7 +2,7 @@ using System;
 
 namespace Api.Core.Interfaces
 {
-    public abstract class DefaultUseCaseRequest : IUseCaseRequest
+    public abstract class DefaultUseCaseRequest : UseCaseRequest
     {
         public string UserId { get; }
 

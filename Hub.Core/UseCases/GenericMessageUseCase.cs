@@ -10,16 +10,19 @@ using Hub.Core.DTO.ResponseMessages;
 using Hub.Core.DTO.UseCaseRequests;
 using Hub.Core.DTO.UseCaseResponses;
 using Hub.Core.Interfaces.UseCases;
+using Hub.Core.Services;
 
 namespace Hub.Core.UseCases
 {
     public class GenericMessageUseCase : IGenericMessageUseCase
     {
+        private readonly EventsService _eventsService;
         private readonly IClientRepository _clientRepository;
         private readonly IGroupRepository _groupRepository;
 
-        public GenericMessageUseCase(IClientRepository clientRepository, IGroupRepository groupRepository)
+        public GenericMessageUseCase(EventsService eventsService, IClientRepository clientRepository, IGroupRepository groupRepository)
         {
+            _eventsService = eventsService;
             _clientRepository = clientRepository;
             _groupRepository = groupRepository;
         }
@@ -52,6 +55,9 @@ namespace Hub.Core.UseCases
             clientIds.Remove(getClientResponse.Client.Id);
 
             IList<GenericMessageMessage> messages = new List<GenericMessageMessage>();
+
+            _eventsService.OnGenericMessageEvent(message);
+
             foreach (Guid clientId in clientIds)
             {
                 GetClientGatewayResponse getGroupClientResponse = await _clientRepository.Get(clientId);
