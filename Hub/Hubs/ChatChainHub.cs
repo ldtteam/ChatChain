@@ -9,7 +9,6 @@ using Hub.Core.DTO.UseCaseRequests.Stats;
 using Hub.Core.Interfaces.UseCases;
 using Hub.Core.Interfaces.UseCases.Events;
 using Hub.Core.Interfaces.UseCases.Stats;
-using Hub.EventConsumers;
 using Hub.Presenters;
 using Hub.Presenters.Events;
 using Hub.Presenters.Stats;
@@ -45,7 +44,7 @@ namespace Hub.Hubs
 
         private bool _hasSentLeaveMessage;
 
-        public ChatChainHub(ILogger<ChatChainHub> logger, GenericMessageEventConsumer genericMessageEventConsumer, GenericMessagePresenter genericMessagePresenter, IGenericMessageUseCase genericMessageUseCase, ClientEventPresenter clientEventPresenter, IClientEventUseCase clientEventUseCase, UserEventPresenter userEventPresenter, IUserEventUseCase userEventUseCase, StatsRequestPresenter statsRequestPresenter, IStatsRequestUseCase statsRequestUseCase, StatsResponsePresenter statsResponsePresenter, IStatsResponseUseCase statsResponseUseCase, GetGroupsPresenter groupsPresenter, IGetGroupsUseCase groupsUseCase, GetClientPresenter clientPresenter, IGetClientUseCase clientUseCase)
+        public ChatChainHub(ILogger<ChatChainHub> logger, GenericMessagePresenter genericMessagePresenter, IGenericMessageUseCase genericMessageUseCase, ClientEventPresenter clientEventPresenter, IClientEventUseCase clientEventUseCase, UserEventPresenter userEventPresenter, IUserEventUseCase userEventUseCase, StatsRequestPresenter statsRequestPresenter, IStatsRequestUseCase statsRequestUseCase, StatsResponsePresenter statsResponsePresenter, IStatsResponseUseCase statsResponseUseCase, GetGroupsPresenter groupsPresenter, IGetGroupsUseCase groupsUseCase, GetClientPresenter clientPresenter, IGetClientUseCase clientUseCase)
         {
             _logger = logger;
             _genericMessagePresenter = genericMessagePresenter;
