@@ -1,9 +1,17 @@
 using System;
 using System.Threading.Tasks;
 using Hub.Core.DTO.ResponseMessages;
+using Hub.Core.DTO.ResponseMessages.Events;
+using Hub.Core.DTO.ResponseMessages.Stats;
 using Hub.Core.DTO.UseCaseRequests;
+using Hub.Core.DTO.UseCaseRequests.Events;
+using Hub.Core.DTO.UseCaseRequests.Stats;
 using Hub.Core.Interfaces.UseCases;
+using Hub.Core.Interfaces.UseCases.Events;
+using Hub.Core.Interfaces.UseCases.Stats;
 using Hub.Presenters;
+using Hub.Presenters.Events;
+using Hub.Presenters.Stats;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
@@ -18,10 +26,17 @@ namespace Hub.Hubs
         private readonly ILogger<ChatChainHub> _logger;
         private readonly GenericMessagePresenter _genericMessagePresenter;
         private readonly IGenericMessageUseCase _genericMessageUseCase;
+        
         private readonly ClientEventPresenter _clientEventPresenter;
         private readonly IClientEventUseCase _clientEventUseCase;
         private readonly UserEventPresenter _userEventPresenter;
         private readonly IUserEventUseCase _userEventUseCase;
+
+        private readonly StatsRequestPresenter _statsRequestPresenter;
+        private readonly IStatsRequestUseCase _statsRequestUseCase;
+        private readonly StatsResponsePresenter _statsResponsePresenter;
+        private readonly IStatsResponseUseCase _statsResponseUseCase;
+        
         private readonly GetGroupsPresenter _getGroupsPresenter;
         private readonly IGetGroupsUseCase _getGroupsUseCase;
         private readonly GetClientPresenter _getClientPresenter;
@@ -29,11 +44,7 @@ namespace Hub.Hubs
 
         private bool _hasSentLeaveMessage;
 
-        public ChatChainHub(ILogger<ChatChainHub> logger, GenericMessagePresenter genericMessagePresenter,
-            IGenericMessageUseCase genericMessageUseCase, ClientEventPresenter clientEventPresenter,
-            IClientEventUseCase clientEventUseCase, UserEventPresenter userEventPresenter,
-            IUserEventUseCase userEventUseCase, GetGroupsPresenter groupsPresenter, IGetGroupsUseCase groupsUseCase,
-            GetClientPresenter clientPresenter, IGetClientUseCase clientUseCase)
+        public ChatChainHub(ILogger<ChatChainHub> logger, GenericMessagePresenter genericMessagePresenter, IGenericMessageUseCase genericMessageUseCase, ClientEventPresenter clientEventPresenter, IClientEventUseCase clientEventUseCase, UserEventPresenter userEventPresenter, IUserEventUseCase userEventUseCase, StatsRequestPresenter statsRequestPresenter, IStatsRequestUseCase statsRequestUseCase, StatsResponsePresenter statsResponsePresenter, IStatsResponseUseCase statsResponseUseCase, GetGroupsPresenter groupsPresenter, IGetGroupsUseCase groupsUseCase, GetClientPresenter clientPresenter, IGetClientUseCase clientUseCase)
         {
             _logger = logger;
             _genericMessagePresenter = genericMessagePresenter;
@@ -42,6 +53,10 @@ namespace Hub.Hubs
             _clientEventUseCase = clientEventUseCase;
             _userEventPresenter = userEventPresenter;
             _userEventUseCase = userEventUseCase;
+            _statsRequestPresenter = statsRequestPresenter;
+            _statsRequestUseCase = statsRequestUseCase;
+            _statsResponsePresenter = statsResponsePresenter;
+            _statsResponseUseCase = statsResponseUseCase;
             _getGroupsPresenter = groupsPresenter;
             _getGroupsUseCase = groupsUseCase;
             _getClientPresenter = clientPresenter;
@@ -60,6 +75,8 @@ namespace Hub.Hubs
             await base.OnDisconnectedAsync(exception);
         }
 
+        #region GenericMessage
+
         public async Task<GenericMessageMessage> SendGenericMessage(GenericMessageRequest request)
         {
             _logger.LogInformation(
@@ -77,6 +94,10 @@ namespace Hub.Hubs
 
             return _genericMessagePresenter.Response.Response;
         }
+        
+        #endregion
+
+        #region Events
 
         // ReSharper disable once UnusedMethodReturnValue.Global
         // ReSharper disable once MemberCanBePrivate.Global
@@ -119,6 +140,48 @@ namespace Hub.Hubs
 
             return _userEventPresenter.Response.Response;
         }
+        
+        #endregion
+
+        #region Stats
+
+        public async Task<StatsRequestMessage> SendStatsRequest(StatsRequestRequest request)
+        {
+            _logger.LogInformation($"Client {Context.UserIdentifier} requested stats from: {request.RequestedClient}");
+            
+            request.ClientId = new Guid(Context.UserIdentifier);
+
+            await _statsRequestUseCase.HandleAsync(request, _statsRequestPresenter);
+            
+            foreach (StatsRequestMessage statsRequestMessage in _statsRequestPresenter.Response.Messages)
+            {
+                await Clients.User(statsRequestMessage.ClientId.ToString())
+                    .SendAsync("ReceiveStatsRequest", statsRequestMessage);
+            }
+
+            return _statsRequestPresenter.Response.Response;
+        }
+        
+        public async Task<StatsResponseMessage> SendStatsResponse(StatsResponseRequest request)
+        {
+            _logger.LogInformation($"Client {Context.UserIdentifier} responded to stats request: {request.RequestId}");
+            
+            request.ClientId = new Guid(Context.UserIdentifier);
+
+            await _statsResponseUseCase.HandleAsync(request, _statsResponsePresenter);
+            
+            foreach (StatsResponseMessage statsResponseMessage in _statsResponsePresenter.Response.Messages)
+            {
+                await Clients.User(statsResponseMessage.ClientId.ToString())
+                    .SendAsync("ReceiveStatsResponse", statsResponseMessage);
+            }
+
+            return _statsResponsePresenter.Response.Response;
+        }
+
+        #endregion
+
+        #region Getters
 
         public async Task<GetGroupsMessage> GetGroups()
         {
@@ -139,5 +202,7 @@ namespace Hub.Hubs
 
             return _getClientPresenter.Response.Response;
         }
+        
+        #endregion
     }
 }

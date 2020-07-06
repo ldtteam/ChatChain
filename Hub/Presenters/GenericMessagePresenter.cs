@@ -5,7 +5,7 @@ namespace Hub.Presenters
 {
     public class GenericMessagePresenter : IOutputPort<GenericMessageResponse>
     {
-        public GenericMessageResponse Response { get; set; }
+        public GenericMessageResponse Response { get; private set; }
         
         public void Handle(GenericMessageResponse response)
         {

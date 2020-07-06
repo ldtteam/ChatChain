@@ -3,7 +3,7 @@ using Api.Core.Interfaces;
 
 namespace Api.Core.DTO.UseCaseRequests.Organisation
 {
-    public class DeleteOrganisationRequest : IUseCaseRequest
+    public class DeleteOrganisationRequest : UseCaseRequest
     {
         public string UserId { get; }
 

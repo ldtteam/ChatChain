@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using IdentityServer4;
-using IdentityServer4.Models;
 
 namespace ChatChainCommon.Config.IdentityServer
 {

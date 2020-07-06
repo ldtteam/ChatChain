@@ -10,6 +10,7 @@ using AutoMapper;
 using ChatChainCommon.Config;
 using Hub.Core;
 using Hub.Hubs;
+using Hub.Infrastructure;
 using Hub.Utils;
 using IdentityServer4.Extensions;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -19,6 +20,7 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using StackExchange.Redis;
 
 namespace Hub
 {
@@ -65,6 +67,8 @@ namespace Hub
 
             if (redisConnectionVariable != null && !redisConnectionVariable.IsNullOrEmpty())
             {
+                ConnectionMultiplexer redis = ConnectionMultiplexer.Connect(redisConnectionVariable);
+                services.AddSingleton<IConnectionMultiplexer>(redis);
                 services.AddSignalR().AddStackExchangeRedis(redisConnectionVariable, options =>
                 {
                     options.Configuration.ChannelPrefix = "ChatChain";
@@ -87,6 +91,7 @@ namespace Hub
             builder.RegisterModule(new CoreModule());
             builder.RegisterModule(new HubCoreModule());
             builder.RegisterModule(new InfrastructureModule());
+            builder.RegisterModule(new HubInfrastructureModule());
 
             builder.RegisterAssemblyTypes(Assembly.GetExecutingAssembly()).Where(t => t.Name.EndsWith("Presenter"))
                 .SingleInstance();
