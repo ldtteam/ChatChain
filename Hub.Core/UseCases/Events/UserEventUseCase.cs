@@ -63,7 +63,7 @@ namespace Hub.Core.UseCases.Events
                     
                     GetClientGatewayResponse getGroupClientResponse = await _clientRepository.Get(groupClientId);
 
-                    if (!getGroupResponse.Success) continue;
+                    if (!getGroupClientResponse.Success) continue;
                     
                     messages.Add(new UserEventMessage(getClientResponse.Client, message.ClientUser, getGroupClientResponse.Client.Id, getGroupResponse.Group, message.Event, message.EventData, true));
                 }
