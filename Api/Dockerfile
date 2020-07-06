@@ -1,4 +1,4 @@
-FROM microsoft/dotnet:sdk AS build-env
+FROM mcr.microsoft.com/dotnet/core/sdk:2.2 AS build-env
 
 #Setup required components of Api
 WORKDIR /ChatChain/ChatChainCommon
@@ -27,7 +27,7 @@ COPY ./Api ./
 RUN dotnet publish -c Release -o out
 
 # Build runtime image
-FROM microsoft/dotnet:aspnetcore-runtime
+FROM mcr.microsoft.com/dotnet/core/aspnet:2.2
 WORKDIR /ChatChain/Api
 COPY --from=build-env /ChatChain/Api/out .
 
