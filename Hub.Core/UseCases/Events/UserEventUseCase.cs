@@ -7,11 +7,8 @@ using Api.Core.DTO.GatewayResponses.Repositories.Group;
 using Api.Core.Entities;
 using Api.Core.Interfaces;
 using Api.Core.Interfaces.Gateways.Repositories;
-using Hub.Core.DTO.ResponseMessages;
 using Hub.Core.DTO.ResponseMessages.Events;
-using Hub.Core.DTO.UseCaseRequests;
 using Hub.Core.DTO.UseCaseRequests.Events;
-using Hub.Core.DTO.UseCaseResponses;
 using Hub.Core.DTO.UseCaseResponses.Events;
 using Hub.Core.Interfaces.UseCases.Events;
 

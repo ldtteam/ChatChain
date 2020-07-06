@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using Hub.Core.DTO.ResponseMessages;
 using Hub.Core.DTO.ResponseMessages.Events;
 using Hub.Core.Interfaces;
 

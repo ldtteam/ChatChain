@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace Hub.Core.Interfaces
 {
-    public abstract class UseCaseResponseMessage<TMessageResponse> where TMessageResponse : MessageResponse
+    public abstract class UseCaseResponseMessage<TMessageResponse>
     {
         public IList<TMessageResponse> Messages { get; }
         
